@@ -98,6 +98,8 @@ func test_phase7_8_scripts() -> void:
 	var attack_vfx = load("res://src/effects/attack_vfx.gd")
 	var pause_menu = load("res://src/ui/menus/pause_menu.gd")
 	var quest_tracker = load("res://src/ui/hud/quest_tracker.gd")
+	var inventory_system = load("res://src/player/components/inventory_system.gd")
+	var equipment_system = load("res://src/player/components/equipment_system.gd")
 	_assert("TacticalMenu script loads", tactical_menu != null)
 	_assert("ControlBar script loads", control_bar != null)
 	_assert("LockOnIndicator script loads", lock_on_indicator != null)
@@ -105,6 +107,8 @@ func test_phase7_8_scripts() -> void:
 	_assert("AttackVFX script loads", attack_vfx != null)
 	_assert("PauseMenu script loads", pause_menu != null)
 	_assert("QuestTracker script loads", quest_tracker != null)
+	_assert("InventorySystem script loads", inventory_system != null)
+	_assert("EquipmentSystem script loads", equipment_system != null)
 
 
 func _assert(test_name: String, condition: bool) -> void:

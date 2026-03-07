@@ -14,6 +14,8 @@ extends CharacterBody3D
 @onready var interaction_anchor: Area3D = $InteractionAnchor
 @onready var lock_on_component: LockOnComponent = $LockOnComponent
 @onready var ability_system: Node = $AbilitySystem
+@onready var inventory_system: Node = $InventorySystem
+@onready var equipment_system: Node = $EquipmentSystem
 
 var is_locked_on: bool = false
 var lock_on_target: Node3D = null
@@ -237,6 +239,8 @@ func get_save_data() -> Dictionary:
 		"hp": current_hp,
 		"mp": current_mp,
 		"atb": current_atb,
+		"inventory": inventory_system.get_save_data(),
+		"equipment": equipment_system.get_save_data(),
 	}
 
 
@@ -252,3 +256,7 @@ func load_save_data(data: Dictionary) -> void:
 	Events.player_hp_changed.emit(current_hp, max_hp)
 	Events.player_mp_changed.emit(current_mp, max_mp)
 	Events.player_atb_changed.emit(current_atb, max_atb)
+	if data.has("inventory"):
+		inventory_system.load_save_data(data["inventory"])
+	if data.has("equipment"):
+		equipment_system.load_save_data(data["equipment"])

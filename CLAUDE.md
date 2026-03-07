@@ -1014,9 +1014,9 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 # Current Focus
 
-Current Phase: Macro Phase 9 — Inventory & Equipment
-Current Task: Create InventorySystem and item data structures
-Next Milestone: Inventory and equipment system functional (item 230)
+Current Phase: Macro Phase 10 — Quests & NPC Interaction
+Current Task: Create interaction and quest systems
+Next Milestone: Quest system and NPC interaction functional (item 255)
 
 ## Completed Phases
 - Phase 1 — Foundation & Project Setup (items 1-20)
@@ -1027,6 +1027,7 @@ Next Milestone: Inventory and equipment system functional (item 230)
 - Phase 6 — MP, ATB & Ability Pipeline (items 121-150)
 - Phase 7 — Tactical Mode Core (items 151-175)
 - Phase 8 — HUD, Menus & UX (items 176-200)
+- Phase 9 — Inventory & Equipment (items 201-230)
 
 ---
 
