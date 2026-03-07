@@ -35,7 +35,7 @@ func process_input(event: InputEvent) -> StringName:
 		player.lock_on_component.switch_target(1.0)
 	if event.is_action_pressed(&"attack"):
 		return &"Attack1"
-	if event.is_action_pressed(&"dodge"):
+	if event.is_action_pressed(&"dodge") and player.dodge_ready:
 		return &"Dodge"
 	if event.is_action_pressed(&"jump"):
 		return &"Jump"

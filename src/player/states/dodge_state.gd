@@ -2,7 +2,6 @@ extends State
 
 @export var dodge_speed: float = 15.0
 @export var dodge_duration: float = 0.4
-@export var dodge_cooldown: float = 0.8
 
 var _timer: float = 0.0
 var _direction: Vector3 = Vector3.BACK
@@ -12,6 +11,8 @@ var _direction: Vector3 = Vector3.BACK
 
 func enter(_msg: Dictionary = {}) -> void:
 	_timer = 0.0
+	player.start_dodge_cooldown()
+
 	var input := InputManager.get_movement_vector()
 	if input.length() > 0.1:
 		var camera_basis := player.get_viewport().get_camera_3d().global_basis
@@ -29,6 +30,8 @@ func enter(_msg: Dictionary = {}) -> void:
 func process_physics(delta: float) -> StringName:
 	_timer += delta
 	if _timer >= dodge_duration:
+		if player.is_locked_on:
+			return &"LockOnIdle"
 		return &"Idle"
 
 	var progress := _timer / dodge_duration

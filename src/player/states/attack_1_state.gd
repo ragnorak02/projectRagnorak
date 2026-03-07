@@ -68,7 +68,7 @@ func process_input(event: InputEvent) -> StringName:
 		else:
 			_buffered_next = &"Attack2"
 
-	if event.is_action_pressed(&"dodge"):
+	if event.is_action_pressed(&"dodge") and player.dodge_ready:
 		return &"Dodge"
 
 	return &""

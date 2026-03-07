@@ -17,6 +17,8 @@ extends CharacterBody3D
 var is_locked_on: bool = false
 var lock_on_target: Node3D = null
 var dodge_ready: bool = true
+var _dodge_cooldown_timer: float = 0.0
+@export var dodge_cooldown_time: float = 0.6
 
 # Jump buffering
 var jump_buffer_time: float = 0.12
@@ -46,6 +48,13 @@ func _ready() -> void:
 	Events.lock_on_target_lost.connect(_on_lock_on_lost)
 	Events.player_spawned.emit(self)
 
+	# Illegal transitions per design contract
+	state_machine.add_illegal_transition(&"Ability", &"Dodge")
+	state_machine.add_illegal_transition(&"Flinch", &"TacticalIdle")
+	state_machine.add_illegal_transition(&"Flinch", &"Attack1")
+	state_machine.add_illegal_transition(&"LedgeGrab", &"Attack1")
+	state_machine.add_illegal_transition(&"ClimbUp", &"Attack1")
+
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
@@ -54,6 +63,12 @@ func _physics_process(delta: float) -> void:
 	# Jump buffer countdown
 	if _jump_buffer_timer > 0.0:
 		_jump_buffer_timer -= delta
+
+	# Dodge cooldown
+	if _dodge_cooldown_timer > 0.0:
+		_dodge_cooldown_timer -= delta
+		if _dodge_cooldown_timer <= 0.0:
+			dodge_ready = true
 
 	# ATB fills over time during combat
 	if current_atb < max_atb:
@@ -67,7 +82,10 @@ func take_damage(amount: float, source: Node3D = null) -> void:
 	current_hp = maxf(current_hp - amount, 0.0)
 	Events.player_hp_changed.emit(current_hp, max_hp)
 	Events.player_hurt.emit(amount, source)
+	disable_hitbox()
 	state_machine.force_transition(&"Flinch")
+	GameManager.hit_stop(65.0)
+	Events.camera_shake_requested.emit(0.15, 0.2)
 
 	if current_hp <= 0.0:
 		Events.player_died.emit()
@@ -149,6 +167,11 @@ func get_ledge_climb_position() -> Vector3:
 	var top_pos: Vector3 = _ledge_wall_point - _ledge_wall_normal * 0.6
 	top_pos.y = _ledge_surface_y + 0.1
 	return top_pos
+
+
+func start_dodge_cooldown() -> void:
+	dodge_ready = false
+	_dodge_cooldown_timer = dodge_cooldown_time
 
 
 func enable_hitbox(damage: float) -> void:

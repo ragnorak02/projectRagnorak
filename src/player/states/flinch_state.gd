@@ -6,6 +6,7 @@ var _timer: float = 0.0
 
 func enter(_msg: Dictionary = {}) -> void:
 	_timer = 0.0
+	player.disable_hitbox()
 
 
 func process_physics(delta: float) -> StringName:
@@ -14,5 +15,7 @@ func process_physics(delta: float) -> StringName:
 	player.velocity.z = move_toward(player.velocity.z, 0.0, 20.0 * delta)
 
 	if _timer >= flinch_duration:
+		if player.is_locked_on:
+			return &"LockOnIdle"
 		return &"Idle"
 	return &""
