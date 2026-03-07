@@ -4,13 +4,18 @@ extends State
 
 
 func process_physics(delta: float) -> StringName:
-	var input := InputManager.get_movement_vector()
-
-	if input.length() < 0.1:
-		return &"LockOnIdle"
+	# Lost target — return to free movement
+	if player.lock_on_target == null:
+		return &"Run"
 
 	if not player.is_on_floor():
 		return &"Fall"
+
+	player.face_lock_target(delta)
+
+	var input := InputManager.get_movement_vector()
+	if input.length() < 0.1:
+		return &"LockOnIdle"
 
 	var camera_basis := player.get_viewport().get_camera_3d().global_basis
 	var forward := (-camera_basis.z).normalized()
@@ -29,8 +34,12 @@ func process_physics(delta: float) -> StringName:
 
 func process_input(event: InputEvent) -> StringName:
 	if event.is_action_pressed(&"lock_on"):
-		Events.lock_on_target_lost.emit()
+		player.lock_on_component.release_target()
 		return &"Run"
+	if event.is_action_pressed(&"target_switch_left"):
+		player.lock_on_component.switch_target(-1.0)
+	elif event.is_action_pressed(&"target_switch_right"):
+		player.lock_on_component.switch_target(1.0)
 	if event.is_action_pressed(&"attack"):
 		return &"Attack1"
 	if event.is_action_pressed(&"dodge"):

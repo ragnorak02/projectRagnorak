@@ -2,34 +2,60 @@ extends State
 
 var _timer: float = 0.0
 var _buffered_next: StringName = &""
+var _hit_active: bool = false
 
 @export var attack_duration: float = 0.6
 @export var combo_window_start: float = 0.3
 @export var combo_window_end: float = 0.55
 @export var forward_movement: float = 3.0
+@export var hit_window_start: float = 0.12
+@export var hit_window_end: float = 0.35
+@export var damage: float = 10.0
 
 
 func enter(_msg: Dictionary = {}) -> void:
 	_timer = 0.0
 	_buffered_next = &""
+	_hit_active = false
 	Events.combo_count_changed.emit(1)
+
+	# Soft track toward lock-on target
+	if player.is_locked_on:
+		player.face_lock_target(1.0)
 
 
 func exit() -> void:
-	pass
+	if _hit_active:
+		player.disable_hitbox()
+		_hit_active = false
 
 
 func process_physics(delta: float) -> StringName:
 	_timer += delta
 
+	# Forward lunge
 	if _timer < 0.2:
 		player.velocity.x = player.global_basis.z.x * -forward_movement
 		player.velocity.z = player.global_basis.z.z * -forward_movement
+	else:
+		player.velocity.x = move_toward(player.velocity.x, 0.0, 20.0 * delta)
+		player.velocity.z = move_toward(player.velocity.z, 0.0, 20.0 * delta)
+
+	# Hit window
+	if _timer >= hit_window_start and _timer < hit_window_end:
+		if not _hit_active:
+			player.enable_hitbox(damage)
+			_hit_active = true
+	elif _hit_active:
+		player.disable_hitbox()
+		_hit_active = false
 
 	if _timer >= attack_duration:
 		if _buffered_next != &"":
 			return _buffered_next
 		Events.combo_reset.emit()
+		if player.is_locked_on:
+			return &"LockOnIdle"
 		return &"Idle"
 
 	return &""

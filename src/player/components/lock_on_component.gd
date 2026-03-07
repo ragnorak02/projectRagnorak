@@ -4,16 +4,18 @@ extends Node
 
 @export var detection_range: float = 20.0
 @export var lose_range_multiplier: float = 1.5
+@export var obstruction_timeout: float = 1.5
 
 var current_target: Node3D = null
 var _player: CharacterBody3D
+var _obstruction_timer: float = 0.0
 
 
 func _ready() -> void:
 	_player = get_parent() as CharacterBody3D
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if current_target != null:
 		if not is_instance_valid(current_target):
 			release_target()
@@ -21,6 +23,26 @@ func _physics_process(_delta: float) -> void:
 		var dist := _player.global_position.distance_to(current_target.global_position)
 		if dist > detection_range * lose_range_multiplier:
 			release_target()
+			return
+
+		# Line-of-sight check
+		if _is_obstructed():
+			_obstruction_timer += delta
+			if _obstruction_timer >= obstruction_timeout:
+				release_target()
+		else:
+			_obstruction_timer = 0.0
+
+
+func _is_obstructed() -> bool:
+	if current_target == null:
+		return false
+	var space := _player.get_world_3d().direct_space_state
+	var from: Vector3 = _player.global_position + Vector3(0, 1.2, 0)
+	var to: Vector3 = current_target.global_position + Vector3(0, 1.0, 0)
+	var query := PhysicsRayQueryParameters3D.create(from, to, 1)
+	var result := space.intersect_ray(query)
+	return not result.is_empty()
 
 
 func acquire_target() -> Node3D:

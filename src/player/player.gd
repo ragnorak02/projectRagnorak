@@ -8,8 +8,11 @@ extends CharacterBody3D
 @onready var visual_root: Node3D = $VisualRoot
 @onready var hurtbox: Area3D = $Hurtbox
 @onready var hitbox_anchor: Node3D = $HitboxAnchor
+@onready var hitbox: Area3D = $HitboxAnchor/Hitbox
+@onready var hitbox_shape: CollisionShape3D = $HitboxAnchor/Hitbox/CollisionShape3D
 @onready var camera_anchor: Node3D = $CameraAnchor
 @onready var interaction_anchor: Area3D = $InteractionAnchor
+@onready var lock_on_component: LockOnComponent = $LockOnComponent
 
 var is_locked_on: bool = false
 var lock_on_target: Node3D = null
@@ -146,6 +149,26 @@ func get_ledge_climb_position() -> Vector3:
 	var top_pos: Vector3 = _ledge_wall_point - _ledge_wall_normal * 0.6
 	top_pos.y = _ledge_surface_y + 0.1
 	return top_pos
+
+
+func enable_hitbox(damage: float) -> void:
+	hitbox.set_meta("damage", damage)
+	hitbox_shape.disabled = false
+
+
+func disable_hitbox() -> void:
+	hitbox_shape.disabled = true
+	if hitbox.has_meta("damage"):
+		hitbox.remove_meta("damage")
+
+
+func face_lock_target(delta: float) -> void:
+	if lock_on_target == null or not is_instance_valid(lock_on_target):
+		return
+	var dir: Vector3 = (lock_on_target.global_position - global_position)
+	dir.y = 0.0
+	if dir.length() > 0.1:
+		basis = basis.slerp(Basis.looking_at(dir.normalized()), 10.0 * delta)
 
 
 func _on_lock_on_acquired(target: Node3D) -> void:
