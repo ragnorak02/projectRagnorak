@@ -1,0 +1,30 @@
+{
+  "id": "projectRagnorak",
+  "title": "Project Ragnorak",
+  "engine": "godot",
+  "engineVersion": "4.6",
+  "genre": "Action RPG",
+  "entryScene": "res://scenes/menus/main_menu.tscn",
+  "testCommand": "tests/run-tests.bat",
+  "launchArgs": ["--path", ".", "--", "res://scenes/test/test_arena.tscn"],
+  "meta": {
+    "lastGameplayUpdate": "2026-03-07",
+    "buildVersion": "0.0.1-pre",
+    "progressPercent": 0,
+    "currentPhase": "Phase 1 — Foundation & Project Setup",
+    "description": "Korean Fantasy Hybrid Action RPG inspired by Final Fantasy VII Remake. Controller-first 3D combat with tactical slow-time menu, ATB-based command execution, and semi-open world exploration.",
+    "stats": {
+      "scripts": 0,
+      "scenes": 0,
+      "resources": 0,
+      "shaders": 0,
+      "abilities": 0,
+      "vfxScenes": 0,
+      "playerStates": 0,
+      "achievements": 0,
+      "testSuites": 0,
+      "testCases": 0
+    },
+    "milestones": []
+  }
+}

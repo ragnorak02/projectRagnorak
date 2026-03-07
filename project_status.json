@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "gameId": "projectRagnorak",
+  "title": "Project Ragnorak",
+  "lastUpdated": "2026-03-07T00:00:00Z",
+
+  "health": {
+    "progressPercent": 0,
+    "buildVersion": "0.0.1-pre",
+    "assetStage": null
+  },
+
+  "tech": {
+    "engine": "Godot",
+    "engineVersion": "4.6",
+    "languages": ["GDScript"],
+    "graphicsType": "3D"
+  },
+
+  "features": {
+    "controllerSupport": "unknown",
+    "achievementsSystem": "missing",
+    "testScripts": "missing",
+    "saveSystem": "missing",
+    "settingsMenu": "missing",
+    "audio": "missing",
+    "vfx": "missing"
+  },
+
+  "milestones": {
+    "firstGraphicsPass": false,
+    "controllerIntegration": false,
+    "coreGameplayLoop": false,
+    "verticalSlice": false,
+    "contentComplete": false,
+    "productionReady": false
+  },
+
+  "testing": {
+    "testCommand": "tests/run-tests.bat",
+    "lastRunAt": null,
+    "status": "unknown",
+    "notes": ""
+  },
+
+  "links": {
+    "repo": null,
+    "launcherId": "projectRagnorak"
+  }
+}

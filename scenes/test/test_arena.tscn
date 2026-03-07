@@ -1,0 +1,205 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://scenes/test/test_arena.gd" id="1_script"]
+
+[sub_resource type="PlaneMesh" id="1"]
+size = Vector2(50, 50)
+
+[sub_resource type="StandardMaterial3D" id="2"]
+albedo_color = Color(0.15, 0.15, 0.2, 1)
+
+[sub_resource type="BoxShape3D" id="3"]
+size = Vector3(50, 0.1, 50)
+
+[sub_resource type="ProceduralSkyMaterial" id="4"]
+sky_top_color = Color(0.05, 0.05, 0.15, 1)
+sky_horizon_color = Color(0.1, 0.08, 0.12, 1)
+ground_bottom_color = Color(0.05, 0.05, 0.05, 1)
+ground_horizon_color = Color(0.1, 0.08, 0.12, 1)
+
+[sub_resource type="Sky" id="5"]
+sky_material = SubResource("4")
+
+[sub_resource type="Environment" id="6"]
+background_mode = 2
+sky = SubResource("5")
+ambient_light_source = 1
+ambient_light_color = Color(0.2, 0.2, 0.3, 1)
+ambient_light_energy = 0.5
+tonemap_mode = 2
+
+; --- Tall Wall: 3x4x3 ---
+[sub_resource type="BoxMesh" id="m_wall"]
+size = Vector3(3, 4, 3)
+
+[sub_resource type="StandardMaterial3D" id="mat_wall"]
+albedo_color = Color(0.3, 0.2, 0.25, 1)
+
+[sub_resource type="BoxShape3D" id="s_wall"]
+size = Vector3(3, 4, 3)
+
+; --- Platform A: 4x3x4 ---
+[sub_resource type="BoxMesh" id="m_platA"]
+size = Vector3(4, 3, 4)
+
+[sub_resource type="StandardMaterial3D" id="mat_platA"]
+albedo_color = Color(0.2, 0.25, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="s_platA"]
+size = Vector3(4, 3, 4)
+
+; --- Platform B/C: 3x2x3 ---
+[sub_resource type="BoxMesh" id="m_platBC"]
+size = Vector3(3, 2, 3)
+
+[sub_resource type="StandardMaterial3D" id="mat_platB"]
+albedo_color = Color(0.25, 0.3, 0.25, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_platC"]
+albedo_color = Color(0.35, 0.25, 0.2, 1)
+
+[sub_resource type="BoxShape3D" id="s_platBC"]
+size = Vector3(3, 2, 3)
+
+; --- Platform D: 4x1x4 (flat island) ---
+[sub_resource type="BoxMesh" id="m_platD"]
+size = Vector3(4, 1, 4)
+
+[sub_resource type="StandardMaterial3D" id="mat_platD"]
+albedo_color = Color(0.3, 0.2, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="s_platD"]
+size = Vector3(4, 1, 4)
+
+; --- Pillar: 2x6x2 ---
+[sub_resource type="BoxMesh" id="m_pillar"]
+size = Vector3(2, 6, 2)
+
+[sub_resource type="StandardMaterial3D" id="mat_pillar"]
+albedo_color = Color(0.25, 0.2, 0.3, 1)
+
+[sub_resource type="BoxShape3D" id="s_pillar"]
+size = Vector3(2, 6, 2)
+
+[node name="TestArena" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("6")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 10, 0)
+light_color = Color(0.95, 0.9, 0.8, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("1")
+material_override = SubResource("2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("3")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+
+[node name="PlayerSpawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="EnemySpawn1" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, -5)
+
+[node name="EnemySpawn2" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -5)
+
+[node name="EnemySpawn3" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -10)
+
+; === TALL WALL — ledge grab from ground (top at y=4) ===
+[node name="TallWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TallWall"]
+mesh = SubResource("m_wall")
+material_override = SubResource("mat_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TallWall"]
+shape = SubResource("s_wall")
+
+; === PLATFORM A — first step (top at y=3) ===
+[node name="PlatformA" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.5, -5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlatformA"]
+mesh = SubResource("m_platA")
+material_override = SubResource("mat_platA")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformA"]
+shape = SubResource("s_platA")
+
+; === PLATFORM B — floating step 2 (top at y=6) ===
+[node name="PlatformB" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 5, -5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlatformB"]
+mesh = SubResource("m_platBC")
+material_override = SubResource("mat_platB")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformB"]
+shape = SubResource("s_platBC")
+
+; === PLATFORM C — floating step 3 (top at y=9) ===
+[node name="PlatformC" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 8, -10)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlatformC"]
+mesh = SubResource("m_platBC")
+material_override = SubResource("mat_platC")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformC"]
+shape = SubResource("s_platBC")
+
+; === PLATFORM D — high floating island (top at y=11.5) ===
+[node name="PlatformD" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 11, -10)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlatformD"]
+mesh = SubResource("m_platD")
+material_override = SubResource("mat_platD")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformD"]
+shape = SubResource("s_platD")
+
+; === PILLAR — tall standalone (top at y=6) ===
+[node name="Pillar" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -8)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pillar"]
+mesh = SubResource("m_pillar")
+material_override = SubResource("mat_pillar")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pillar"]
+shape = SubResource("s_pillar")
+
+; === FLOATING ISLAND 1 — isolated jump target (top at y=3.5) ===
+[node name="FloatIsland1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 3, -14)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FloatIsland1"]
+mesh = SubResource("m_platD")
+material_override = SubResource("mat_platA")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FloatIsland1"]
+shape = SubResource("s_platD")
+
+; === FLOATING ISLAND 2 — hop from Island 1 (top at y=6.5) ===
+[node name="FloatIsland2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 6, -14)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FloatIsland2"]
+mesh = SubResource("m_platD")
+material_override = SubResource("mat_platB")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FloatIsland2"]
+shape = SubResource("s_platD")
