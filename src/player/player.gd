@@ -67,6 +67,11 @@ func _ready() -> void:
 	state_machine.add_illegal_transition(&"LedgeGrab", &"Attack1")
 	state_machine.add_illegal_transition(&"ClimbUp", &"Attack1")
 
+	# Block tactical mode from forced/locked states (items 167-170)
+	for blocked_state in [&"Dodge", &"Ability", &"LedgeGrab", &"ClimbUp",
+			&"JumpAttack", &"Attack1", &"Attack2", &"Attack3", &"Land"]:
+		state_machine.add_illegal_transition(blocked_state, &"TacticalIdle")
+
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():

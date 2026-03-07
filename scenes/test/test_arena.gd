@@ -7,6 +7,9 @@ const EnemyScene := preload("res://src/enemies/enemy.tscn")
 const CombatHudScript := preload("res://src/ui/hud/combat_hud.gd")
 const ControlBarScript := preload("res://src/ui/hud/control_bar.gd")
 const TacticalMenuScript := preload("res://src/ui/hud/tactical_menu.gd")
+const LockOnIndicatorScript := preload("res://src/ui/hud/lock_on_indicator.gd")
+const InteractionPromptScript := preload("res://src/ui/hud/interaction_prompt.gd")
+const PauseMenuScript := preload("res://src/ui/menus/pause_menu.gd")
 
 @onready var player_spawn: Marker3D = $PlayerSpawn
 
@@ -45,14 +48,24 @@ func _ready() -> void:
 	tactical_menu.set_script(TacticalMenuScript)
 	add_child(tactical_menu)
 
+	# Add lock-on target indicator
+	var lock_indicator := CanvasLayer.new()
+	lock_indicator.set_script(LockOnIndicatorScript)
+	add_child(lock_indicator)
+
+	# Add interaction prompt
+	var interact_prompt := CanvasLayer.new()
+	interact_prompt.set_script(InteractionPromptScript)
+	add_child(interact_prompt)
+
+	# Add pause menu
+	var pause_menu := CanvasLayer.new()
+	pause_menu.set_script(PauseMenuScript)
+	add_child(pause_menu)
+
 	# Emit initial values so HUD updates
 	Events.player_hp_changed.emit(player_inst.current_hp, player_inst.max_hp)
 	Events.player_mp_changed.emit(player_inst.current_mp, player_inst.max_mp)
 	Events.player_atb_changed.emit(player_inst.current_atb, player_inst.max_atb)
 
 	GameManager.change_state(GameManager.GameState.PLAYING)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"pause"):
-		get_tree().change_scene_to_file("res://scenes/menus/main_menu.tscn")

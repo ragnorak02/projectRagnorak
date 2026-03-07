@@ -16,6 +16,7 @@ func _ready() -> void:
 	test_resource_definitions()
 	test_locomotion_states()
 	test_phase6_scripts()
+	test_phase7_8_scripts()
 	_print_results()
 
 
@@ -87,6 +88,21 @@ func test_phase6_scripts() -> void:
 	_assert("SpellProjectile script loads", spell_projectile != null)
 	_assert("SpellProjectile scene loads", projectile_scene != null)
 	_assert("Fire Bolt resource loads", fire_bolt != null)
+
+
+func test_phase7_8_scripts() -> void:
+	var tactical_menu = load("res://src/ui/hud/tactical_menu.gd")
+	var control_bar = load("res://src/ui/hud/control_bar.gd")
+	var lock_on_indicator = load("res://src/ui/hud/lock_on_indicator.gd")
+	var interaction_prompt = load("res://src/ui/hud/interaction_prompt.gd")
+	var attack_vfx = load("res://src/effects/attack_vfx.gd")
+	var pause_menu = load("res://src/ui/menus/pause_menu.gd")
+	_assert("TacticalMenu script loads", tactical_menu != null)
+	_assert("ControlBar script loads", control_bar != null)
+	_assert("LockOnIndicator script loads", lock_on_indicator != null)
+	_assert("InteractionPrompt script loads", interaction_prompt != null)
+	_assert("AttackVFX script loads", attack_vfx != null)
+	_assert("PauseMenu script loads", pause_menu != null)
 
 
 func _assert(test_name: String, condition: bool) -> void:

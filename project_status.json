@@ -2,21 +2,21 @@
   "schemaVersion": 1,
   "gameId": "projectRagnorak",
   "title": "Project Ragnorak",
-  "lastUpdated": "2026-03-07T14:30:00Z",
+  "lastUpdated": "2026-03-07T16:00:00Z",
 
   "health": {
-    "progressPercent": 15,
-    "buildVersion": "0.0.6-dev",
+    "progressPercent": 20,
+    "buildVersion": "0.0.8-dev",
     "assetStage": "placeholder"
   },
 
   "phase": {
-    "macroPhase": 6,
-    "macroPhaseLabel": "MP, ATB & Ability Pipeline",
-    "status": "complete",
-    "currentGoal": "Phase 7 — Tactical Mode Core",
-    "currentTask": "Create TacticalMenuState and menu UI",
-    "nextMilestone": "Tactical menu open/close with ability selection"
+    "macroPhase": 8,
+    "macroPhaseLabel": "HUD, Menus & UX",
+    "status": "in-progress",
+    "currentGoal": "Phase 8 — Complete HUD and menu systems",
+    "currentTask": "Menu validation and remaining HUD elements",
+    "nextMilestone": "Full pause menu and HUD verified on controller + keyboard"
   },
 
   "tech": {
@@ -31,9 +31,9 @@
     "achievementsSystem": "missing",
     "testScripts": "active",
     "saveSystem": "scaffolded",
-    "settingsMenu": "missing",
+    "settingsMenu": "placeholder",
     "audio": "missing",
-    "vfx": "minimal"
+    "vfx": "basic"
   },
 
   "completedPhases": {
@@ -42,7 +42,8 @@
     "phase3_camera_targeting": true,
     "phase4_basic_combat": true,
     "phase5_enemy_damage_loop": true,
-    "phase6_mp_atb_abilities": true
+    "phase6_mp_atb_abilities": true,
+    "phase7_tactical_mode": true
   },
 
   "milestones": {
@@ -56,12 +57,13 @@
 
   "testing": {
     "testCommand": "tests/run-tests.bat",
-    "lastRunAt": "2026-03-07T14:30:00Z",
+    "lastRunAt": "2026-03-07T16:00:00Z",
     "status": "pass",
-    "smokeTests": 26,
+    "smokeTests": 32,
     "phase6Tests": 111,
-    "totalTests": 137,
-    "notes": "All 137 tests passing (26 smoke + 111 Phase 6)"
+    "phase7Tests": 23,
+    "totalTests": 166,
+    "notes": "All 166 tests passing (32 smoke + 111 Phase 6 + 23 Phase 7)"
   },
 
   "links": {

@@ -1014,9 +1014,9 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 # Current Focus
 
-Current Phase: Macro Phase 7 — Tactical Mode Core
-Current Task: Create TacticalMenuState and menu UI
-Next Milestone: Tactical menu open/close with ability selection (item 175)
+Current Phase: Macro Phase 8 — HUD, Menus & UX
+Current Task: Menu validation and remaining HUD elements
+Next Milestone: Full pause menu and HUD verified on controller + keyboard (item 200)
 
 ## Completed Phases
 - Phase 1 — Foundation & Project Setup (items 1-20)
