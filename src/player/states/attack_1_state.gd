@@ -1,5 +1,7 @@
 extends State
 
+const AttackVFX = preload("res://src/effects/attack_vfx.gd")
+
 var _timer: float = 0.0
 var _buffered_next: StringName = &""
 var _hit_active: bool = false
@@ -22,6 +24,8 @@ func enter(_msg: Dictionary = {}) -> void:
 	# Soft track toward lock-on target
 	if player.is_locked_on:
 		player.face_lock_target(1.0)
+
+	AttackVFX.spawn(player.get_parent(), 1, player.global_position + Vector3(0, 1.0, 0), -player.global_basis.z)
 
 
 func exit() -> void:

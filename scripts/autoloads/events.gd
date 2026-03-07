@@ -42,8 +42,10 @@ signal enemy_aggro_triggered(enemy: Node3D)
 signal ability_cast_started(ability_data: Resource)
 signal ability_cast_completed(ability_data: Resource)
 signal ability_cast_interrupted(ability_data: Resource)
-signal ability_cooldown_started(slot: int, duration: float)
-signal ability_cooldown_finished(slot: int)
+signal ability_cooldown_started(ability_id: StringName, duration: float)
+signal ability_cooldown_finished(ability_id: StringName)
+signal ability_request_failed(reason: String, ability_data: Resource)
+signal ability_effect_spawned(effect: Node3D, ability_data: Resource)
 
 # --- Inventory / Equipment ---
 signal item_acquired(item_data: Resource, quantity: int)

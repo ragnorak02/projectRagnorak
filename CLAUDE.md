@@ -1014,9 +1014,17 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 # Current Focus
 
-Current Phase: Macro Phase 1 — Foundation & Project Setup
-Current Task: Create project structure and base scenes
-Next Milestone: All base scenes boot without errors (item 20)
+Current Phase: Macro Phase 7 — Tactical Mode Core
+Current Task: Create TacticalMenuState and menu UI
+Next Milestone: Tactical menu open/close with ability selection (item 175)
+
+## Completed Phases
+- Phase 1 — Foundation & Project Setup (items 1-20)
+- Phase 2 — Player Locomotion Core (items 21-40)
+- Phase 3 — Camera & Targeting Core (items 41-65)
+- Phase 4 — Basic Combat Core (items 66-95)
+- Phase 5 — Enemy Core & Damage Loop (items 96-120)
+- Phase 6 — MP, ATB & Ability Pipeline (items 121-150)
 
 ---
 

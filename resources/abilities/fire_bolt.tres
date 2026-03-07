@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/abilities/ability_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://src/effects/spell_projectile.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"fire_bolt"
+display_name = "Fire Bolt"
+description = "Launches a bolt of fire at the target."
+ability_type = 1
+mp_cost = 15.0
+atb_cost = 25.0
+cooldown = 3.0
+cast_time = 0.8
+damage = 25.0
+animation_name = &""
+effect_scene = ExtResource("2")
+icon = null

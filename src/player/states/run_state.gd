@@ -28,7 +28,7 @@ func process_physics(delta: float) -> StringName:
 	player.velocity.z = move_toward(player.velocity.z, target_velocity.z, acceleration * delta)
 
 	if direction.length() > 0.1:
-		player.basis = player.basis.slerp(Basis.looking_at(direction), 10.0 * delta)
+		player.basis = player.basis.slerp(Basis.looking_at(direction), clampf(10.0 * delta, 0.0, 1.0))
 
 	return &""
 

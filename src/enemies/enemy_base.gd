@@ -16,7 +16,6 @@ class_name EnemyBase
 
 var current_hp: float
 
-@onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var visual_root: Node3D = $VisualRoot
 @onready var hurtbox: Area3D = $Hurtbox
 @onready var attack_origin: Node3D = $AttackOrigin
@@ -149,17 +148,19 @@ func _process_chase(delta: float) -> void:
 		_enter_attack_telegraph()
 		return
 
-	# Navigate toward target
-	nav_agent.target_position = _target.global_position
-	var next_pos := nav_agent.get_next_path_position()
-	var direction := (next_pos - global_position).normalized()
+	# Navigate toward target — use direct steering (no nav mesh dependency)
+	var direction: Vector3 = (_target.global_position - global_position)
 	direction.y = 0.0
-	velocity.x = direction.x * move_speed
-	velocity.z = direction.z * move_speed
-
-	# Face movement direction
 	if direction.length() > 0.1:
-		basis = basis.slerp(Basis.looking_at(direction.normalized()), 8.0 * delta)
+		direction = direction.normalized()
+		velocity.x = direction.x * move_speed
+		velocity.z = direction.z * move_speed
+
+		# Face movement direction
+		basis = basis.slerp(Basis.looking_at(direction), clampf(8.0 * delta, 0.0, 1.0))
+	else:
+		velocity.x = 0.0
+		velocity.z = 0.0
 
 
 func _enter_attack_telegraph() -> void:
@@ -179,7 +180,7 @@ func _process_attack_telegraph(delta: float) -> void:
 		var dir: Vector3 = (_target.global_position - global_position)
 		dir.y = 0.0
 		if dir.length() > 0.1:
-			basis = basis.slerp(Basis.looking_at(dir.normalized()), 12.0 * delta)
+			basis = basis.slerp(Basis.looking_at(dir.normalized()), clampf(12.0 * delta, 0.0, 1.0))
 
 	if _state_timer >= attack_telegraph:
 		_enter_attack_strike()
@@ -243,7 +244,7 @@ func _enable_attack_hitbox() -> void:
 
 func _disable_attack_hitbox() -> void:
 	if _hit_active:
-		attack_hitbox_shape.disabled = true
+		attack_hitbox_shape.set_deferred("disabled", true)
 		var hitbox_area: Area3D = attack_hitbox_shape.get_parent()
 		if hitbox_area.has_meta("damage"):
 			hitbox_area.remove_meta("damage")

@@ -15,6 +15,7 @@ func _ready() -> void:
 	test_camera_rig_loads()
 	test_resource_definitions()
 	test_locomotion_states()
+	test_phase6_scripts()
 	_print_results()
 
 
@@ -73,6 +74,19 @@ func test_locomotion_states() -> void:
 	_assert("JumpState loads", jump != null)
 	_assert("FallState loads", fall != null)
 	_assert("LandState loads", land != null)
+
+
+func test_phase6_scripts() -> void:
+	var ability_system = load("res://src/player/components/ability_system.gd")
+	var combat_hud = load("res://src/ui/hud/combat_hud.gd")
+	var spell_projectile = load("res://src/effects/spell_projectile.gd")
+	var projectile_scene = load("res://src/effects/spell_projectile.tscn")
+	var fire_bolt = load("res://resources/abilities/fire_bolt.tres")
+	_assert("AbilitySystem script loads", ability_system != null)
+	_assert("CombatHUD script loads", combat_hud != null)
+	_assert("SpellProjectile script loads", spell_projectile != null)
+	_assert("SpellProjectile scene loads", projectile_scene != null)
+	_assert("Fire Bolt resource loads", fire_bolt != null)
 
 
 func _assert(test_name: String, condition: bool) -> void:

@@ -13,6 +13,7 @@ extends CharacterBody3D
 @onready var camera_anchor: Node3D = $CameraAnchor
 @onready var interaction_anchor: Area3D = $InteractionAnchor
 @onready var lock_on_component: LockOnComponent = $LockOnComponent
+@onready var ability_system: Node = $AbilitySystem
 
 var is_locked_on: bool = false
 var lock_on_target: Node3D = null
@@ -39,14 +40,25 @@ var current_atb: float = 0.0
 var max_atb: float = 100.0
 var atb_fill_rate: float = 5.0
 
+# MP regen
+var mp_regen_rate: float = 1.5  # MP per second (passive regen)
+var mp_regen_delay: float = 2.0  # Seconds after spending MP before regen starts
+var _mp_regen_timer: float = 0.0
+
 
 func _ready() -> void:
 	add_to_group(&"player")
 	state_machine.initialize(self)
+	ability_system.initialize(self)
 	hurtbox.area_entered.connect(_on_hurtbox_hit)
 	Events.lock_on_target_acquired.connect(_on_lock_on_acquired)
 	Events.lock_on_target_lost.connect(_on_lock_on_lost)
 	Events.player_spawned.emit(self)
+
+	# Equip default ability (Fire Bolt)
+	var fire_bolt := load("res://resources/abilities/fire_bolt.tres") as AbilityData
+	if fire_bolt:
+		ability_system.equip_ability(fire_bolt, 0)
 
 	# Illegal transitions per design contract
 	state_machine.add_illegal_transition(&"Ability", &"Dodge")
@@ -74,6 +86,13 @@ func _physics_process(delta: float) -> void:
 	if current_atb < max_atb:
 		current_atb = minf(current_atb + atb_fill_rate * delta, max_atb)
 		Events.player_atb_changed.emit(current_atb, max_atb)
+
+	# MP passive regen after delay
+	if _mp_regen_timer > 0.0:
+		_mp_regen_timer -= delta
+	elif current_mp < max_mp:
+		current_mp = minf(current_mp + mp_regen_rate * delta, max_mp)
+		Events.player_mp_changed.emit(current_mp, max_mp)
 
 	move_and_slide()
 
@@ -103,6 +122,7 @@ func has_mp(cost: float) -> bool:
 
 func spend_mp(cost: float) -> void:
 	current_mp = maxf(current_mp - cost, 0.0)
+	_mp_regen_timer = mp_regen_delay
 	Events.player_mp_changed.emit(current_mp, max_mp)
 
 
@@ -176,11 +196,11 @@ func start_dodge_cooldown() -> void:
 
 func enable_hitbox(damage: float) -> void:
 	hitbox.set_meta("damage", damage)
-	hitbox_shape.disabled = false
+	hitbox_shape.set_deferred("disabled", false)
 
 
 func disable_hitbox() -> void:
-	hitbox_shape.disabled = true
+	hitbox_shape.set_deferred("disabled", true)
 	if hitbox.has_meta("damage"):
 		hitbox.remove_meta("damage")
 
@@ -191,7 +211,8 @@ func face_lock_target(delta: float) -> void:
 	var dir: Vector3 = (lock_on_target.global_position - global_position)
 	dir.y = 0.0
 	if dir.length() > 0.1:
-		basis = basis.slerp(Basis.looking_at(dir.normalized()), 10.0 * delta)
+		var target_basis := Basis.looking_at(dir.normalized())
+		basis = basis.slerp(target_basis, clampf(10.0 * delta, 0.0, 1.0))
 
 
 func _on_lock_on_acquired(target: Node3D) -> void:
@@ -223,3 +244,6 @@ func load_save_data(data: Dictionary) -> void:
 	current_hp = data.get("hp", max_hp)
 	current_mp = data.get("mp", max_mp)
 	current_atb = data.get("atb", 0.0)
+	Events.player_hp_changed.emit(current_hp, max_hp)
+	Events.player_mp_changed.emit(current_mp, max_mp)
+	Events.player_atb_changed.emit(current_atb, max_atb)
