@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "gameId": "projectRagnorak",
   "title": "Project Ragnorak",
-  "lastUpdated": "2026-03-07T16:00:00Z",
+  "lastUpdated": "2026-03-08T01:00:00Z",
 
   "health": {
-    "progressPercent": 20,
+    "progressPercent": 21,
     "buildVersion": "0.0.8-dev",
     "assetStage": "placeholder"
   },
@@ -13,10 +13,10 @@
   "phase": {
     "macroPhase": 8,
     "macroPhaseLabel": "HUD, Menus & UX",
-    "status": "in-progress",
-    "currentGoal": "Phase 8 — Complete HUD and menu systems",
-    "currentTask": "Menu validation and remaining HUD elements",
-    "nextMilestone": "Full pause menu and HUD verified on controller + keyboard"
+    "status": "complete",
+    "currentGoal": "Phase 9 — Inventory & Equipment",
+    "currentTask": "Create InventorySystem and item data structures",
+    "nextMilestone": "Inventory and equipment system functional (item 230)"
   },
 
   "tech": {
@@ -43,7 +43,8 @@
     "phase4_basic_combat": true,
     "phase5_enemy_damage_loop": true,
     "phase6_mp_atb_abilities": true,
-    "phase7_tactical_mode": true
+    "phase7_tactical_mode": true,
+    "phase8_hud_menus_ux": true
   },
 
   "milestones": {
@@ -59,11 +60,12 @@
     "testCommand": "tests/run-tests.bat",
     "lastRunAt": "2026-03-07T16:00:00Z",
     "status": "pass",
-    "smokeTests": 32,
+    "smokeTests": 33,
     "phase6Tests": 111,
     "phase7Tests": 23,
-    "totalTests": 166,
-    "notes": "All 166 tests passing (32 smoke + 111 Phase 6 + 23 Phase 7)"
+    "phase8Tests": 65,
+    "totalTests": 232,
+    "notes": "All 232 tests passing (33 smoke + 111 Phase 6 + 23 Phase 7 + 65 Phase 8)"
   },
 
   "links": {

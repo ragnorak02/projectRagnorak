@@ -1014,9 +1014,9 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 # Current Focus
 
-Current Phase: Macro Phase 8 — HUD, Menus & UX
-Current Task: Menu validation and remaining HUD elements
-Next Milestone: Full pause menu and HUD verified on controller + keyboard (item 200)
+Current Phase: Macro Phase 9 — Inventory & Equipment
+Current Task: Create InventorySystem and item data structures
+Next Milestone: Inventory and equipment system functional (item 230)
 
 ## Completed Phases
 - Phase 1 — Foundation & Project Setup (items 1-20)
@@ -1025,6 +1025,8 @@ Next Milestone: Full pause menu and HUD verified on controller + keyboard (item 
 - Phase 4 — Basic Combat Core (items 66-95)
 - Phase 5 — Enemy Core & Damage Loop (items 96-120)
 - Phase 6 — MP, ATB & Ability Pipeline (items 121-150)
+- Phase 7 — Tactical Mode Core (items 151-175)
+- Phase 8 — HUD, Menus & UX (items 176-200)
 
 ---
 

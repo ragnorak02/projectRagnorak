@@ -9,6 +9,7 @@ const ControlBarScript := preload("res://src/ui/hud/control_bar.gd")
 const TacticalMenuScript := preload("res://src/ui/hud/tactical_menu.gd")
 const LockOnIndicatorScript := preload("res://src/ui/hud/lock_on_indicator.gd")
 const InteractionPromptScript := preload("res://src/ui/hud/interaction_prompt.gd")
+const QuestTrackerScript := preload("res://src/ui/hud/quest_tracker.gd")
 const PauseMenuScript := preload("res://src/ui/menus/pause_menu.gd")
 
 @onready var player_spawn: Marker3D = $PlayerSpawn
@@ -57,6 +58,11 @@ func _ready() -> void:
 	var interact_prompt := CanvasLayer.new()
 	interact_prompt.set_script(InteractionPromptScript)
 	add_child(interact_prompt)
+
+	# Add quest tracker placeholder
+	var quest_tracker := CanvasLayer.new()
+	quest_tracker.set_script(QuestTrackerScript)
+	add_child(quest_tracker)
 
 	# Add pause menu
 	var pause_menu := CanvasLayer.new()
