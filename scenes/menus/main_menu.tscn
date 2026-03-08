@@ -24,9 +24,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -100.0
-offset_top = -60.0
+offset_top = -80.0
 offset_right = 100.0
-offset_bottom = 60.0
+offset_bottom = 80.0
 
 [node name="Title" type="Label" parent="VBox"]
 layout_mode = 2
@@ -45,6 +45,11 @@ focus_mode = 2
 [node name="Continue" type="Button" parent="VBox"]
 layout_mode = 2
 text = "Continue"
+focus_mode = 2
+
+[node name="Load" type="Button" parent="VBox"]
+layout_mode = 2
+text = "Load Game"
 focus_mode = 2
 
 [node name="Options" type="Button" parent="VBox"]

@@ -1,6 +1,6 @@
-## Quest tracker placeholder HUD element.
-## Displays current quest objective text in the top-right corner.
-## Will be connected to the QuestSystem once Phase 10 is implemented.
+## Quest tracker HUD element.
+## Displays current tracked quest objective text in the top-right corner.
+## Listens to QuestSystem signals via Events bus.
 extends CanvasLayer
 
 const BG_COLOR := Color(0.02, 0.04, 0.12, 0.7)
@@ -106,8 +106,39 @@ func clear_quest() -> void:
 	_show_placeholder()
 
 
-func _on_objective_updated(quest_id: StringName, _objective_index: int) -> void:
-	_header_label.text = String(quest_id)
+func _on_objective_updated(quest_id: StringName, objective_index: int) -> void:
+	# Try to find the tracked quest data from the player's quest system
+	var players := get_tree().get_nodes_in_group(&"player")
+	if players.is_empty():
+		_header_label.text = String(quest_id)
+		return
+
+	var player: Node = players[0]
+	if not player.has_node("QuestSystem"):
+		_header_label.text = String(quest_id)
+		return
+
+	var quest_sys: Node = player.get_node("QuestSystem")
+	var tracked: Dictionary = quest_sys.get_tracked_quest()
+	if tracked.is_empty() or tracked["quest_id"] != quest_id:
+		return
+
+	var data: Resource = tracked["data"]
+	var progress: Array = tracked["progress"]
+	var idx: int = tracked["current_objective_index"]
+
+	_header_label.text = data.title
+	if idx < data.objectives.size():
+		var obj: Resource = data.objectives[idx]
+		if obj.target_count > 1:
+			var current: int = progress[idx] if idx < progress.size() else 0
+			_objective_label.text = "%s (%d/%d)" % [obj.description, current, obj.target_count]
+		else:
+			_objective_label.text = obj.description
+	else:
+		_objective_label.text = "All objectives complete"
+	_objective_label.visible = true
+	_no_quest_label.visible = false
 
 
 func _on_quest_completed(_quest_id: StringName) -> void:

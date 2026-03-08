@@ -33,25 +33,28 @@ func _unhandled_input(event: InputEvent) -> void:
 		_reset_camera()
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if follow_target == null:
 		return
 
+	# Use unscaled delta so camera stays responsive during tactical slow-time
+	var real_delta := _delta if Engine.time_scale == 0.0 else _delta / Engine.time_scale
+
 	# Smooth follow with frame-rate independent exponential decay
-	var t := 1.0 - exp(-follow_speed * delta)
+	var t := 1.0 - exp(-follow_speed * real_delta)
 	global_position = global_position.lerp(follow_target.global_position, t)
 
-	# Controller camera input only
+	# Controller camera input only — always at full speed
 	var cam_input := InputManager.get_camera_vector()
-	_yaw -= cam_input.x * yaw_speed * delta
-	_pitch -= cam_input.y * pitch_speed * delta
+	_yaw -= cam_input.x * yaw_speed * real_delta
+	_pitch -= cam_input.y * pitch_speed * real_delta
 
 	_pitch = clampf(_pitch, min_pitch, max_pitch)
 
 	if _is_locked_on and is_instance_valid(_lock_target):
 		var dir_to_target := (_lock_target.global_position - follow_target.global_position).normalized()
 		var target_yaw := atan2(dir_to_target.x, dir_to_target.z)
-		_yaw = lerp_angle(_yaw, -target_yaw + PI, 5.0 * delta)
+		_yaw = lerp_angle(_yaw, -target_yaw + PI, 5.0 * real_delta)
 
 	yaw_pivot.rotation_degrees.y = rad_to_deg(_yaw)
 	pitch_pivot.rotation_degrees.x = _pitch

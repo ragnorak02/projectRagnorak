@@ -1,4 +1,5 @@
 ## Test arena — spawns player, camera, enemies, and HUD for testing.
+## Supports loading saved state via SaveManager pending load system.
 extends Node3D
 
 const PlayerScene := preload("res://src/player/player.tscn")
@@ -11,6 +12,8 @@ const LockOnIndicatorScript := preload("res://src/ui/hud/lock_on_indicator.gd")
 const InteractionPromptScript := preload("res://src/ui/hud/interaction_prompt.gd")
 const QuestTrackerScript := preload("res://src/ui/hud/quest_tracker.gd")
 const PauseMenuScript := preload("res://src/ui/menus/pause_menu.gd")
+const DialogueUiScript := preload("res://src/ui/dialogue/dialogue_ui.gd")
+const SaveFeedbackScript := preload("res://src/ui/hud/save_feedback.gd")
 
 @onready var player_spawn: Marker3D = $PlayerSpawn
 
@@ -64,14 +67,39 @@ func _ready() -> void:
 	quest_tracker.set_script(QuestTrackerScript)
 	add_child(quest_tracker)
 
+	# Add dialogue UI
+	var dialogue_ui := CanvasLayer.new()
+	dialogue_ui.set_script(DialogueUiScript)
+	add_child(dialogue_ui)
+
 	# Add pause menu
 	var pause_menu := CanvasLayer.new()
 	pause_menu.set_script(PauseMenuScript)
 	add_child(pause_menu)
 
-	# Emit initial values so HUD updates
-	Events.player_hp_changed.emit(player_inst.current_hp, player_inst.max_hp)
-	Events.player_mp_changed.emit(player_inst.current_mp, player_inst.max_mp)
-	Events.player_atb_changed.emit(player_inst.current_atb, player_inst.max_atb)
+	# Add save feedback HUD
+	var save_feedback := CanvasLayer.new()
+	save_feedback.set_script(SaveFeedbackScript)
+	add_child(save_feedback)
+
+	# Apply pending save data if loading from a save
+	if SaveManager.has_pending_load():
+		var data := SaveManager.consume_pending_load()
+		SaveManager.apply_load_data(data)
+	else:
+		# Emit initial values so HUD updates (new game)
+		Events.player_hp_changed.emit(player_inst.current_hp, player_inst.max_hp)
+		Events.player_mp_changed.emit(player_inst.current_mp, player_inst.max_mp)
+		Events.player_atb_changed.emit(player_inst.current_atb, player_inst.max_atb)
 
 	GameManager.change_state(GameManager.GameState.PLAYING)
+
+	# Autosave on zone entry
+	call_deferred("_autosave_on_entry")
+
+
+func _autosave_on_entry() -> void:
+	# Brief delay to ensure all systems are initialized
+	await get_tree().create_timer(0.5).timeout
+	if GameManager.current_state == GameManager.GameState.PLAYING:
+		SaveManager.autosave()

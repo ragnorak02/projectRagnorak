@@ -3,6 +3,9 @@
 ## Toggle with the "pause" action (Escape / Start button).
 extends CanvasLayer
 
+const QuestLogScript := preload("res://src/ui/menus/quest_log.gd")
+const SaveLoadMenuScript := preload("res://src/ui/menus/save_load_menu.gd")
+
 # --- Colors ---
 const OVERLAY_COLOR := Color(0.0, 0.0, 0.0, 0.7)
 const PANEL_BG := Color(0.05, 0.08, 0.15, 0.95)
@@ -13,12 +16,13 @@ const HIGHLIGHT_BG := Color(0.15, 0.25, 0.55, 0.9)
 const DIMMED_COLOR := Color(0.4, 0.4, 0.5)
 
 # --- Menu item definitions ---
-enum MenuItem { RESUME, INVENTORY, QUEST_LOG, SETTINGS, RETURN_TO_TITLE }
+enum MenuItem { RESUME, SAVE_GAME, INVENTORY, QUEST_LOG, SETTINGS, RETURN_TO_TITLE }
 
 const MENU_ITEMS: Array[Dictionary] = [
 	{ "id": MenuItem.RESUME, "label": "Resume", "available": true },
+	{ "id": MenuItem.SAVE_GAME, "label": "Save Game", "available": true },
 	{ "id": MenuItem.INVENTORY, "label": "Inventory", "available": false },
-	{ "id": MenuItem.QUEST_LOG, "label": "Quest Log", "available": false },
+	{ "id": MenuItem.QUEST_LOG, "label": "Quest Log", "available": true },
 	{ "id": MenuItem.SETTINGS, "label": "Settings", "available": false },
 	{ "id": MenuItem.RETURN_TO_TITLE, "label": "Return to Title", "available": true },
 ]
@@ -34,6 +38,8 @@ var _panel: PanelContainer
 var _item_rows: Array[PanelContainer] = []
 var _item_labels: Array[Label] = []
 var _placeholder_label: Label
+var _quest_log: Node = null
+var _save_load_menu: Node = null
 
 
 func _ready() -> void:
@@ -287,8 +293,35 @@ func _confirm_selection() -> void:
 	match item_id:
 		MenuItem.RESUME:
 			_close_menu()
+		MenuItem.SAVE_GAME:
+			_open_save_menu()
+		MenuItem.QUEST_LOG:
+			_open_quest_log()
 		MenuItem.RETURN_TO_TITLE:
 			_return_to_title()
+
+
+func _open_save_menu() -> void:
+	if _save_load_menu == null:
+		_save_load_menu = CanvasLayer.new()
+		_save_load_menu.set_script(SaveLoadMenuScript)
+		add_child(_save_load_menu)
+	_save_load_menu.open_menu(0)  # 0 = Mode.SAVE
+
+
+func _open_quest_log() -> void:
+	# Find player's quest system
+	var players := get_tree().get_nodes_in_group(&"player")
+	var quest_sys: Node = null
+	if not players.is_empty() and players[0].has_node("QuestSystem"):
+		quest_sys = players[0].get_node("QuestSystem")
+
+	if _quest_log == null:
+		_quest_log = CanvasLayer.new()
+		_quest_log.set_script(QuestLogScript)
+		add_child(_quest_log)
+
+	_quest_log.open_log(quest_sys)
 
 
 func _return_to_title() -> void:

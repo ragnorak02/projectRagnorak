@@ -1,0 +1,30 @@
+[gd_resource type="Resource" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/quests/quest_data.gd" id="1"]
+[ext_resource type="Script" path="res://resources/quests/quest_objective.gd" id="2"]
+
+[sub_resource type="Resource" id="obj1"]
+script = ExtResource("2")
+objective_id = &"gather_herbs"
+description = "Gather herbs from the field"
+target_id = &"herb_item"
+target_count = 3
+marker_position = Vector3(10, 0, 5)
+
+[sub_resource type="Resource" id="obj2"]
+script = ExtResource("2")
+objective_id = &"return_to_npc"
+description = "Return to the herbalist"
+target_id = &"herbalist_npc"
+target_count = 1
+marker_position = Vector3(0, 0, 0)
+
+[resource]
+script = ExtResource("1")
+quest_id = &"fetch_herbs"
+title = "Herbal Remedy"
+description = "The village herbalist needs fresh herbs from the nearby field. Gather 3 herbs and bring them back."
+quest_type = 1
+objectives = [SubResource("obj1"), SubResource("obj2")]
+prerequisite_quests = []
+rewards = {"gold": 50, "xp": 100}

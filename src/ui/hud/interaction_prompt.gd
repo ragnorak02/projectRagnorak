@@ -57,21 +57,33 @@ func _connect_signals() -> void:
 	Events.interaction_cleared.connect(_on_interaction_cleared)
 
 
-func _on_interaction_available(_interactable: Node3D) -> void:
-	_show_prompt()
+func _on_interaction_available(interactable: Node3D) -> void:
+	var custom_text: String = ""
+	if interactable != null and interactable.has_method("get_prompt_text"):
+		custom_text = interactable.get_prompt_text()
+	_show_prompt(custom_text)
 
 
 func _on_interaction_cleared() -> void:
 	_hide_prompt()
 
 
-func _show_prompt() -> void:
+var _custom_text: String = ""
+
+
+func _show_prompt(custom: String = "") -> void:
 	_visible_state = true
-	if InputManager.is_using_controller():
-		_prompt_label.text = "Press [Y] to Interact"
-	else:
-		_prompt_label.text = "Press [E] to Interact"
+	_custom_text = custom
+	_update_prompt_text()
 	_bg_panel.visible = true
+
+
+func _update_prompt_text() -> void:
+	var key_hint: String = "[Y]" if InputManager.is_using_controller() else "[E]"
+	if _custom_text != "":
+		_prompt_label.text = "%s %s" % [key_hint, _custom_text]
+	else:
+		_prompt_label.text = "Press %s to Interact" % key_hint
 
 
 func _hide_prompt() -> void:
@@ -82,8 +94,4 @@ func _hide_prompt() -> void:
 func _process(_delta: float) -> void:
 	if not _visible_state:
 		return
-	# Update prompt text if input device changes
-	if InputManager.is_using_controller():
-		_prompt_label.text = "Press [Y] to Interact"
-	else:
-		_prompt_label.text = "Press [E] to Interact"
+	_update_prompt_text()

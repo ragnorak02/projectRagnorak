@@ -60,6 +60,7 @@ signal quest_objective_updated(quest_id: StringName, objective_index: int)
 # --- Save ---
 signal save_completed(slot: int)
 signal load_completed(slot: int)
+signal save_feedback(message: String)
 
 # --- Party ---
 signal party_member_joined(member_id: StringName)
@@ -67,6 +68,10 @@ signal party_member_switched(old_id: StringName, new_id: StringName)
 signal party_member_downed(member_id: StringName)
 signal party_member_revived(member_id: StringName)
 signal team_meter_changed(current: float, maximum: float)
+
+# --- Dialogue ---
+signal dialogue_started
+signal dialogue_ended
 
 # --- World ---
 signal zone_entered(zone_id: StringName)
