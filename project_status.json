@@ -2,21 +2,21 @@
   "schemaVersion": 1,
   "gameId": "projectRagnorak",
   "title": "Project Ragnorak",
-  "lastUpdated": "2026-03-08T15:00:00Z",
+  "lastUpdated": "2026-03-08T16:00:00Z",
 
   "health": {
-    "progressPercent": 31,
-    "buildVersion": "0.0.12-dev",
+    "progressPercent": 34,
+    "buildVersion": "0.0.13-dev",
     "assetStage": "placeholder"
   },
 
   "phase": {
-    "macroPhase": 12,
-    "macroPhaseLabel": "World & Traversal",
+    "macroPhase": 13,
+    "macroPhaseLabel": "Party System",
     "status": "complete",
-    "currentGoal": "Phase 13 — Party System",
-    "currentTask": "Add party members and AI companion logic",
-    "nextMilestone": "Party system complete with team attacks (item 340)"
+    "currentGoal": "Phase 14 — Audio & VFX",
+    "currentTask": "Add audio manager, SFX hooks, and VFX polish",
+    "nextMilestone": "Audio & VFX complete (item 365)"
   },
 
   "tech": {
@@ -34,7 +34,8 @@
     "settingsMenu": "placeholder",
     "audio": "missing",
     "vfx": "basic",
-    "worldSystem": "complete"
+    "worldSystem": "complete",
+    "partySystem": "complete"
   },
 
   "completedPhases": {
@@ -49,7 +50,8 @@
     "phase9_inventory_equipment": true,
     "phase10_quests_npc_interaction": true,
     "phase11_save_system": true,
-    "phase12_world_traversal": true
+    "phase12_world_traversal": true,
+    "phase13_party_system": true
   },
 
   "milestones": {
@@ -63,7 +65,7 @@
 
   "testing": {
     "testCommand": "tests/run-tests.bat",
-    "lastRunAt": "2026-03-08T15:00:00Z",
+    "lastRunAt": "2026-03-08T16:00:00Z",
     "status": "pass",
     "smokeTests": 35,
     "phase6Tests": 111,
@@ -73,8 +75,9 @@
     "phase10Tests": 72,
     "phase11Tests": 63,
     "phase12Tests": 65,
-    "totalTests": 490,
-    "notes": "All 490 tests passing (35 smoke + 111 P6 + 23 P7 + 65 P8 + 56 P9 + 72 P10 + 63 P11 + 65 P12)"
+    "phase13Tests": 64,
+    "totalTests": 554,
+    "notes": "All 554 tests passing (35 smoke + 111 P6 + 23 P7 + 65 P8 + 56 P9 + 72 P10 + 63 P11 + 65 P12 + 64 P13)"
   },
 
   "links": {

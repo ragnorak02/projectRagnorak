@@ -17,6 +17,7 @@ extends CharacterBody3D
 @onready var inventory_system: Node = $InventorySystem
 @onready var equipment_system: Node = $EquipmentSystem
 @onready var quest_system: Node = $QuestSystem
+var party_system: Node = null  # Assigned by zone/arena after spawn
 
 var is_locked_on: bool = false
 var lock_on_target: Node3D = null
@@ -304,7 +305,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func get_save_data() -> Dictionary:
-	return {
+	var data := {
 		"position": {"x": global_position.x, "y": global_position.y, "z": global_position.z},
 		"rotation_y": global_rotation.y,
 		"hp": current_hp,
@@ -314,6 +315,9 @@ func get_save_data() -> Dictionary:
 		"equipment": equipment_system.get_save_data(),
 		"quests": quest_system.get_save_data(),
 	}
+	if party_system and party_system.has_method("get_save_data"):
+		data["party"] = party_system.get_save_data()
+	return data
 
 
 func load_save_data(data: Dictionary) -> void:
@@ -334,3 +338,5 @@ func load_save_data(data: Dictionary) -> void:
 		equipment_system.load_save_data(data["equipment"])
 	if data.has("quests"):
 		quest_system.load_save_data(data["quests"])
+	if data.has("party") and party_system and party_system.has_method("load_save_data"):
+		party_system.load_save_data(data["party"])

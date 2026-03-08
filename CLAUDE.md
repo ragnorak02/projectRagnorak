@@ -1014,9 +1014,9 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 # Current Focus
 
-Current Phase: Macro Phase 13 — Party System
-Current Task: Add party members and AI companion logic
-Next Milestone: Party system complete with team attacks (item 340)
+Current Phase: Macro Phase 14 — Audio & VFX
+Current Task: Add audio manager, SFX hooks, and VFX polish
+Next Milestone: Audio & VFX complete (item 365)
 
 ## Completed Phases
 - Phase 1 — Foundation & Project Setup (items 1-20)
@@ -1031,6 +1031,7 @@ Next Milestone: Party system complete with team attacks (item 340)
 - Phase 10 — Quests & NPC Interaction (items 231-255)
 - Phase 11 — Save System (items 256-280)
 - Phase 12 — World & Traversal (items 281-310)
+- Phase 13 — Party System (items 311-340)
 
 ---
 

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/party_member_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+member_id = &"companion"
+display_name = "Yuna"
+max_hp = 80.0
+max_mp = 70.0
+max_atb = 100.0
+atb_fill_rate = 6.0
+mp_regen_rate = 2.0
+attack_damage = 12.0
+move_speed = 7.0
+capsule_color = Color(0.8, 0.4, 0.5, 1)
+traversal_flags = ["has_wall_break"]

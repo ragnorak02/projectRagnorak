@@ -1,4 +1,4 @@
-## Combat HUD displaying HP, MP, ATB bars and insufficient resource feedback.
+## Combat HUD displaying HP, MP, ATB bars, ally HP, team meter, and feedback.
 ## Builds UI programmatically for easy testing and iteration.
 extends CanvasLayer
 
@@ -11,6 +11,13 @@ var _mp_label: Label
 var _atb_label: Label
 var _flash_label: Label
 var _cooldown_container: VBoxContainer
+
+# Party HUD
+var _ally_hp_bar: ProgressBar
+var _ally_hp_label: Label
+var _ally_bar_container: VBoxContainer
+var _team_meter_bar: ProgressBar
+var _team_meter_label: Label
 
 # Flash feedback
 var _flash_tween: Tween = null
@@ -85,6 +92,24 @@ func _build_ui() -> void:
 	_cooldown_container.position = Vector2(20, 0)
 	_cooldown_container.size = Vector2(200, 60)
 	bar_container.add_child(_cooldown_container)
+
+	# --- Ally HP bar (bottom-left, above main bars) ---
+	_ally_bar_container = VBoxContainer.new()
+	_ally_bar_container.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_ally_bar_container.position = Vector2(20, -170)
+	_ally_bar_container.size = Vector2(200, 40)
+	_ally_bar_container.add_theme_constant_override("separation", 2)
+	_ally_bar_container.visible = false
+	root.add_child(_ally_bar_container)
+
+	_ally_hp_bar = _create_bar("Ally", Color(0.8, 0.4, 0.5), _ally_bar_container)
+	_ally_hp_bar.custom_minimum_size = Vector2(160, 14)
+	_ally_hp_label = _ally_hp_bar.get_node("Label")
+
+	# Team meter (below ally bar)
+	_team_meter_bar = _create_bar("TEAM", Color(0.9, 0.5, 0.1), _ally_bar_container)
+	_team_meter_bar.custom_minimum_size = Vector2(160, 14)
+	_team_meter_label = _team_meter_bar.get_node("Label")
 
 
 func _create_bar(label_text: String, fill_color: Color, parent: Control) -> ProgressBar:
@@ -161,6 +186,10 @@ func _connect_signals() -> void:
 	Events.ability_cooldown_finished.connect(_on_cooldown_finished)
 	Events.ability_cast_started.connect(_on_cast_started)
 	Events.ability_cast_completed.connect(_on_cast_completed)
+	Events.party_member_joined.connect(_on_party_member_joined)
+	Events.party_member_downed.connect(_on_party_member_downed)
+	Events.party_member_revived.connect(_on_party_member_revived)
+	Events.team_meter_changed.connect(_on_team_meter_changed)
 
 
 # --- Signal Handlers ---
@@ -280,3 +309,39 @@ func _show_flash_text(text: String, color: Color = Color(1.0, 0.3, 0.3)) -> void
 	_flash_tween = create_tween()
 	_flash_tween.tween_interval(0.8)
 	_flash_tween.tween_property(_flash_label, "modulate:a", 0.0, 0.4)
+
+
+# --- Party HUD ---
+
+func _on_party_member_joined(_member_id: StringName) -> void:
+	_ally_bar_container.visible = true
+
+
+func _on_party_member_downed(member_id: StringName) -> void:
+	_ally_hp_label.text = "%s DOWNED" % String(member_id).capitalize()
+	var fill := _ally_hp_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	fill.bg_color = Color(0.5, 0.2, 0.2)
+
+
+func _on_party_member_revived(_member_id: StringName) -> void:
+	var fill := _ally_hp_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	fill.bg_color = Color(0.8, 0.4, 0.5)
+
+
+func _on_team_meter_changed(current: float, maximum: float) -> void:
+	_team_meter_bar.max_value = maximum
+	_team_meter_bar.value = current
+	_team_meter_label.text = "%d%%" % [int((current / maximum) * 100.0)]
+
+	# Glow when full
+	var fill := _team_meter_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	if current >= maximum:
+		fill.bg_color = Color(1.0, 0.7, 0.2)
+	else:
+		fill.bg_color = Color(0.9, 0.5, 0.1)
+
+
+func _update_ally_hp(current: float, maximum: float) -> void:
+	_ally_hp_bar.max_value = maximum
+	_ally_hp_bar.value = current
+	_ally_hp_label.text = "%d / %d" % [int(current), int(maximum)]

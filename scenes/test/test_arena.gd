@@ -14,6 +14,7 @@ const QuestTrackerScript := preload("res://src/ui/hud/quest_tracker.gd")
 const PauseMenuScript := preload("res://src/ui/menus/pause_menu.gd")
 const DialogueUiScript := preload("res://src/ui/dialogue/dialogue_ui.gd")
 const SaveFeedbackScript := preload("res://src/ui/hud/save_feedback.gd")
+const PartySystemScript := preload("res://src/party/party_system.gd")
 
 @onready var player_spawn: Marker3D = $PlayerSpawn
 
@@ -81,6 +82,18 @@ func _ready() -> void:
 	var save_feedback := CanvasLayer.new()
 	save_feedback.set_script(SaveFeedbackScript)
 	add_child(save_feedback)
+
+	# Setup party system
+	var party := Node.new()
+	party.set_script(PartySystemScript)
+	add_child(party)
+	player_inst.party_system = party
+
+	var companion_data := load("res://resources/characters/companion.tres")
+	if companion_data:
+		party.initialize(player_inst, companion_data)
+	else:
+		party.initialize(player_inst)
 
 	# Apply pending save data if loading from a save
 	if SaveManager.has_pending_load():

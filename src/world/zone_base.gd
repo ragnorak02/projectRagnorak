@@ -1,5 +1,5 @@
 ## Base script for all zone scenes (towns, fields, dungeons).
-## Handles player/camera/HUD spawning, save data loading, autosave, and zone signals.
+## Handles player/camera/HUD spawning, party system, save data loading, autosave.
 ## Extend this in specific zone scripts and override _setup_zone() for custom content.
 extends Node3D
 
@@ -15,9 +15,11 @@ const PauseMenuScript := preload("res://src/ui/menus/pause_menu.gd")
 const DialogueUiScript := preload("res://src/ui/dialogue/dialogue_ui.gd")
 const SaveFeedbackScript := preload("res://src/ui/hud/save_feedback.gd")
 const LoadingScreenScript := preload("res://src/ui/hud/loading_screen.gd")
+const PartySystemScript := preload("res://src/party/party_system.gd")
 
 @export var zone_id: String = ""
 @export var spawn_position: Vector3 = Vector3(0, 1, 0)
+@export var spawn_companion: bool = true
 
 var player: CharacterBody3D = null
 
@@ -41,6 +43,9 @@ func _ready() -> void:
 	add_child(camera)
 	camera.follow_target = player.camera_anchor
 
+	# Setup party system
+	_setup_party()
+
 	# Setup zone-specific content (enemies, NPCs, etc.)
 	_setup_zone()
 
@@ -59,8 +64,25 @@ func _ready() -> void:
 	GameManager.change_state(GameManager.GameState.PLAYING)
 	Events.zone_entered.emit(StringName(zone_id))
 
+	# Apply party traversal flags
+	if player.party_system:
+		player.party_system.apply_traversal_flags()
+
 	# Autosave on zone entry
 	call_deferred("_autosave_on_entry")
+
+
+func _setup_party() -> void:
+	var party := Node.new()
+	party.set_script(PartySystemScript)
+	add_child(party)
+	player.party_system = party
+
+	var companion_data := load("res://resources/characters/companion.tres")
+	if companion_data and spawn_companion:
+		party.initialize(player, companion_data)
+	else:
+		party.initialize(player)
 
 
 func _setup_zone() -> void:
