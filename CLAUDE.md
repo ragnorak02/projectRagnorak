@@ -1014,9 +1014,9 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 # Current Focus
 
-Current Phase: Macro Phase 14 — Audio & VFX
-Current Task: Add audio manager, SFX hooks, and VFX polish
-Next Milestone: Audio & VFX complete (item 365)
+Current Phase: Macro Phase 15 — Polish, QA, and Regression
+Current Task: Combat polish, UX/accessibility, performance, regression tests
+Next Milestone: Polish & QA complete (item 400)
 
 ## Completed Phases
 - Phase 1 — Foundation & Project Setup (items 1-20)
@@ -1032,6 +1032,7 @@ Next Milestone: Audio & VFX complete (item 365)
 - Phase 11 — Save System (items 256-280)
 - Phase 12 — World & Traversal (items 281-310)
 - Phase 13 — Party System (items 311-340)
+- Phase 14 — Audio & VFX (items 341-365)
 
 ---
 

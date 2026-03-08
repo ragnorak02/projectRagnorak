@@ -25,6 +25,7 @@ func enter(_msg: Dictionary = {}) -> void:
 		player.face_lock_target(1.0)
 
 	AttackVFX.spawn(player.get_parent(), 2, player.global_position + Vector3(0, 1.0, 0), -player.global_basis.z)
+	AudioManager.play_sfx_varied("attack_2")
 
 
 func exit() -> void:

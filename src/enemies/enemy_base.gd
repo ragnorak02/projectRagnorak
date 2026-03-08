@@ -89,12 +89,14 @@ func take_damage(amount: float, _source: Node3D = null) -> void:
 		die()
 	else:
 		_enter_hurt()
+		AudioManager.play_sfx_varied("enemy_hurt")
 
 
 func die() -> void:
 	_is_dead = true
 	ai_state = AIState.DEAD
 	_disable_attack_hitbox()
+	AudioManager.play_sfx_named("enemy_die")
 
 	# Disable collisions so player/lock-on clean up
 	collision_layer = 0

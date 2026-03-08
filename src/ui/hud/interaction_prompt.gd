@@ -71,11 +71,22 @@ func _on_interaction_cleared() -> void:
 var _custom_text: String = ""
 
 
+var _pulse_tween: Tween = null
+
+
 func _show_prompt(custom: String = "") -> void:
 	_visible_state = true
 	_custom_text = custom
 	_update_prompt_text()
 	_bg_panel.visible = true
+	AudioManager.play_sfx_named("interaction_prompt")
+
+	# Subtle pulse animation on show
+	if _pulse_tween and _pulse_tween.is_running():
+		_pulse_tween.kill()
+	_bg_panel.modulate = Color(1.2, 1.2, 1.3, 1.0)
+	_pulse_tween = create_tween()
+	_pulse_tween.tween_property(_bg_panel, "modulate", Color.WHITE, 0.3)
 
 
 func _update_prompt_text() -> void:

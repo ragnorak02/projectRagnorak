@@ -248,6 +248,7 @@ func _open_menu() -> void:
 	_show_menu()
 	GameManager.change_state(GameManager.GameState.PAUSED)
 	Events.ui_menu_opened.emit(&"pause_menu")
+	AudioManager.play_sfx_named("menu_open")
 
 
 func _close_menu() -> void:
@@ -258,6 +259,7 @@ func _close_menu() -> void:
 	_hide_menu()
 	GameManager.change_state(GameManager.GameState.PLAYING)
 	Events.ui_menu_closed.emit(&"pause_menu")
+	AudioManager.play_sfx_named("menu_close")
 
 
 # --- Selection ---
@@ -265,6 +267,7 @@ func _close_menu() -> void:
 func _move_selection(direction: int) -> void:
 	_selected_index = wrapi(_selected_index + direction, 0, _item_rows.size())
 	_update_selection()
+	AudioManager.play_sfx_named("menu_select")
 
 
 func _update_selection() -> void:
@@ -290,6 +293,7 @@ func _confirm_selection() -> void:
 		_show_placeholder()
 		return
 
+	AudioManager.play_sfx_named("menu_confirm")
 	match item_id:
 		MenuItem.RESUME:
 			_close_menu()
@@ -348,8 +352,21 @@ func _show_placeholder() -> void:
 
 # --- Visibility ---
 
+var _menu_tween: Tween = null
+
+
 func _show_menu() -> void:
 	_root.visible = true
+	# Fade-in transition
+	if _menu_tween and _menu_tween.is_running():
+		_menu_tween.kill()
+	_overlay.modulate.a = 0.0
+	_panel.modulate.a = 0.0
+	_menu_tween = create_tween()
+	_menu_tween.set_process_mode(Tween.TWEEN_PROCESS_IDLE)
+	_menu_tween.set_parallel(true)
+	_menu_tween.tween_property(_overlay, "modulate:a", 1.0, 0.15)
+	_menu_tween.tween_property(_panel, "modulate:a", 1.0, 0.2).set_delay(0.05)
 
 
 func _hide_menu() -> void:

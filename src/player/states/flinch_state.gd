@@ -7,6 +7,7 @@ var _timer: float = 0.0
 func enter(_msg: Dictionary = {}) -> void:
 	_timer = 0.0
 	player.disable_hitbox()
+	AudioManager.play_sfx_varied("hit_react")
 
 	# If we were casting an ability, interrupt it
 	var ability_node: Node = player.state_machine.states.get(&"Ability")

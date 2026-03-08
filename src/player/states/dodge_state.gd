@@ -1,5 +1,7 @@
 extends State
 
+const DodgeVFX = preload("res://src/effects/dodge_vfx.gd")
+
 @export var dodge_speed: float = 15.0
 @export var dodge_duration: float = 0.4
 
@@ -12,6 +14,10 @@ var _direction: Vector3 = Vector3.BACK
 func enter(_msg: Dictionary = {}) -> void:
 	_timer = 0.0
 	player.start_dodge_cooldown()
+
+	# Spawn ghost afterimage at start position
+	DodgeVFX.spawn(player.get_parent(), player.global_position, -player.global_basis.z)
+	AudioManager.play_sfx_named("dodge")
 
 	var input := InputManager.get_movement_vector()
 	if input.length() > 0.1:

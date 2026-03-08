@@ -37,6 +37,7 @@ func enter(msg: Dictionary = {}) -> void:
 		player.face_lock_target(1.0)
 
 	Events.ability_cast_started.emit(_ability_data)
+	AudioManager.play_sfx_named("spell_cast")
 
 	if DebugFlags.DEBUG_COMBAT:
 		var name_str := _ability_data.display_name if _ability_data else "unknown"
@@ -81,6 +82,7 @@ func process_input(_event: InputEvent) -> StringName:
 
 func interrupt() -> void:
 	Events.ability_cast_interrupted.emit(_ability_data)
+	AudioManager.play_sfx_named("spell_interrupt")
 	if DebugFlags.DEBUG_COMBAT:
 		var name_str := _ability_data.display_name if _ability_data else "unknown"
 		print("AbilityState: Cast interrupted — %s" % name_str)
@@ -90,6 +92,7 @@ func _spawn_effect() -> void:
 	if _effect_spawned:
 		return
 	_effect_spawned = true
+	AudioManager.play_sfx_named("spell_release")
 
 	if _ability_data == null:
 		return
