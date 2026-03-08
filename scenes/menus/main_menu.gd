@@ -41,14 +41,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_new_game() -> void:
 	AudioManager.play_sfx_named("menu_confirm")
-	get_tree().change_scene_to_file("res://scenes/test/test_arena.tscn")
+	get_tree().change_scene_to_file("res://scenes/zones/town_hub.tscn")
 
 
 func _on_continue() -> void:
 	AudioManager.play_sfx_named("menu_confirm")
 	if not SaveManager.continue_game():
 		# Fallback if continue fails
-		get_tree().change_scene_to_file("res://scenes/test/test_arena.tscn")
+		get_tree().change_scene_to_file("res://scenes/zones/town_hub.tscn")
 
 
 func _on_load() -> void:
