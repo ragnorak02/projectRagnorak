@@ -76,6 +76,41 @@ func request_ability(ability_data: AbilityData) -> bool:
 	return true
 
 
+func request_ability_with_target(ability_data: AbilityData, target: Node3D) -> bool:
+	if _player == null:
+		return false
+
+	# Validate resources
+	if is_on_cooldown(ability_data.ability_id):
+		Events.ability_request_failed.emit("cooldown", ability_data)
+		return false
+	if not _player.has_atb(ability_data.atb_cost):
+		Events.ability_request_failed.emit("atb", ability_data)
+		return false
+	if not _player.has_mp(ability_data.mp_cost):
+		Events.ability_request_failed.emit("mp", ability_data)
+		return false
+
+	# Spend resources
+	_player.spend_atb(ability_data.atb_cost)
+	_player.spend_mp(ability_data.mp_cost)
+	_start_cooldown(ability_data)
+	_casting_ability = ability_data
+
+	# Transition with explicit target
+	_player.state_machine.force_transition(&"Ability", {
+		"ability_data": ability_data,
+		"cast_time": ability_data.cast_time,
+		"target": target,
+	})
+
+	if DebugFlags.DEBUG_COMBAT:
+		print("AbilitySystem: Casting %s → %s (MP: -%.0f, ATB: -%.0f)" % [
+			ability_data.display_name, target.name, ability_data.mp_cost, ability_data.atb_cost])
+
+	return true
+
+
 func can_use_ability(ability_data: AbilityData) -> bool:
 	if _player == null:
 		return false

@@ -16,14 +16,15 @@ func _ready() -> void:
 		if child.has_method("process_physics"):
 			states[child.name] = child
 
-	if states.has(initial_state_name):
-		current_state = states[initial_state_name]
-		current_state.enter()
-
 
 func initialize(player: CharacterBody3D) -> void:
 	for state in states.values():
 		state.initialize(player)
+
+	# Enter initial state AFTER player reference is set on all states
+	if states.has(initial_state_name):
+		current_state = states[initial_state_name]
+		current_state.enter()
 
 
 func _physics_process(delta: float) -> void:

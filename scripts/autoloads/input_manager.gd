@@ -5,7 +5,7 @@ enum DeviceType { KEYBOARD_MOUSE, CONTROLLER }
 
 var active_device: DeviceType = DeviceType.KEYBOARD_MOUSE
 var mouse_sensitivity: float = 0.002
-var controller_camera_sensitivity: float = 3.0
+var controller_camera_sensitivity: float = 4.0
 
 signal device_changed(new_device: DeviceType)
 

@@ -375,7 +375,7 @@ func test_tactical_idle_state_loads() -> void:
 	_assert("TacticalIdleState script loads", script != null)
 	var source := script.source_code as String
 	_assert("TacticalIdle has slot navigation", source.contains("_navigate_slot"))
-	_assert("TacticalIdle has execute method", source.contains("_execute_selected"))
+	_assert("TacticalIdle has execute method", source.contains("_confirm_ability"))
 	_assert("TacticalIdle calls request_ability", source.contains("request_ability"))
 	_assert("TacticalIdle allows exit to Idle", source.contains('return &"Idle"'))
 	_assert("TacticalIdle allows exit to LockOnIdle", source.contains('return &"LockOnIdle"'))

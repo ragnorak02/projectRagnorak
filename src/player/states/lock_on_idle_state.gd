@@ -2,6 +2,7 @@ extends State
 
 
 func enter(_msg: Dictionary = {}) -> void:
+	player.play_animation(&"idle")
 	if player.lock_on_target == null:
 		var target: Node3D = player.lock_on_component.acquire_target()
 		if target == null:

@@ -4,6 +4,10 @@ extends State
 @export var acceleration: float = 20.0
 
 
+func enter(_msg: Dictionary = {}) -> void:
+	player.play_animation(&"walk")
+
+
 func process_physics(delta: float) -> StringName:
 	var input := InputManager.get_movement_vector()
 

@@ -6,13 +6,13 @@ var _timer: float = 0.0
 var _buffered_next: StringName = &""
 var _hit_active: bool = false
 
-@export var attack_duration: float = 0.6
-@export var combo_window_start: float = 0.3
-@export var combo_window_end: float = 0.55
-@export var forward_movement: float = 2.5
-@export var hit_window_start: float = 0.12
-@export var hit_window_end: float = 0.35
-@export var damage: float = 15.0
+@export var attack_duration: float = 0.48
+@export var combo_window_start: float = 0.2
+@export var combo_window_end: float = 0.44
+@export var forward_movement: float = 3.5
+@export var hit_window_start: float = 0.08
+@export var hit_window_end: float = 0.28
+@export var damage: float = 16.0
 
 
 func enter(_msg: Dictionary = {}) -> void:
@@ -37,12 +37,13 @@ func exit() -> void:
 func process_physics(delta: float) -> StringName:
 	_timer += delta
 
-	if _timer < 0.2:
+	# Forward lunge — short burst then quick stop
+	if _timer < 0.12:
 		player.velocity.x = player.global_basis.z.x * -forward_movement
 		player.velocity.z = player.global_basis.z.z * -forward_movement
 	else:
-		player.velocity.x = move_toward(player.velocity.x, 0.0, 20.0 * delta)
-		player.velocity.z = move_toward(player.velocity.z, 0.0, 20.0 * delta)
+		player.velocity.x = move_toward(player.velocity.x, 0.0, 35.0 * delta)
+		player.velocity.z = move_toward(player.velocity.z, 0.0, 35.0 * delta)
 
 	if _timer >= hit_window_start and _timer < hit_window_end:
 		if not _hit_active:

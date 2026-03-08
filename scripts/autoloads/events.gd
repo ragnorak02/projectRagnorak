@@ -31,6 +31,10 @@ signal tactical_mode_entered
 signal tactical_mode_exited
 signal tactical_command_selected(ability_data: Resource)
 signal tactical_command_executed(ability_data: Resource)
+signal tactical_slot_changed(index: int)
+signal tactical_category_changed(category: int)
+signal tactical_phase_changed(phase: int)
+signal tactical_target_info(ability_name: String, target_names: PackedStringArray, selected_index: int)
 
 # --- Enemy ---
 signal enemy_spawned(enemy: Node3D)

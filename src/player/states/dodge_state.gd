@@ -2,8 +2,8 @@ extends State
 
 const DodgeVFX = preload("res://src/effects/dodge_vfx.gd")
 
-@export var dodge_speed: float = 15.0
-@export var dodge_duration: float = 0.4
+@export var dodge_speed: float = 17.0
+@export var dodge_duration: float = 0.35
 
 var _timer: float = 0.0
 var _direction: Vector3 = Vector3.BACK

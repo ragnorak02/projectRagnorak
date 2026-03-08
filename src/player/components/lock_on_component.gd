@@ -13,6 +13,7 @@ var _obstruction_timer: float = 0.0
 
 func _ready() -> void:
 	_player = get_parent() as CharacterBody3D
+	Events.enemy_died.connect(_on_enemy_died)
 
 
 func _physics_process(delta: float) -> void:
@@ -51,7 +52,7 @@ func acquire_target() -> Node3D:
 	var closest_dist: float = detection_range
 
 	for enemy in enemies:
-		if not is_instance_valid(enemy) or not enemy is Node3D:
+		if not _is_valid_target(enemy):
 			continue
 		var dist := _player.global_position.distance_to(enemy.global_position)
 		if dist < closest_dist:
@@ -69,6 +70,11 @@ func release_target() -> void:
 	Events.lock_on_target_lost.emit()
 
 
+func _on_enemy_died(enemy: Node3D) -> void:
+	if current_target == enemy:
+		release_target()
+
+
 func switch_target(direction: float) -> void:
 	if current_target == null:
 		return
@@ -82,7 +88,7 @@ func switch_target(direction: float) -> void:
 	var candidates: Array[Dictionary] = []
 
 	for enemy in enemies:
-		if enemy == current_target or not is_instance_valid(enemy):
+		if enemy == current_target or not _is_valid_target(enemy):
 			continue
 		var dist := _player.global_position.distance_to(enemy.global_position)
 		if dist > detection_range:
@@ -95,6 +101,20 @@ func switch_target(direction: float) -> void:
 	if candidates.is_empty():
 		return
 
+	# Prefer nearest valid target in the requested direction
 	candidates.sort_custom(func(a, b): return a["dist"] < b["dist"])
 	current_target = candidates[0]["node"]
 	Events.lock_on_target_switched.emit(current_target)
+
+
+func _is_valid_target(enemy: Node) -> bool:
+	if not is_instance_valid(enemy) or not enemy is Node3D:
+		return false
+	# Skip dead enemies
+	if enemy.has_method("is_dead") and enemy.is_dead():
+		return false
+	if "ai_state" in enemy and enemy.ai_state == enemy.AIState.DEAD:
+		return false
+	if "_is_dead" in enemy and enemy._is_dead:
+		return false
+	return true

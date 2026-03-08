@@ -59,7 +59,7 @@ func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array) -> voi
 	var npc := Area3D.new()
 	npc.set_script(NpcInteractable)
 	npc.npc_name = npc_name
-	npc.dialogue_pages = pages
+	npc.dialogue_pages.assign(pages)
 
 	var col := CollisionShape3D.new()
 	var shape := SphereShape3D.new()

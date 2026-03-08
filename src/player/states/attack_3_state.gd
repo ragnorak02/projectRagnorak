@@ -5,11 +5,11 @@ const AttackVFX = preload("res://src/effects/attack_vfx.gd")
 var _timer: float = 0.0
 var _hit_active: bool = false
 
-@export var attack_duration: float = 0.7
-@export var forward_movement: float = 4.0
-@export var hit_window_start: float = 0.18
-@export var hit_window_end: float = 0.42
-@export var damage: float = 25.0
+@export var attack_duration: float = 0.6
+@export var forward_movement: float = 5.5
+@export var hit_window_start: float = 0.12
+@export var hit_window_end: float = 0.38
+@export var damage: float = 28.0
 
 
 func enter(_msg: Dictionary = {}) -> void:
@@ -33,12 +33,13 @@ func exit() -> void:
 func process_physics(delta: float) -> StringName:
 	_timer += delta
 
-	if _timer < 0.25:
+	# Big finisher lunge — longer burst, heavy momentum
+	if _timer < 0.18:
 		player.velocity.x = player.global_basis.z.x * -forward_movement
 		player.velocity.z = player.global_basis.z.z * -forward_movement
 	else:
-		player.velocity.x = move_toward(player.velocity.x, 0.0, 20.0 * delta)
-		player.velocity.z = move_toward(player.velocity.z, 0.0, 20.0 * delta)
+		player.velocity.x = move_toward(player.velocity.x, 0.0, 30.0 * delta)
+		player.velocity.z = move_toward(player.velocity.z, 0.0, 30.0 * delta)
 
 	if _timer >= hit_window_start and _timer < hit_window_end:
 		if not _hit_active:

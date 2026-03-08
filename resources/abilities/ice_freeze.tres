@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/abilities/ability_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://src/effects/ice_projectile.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"ice_freeze"
+display_name = "Ice Freeze"
+description = "Hurls a freezing shard that damages and slows the target."
+ability_type = 1
+mp_cost = 20.0
+atb_cost = 30.0
+cooldown = 5.0
+cast_time = 0.9
+damage = 30.0
+animation_name = &""
+effect_scene = ExtResource("2")
+icon = null

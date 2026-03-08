@@ -6,6 +6,8 @@ extends CharacterBody3D
 
 @onready var state_machine: Node = $StateMachine
 @onready var visual_root: Node3D = $VisualRoot
+@onready var model: Node3D = $VisualRoot/Model
+var anim_player: AnimationPlayer = null
 @onready var hurtbox: Area3D = $Hurtbox
 @onready var hitbox_anchor: Node3D = $HitboxAnchor
 @onready var hitbox: Area3D = $HitboxAnchor/Hitbox
@@ -23,7 +25,7 @@ var is_locked_on: bool = false
 var lock_on_target: Node3D = null
 var dodge_ready: bool = true
 var _dodge_cooldown_timer: float = 0.0
-@export var dodge_cooldown_time: float = 0.6
+@export var dodge_cooldown_time: float = 0.45
 
 # Jump buffering
 var jump_buffer_time: float = 0.12
@@ -60,10 +62,12 @@ var _mp_regen_timer: float = 0.0
 
 func _ready() -> void:
 	add_to_group(&"player")
+	_setup_model()
 	state_machine.initialize(self)
 	ability_system.initialize(self)
 	hurtbox.area_entered.connect(_on_hurtbox_hit)
 	Events.lock_on_target_acquired.connect(_on_lock_on_acquired)
+	Events.lock_on_target_switched.connect(_on_lock_on_switched)
 	Events.lock_on_target_lost.connect(_on_lock_on_lost)
 	Events.player_spawned.emit(self)
 
@@ -71,10 +75,16 @@ func _ready() -> void:
 	interaction_anchor.area_entered.connect(_on_interactable_entered)
 	interaction_anchor.area_exited.connect(_on_interactable_exited)
 
-	# Equip default ability (Fire Bolt)
+	# Equip default abilities
 	var fire_bolt := load("res://resources/abilities/fire_bolt.tres") as AbilityData
 	if fire_bolt:
 		ability_system.equip_ability(fire_bolt, 0)
+	var ice_freeze := load("res://resources/abilities/ice_freeze.tres") as AbilityData
+	if ice_freeze:
+		ability_system.equip_ability(ice_freeze, 1)
+	var heal := load("res://resources/abilities/heal.tres") as AbilityData
+	if heal:
+		ability_system.equip_ability(heal, 2)
 
 	# Illegal transitions per design contract
 	state_machine.add_illegal_transition(&"Ability", &"Dodge")
@@ -243,6 +253,10 @@ func _on_lock_on_acquired(target: Node3D) -> void:
 	lock_on_target = target
 
 
+func _on_lock_on_switched(new_target: Node3D) -> void:
+	lock_on_target = new_target
+
+
 func _on_lock_on_lost() -> void:
 	is_locked_on = false
 	lock_on_target = null
@@ -302,6 +316,67 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"interact") and _current_interactable != null:
 		if _current_interactable.has_method("interact"):
 			_current_interactable.interact(self)
+
+
+# --- Model & Animation Setup ---
+
+func _setup_model() -> void:
+	# Find AnimationPlayer in the imported model
+	anim_player = _find_child_of_type(model, "AnimationPlayer") as AnimationPlayer
+	if anim_player == null:
+		push_warning("Player: No AnimationPlayer found in model")
+		return
+
+	# Rename the default imported animation to "idle" (T-pose rest)
+	var default_lib: AnimationLibrary = anim_player.get_animation_library(&"")
+	if default_lib and default_lib.has_animation(&"mixamo_com"):
+		var idle_anim: Animation = default_lib.get_animation(&"mixamo_com")
+		default_lib.remove_animation(&"mixamo_com")
+		default_lib.add_animation(&"idle", idle_anim)
+
+	# Load walking animation from separate FBX
+	_import_animation("res://public/assets/fbx/redKnight/red_knight_walking.fbx", &"walk")
+
+	if DebugFlags.DEBUG_PLAYER:
+		print("Player: Animations loaded: %s" % str(anim_player.get_animation_list()))
+
+
+func _import_animation(fbx_path: String, anim_name: StringName) -> void:
+	var scene: PackedScene = load(fbx_path)
+	if scene == null:
+		return
+	var instance: Node = scene.instantiate()
+	var src_anim_player: AnimationPlayer = _find_child_of_type(instance, "AnimationPlayer") as AnimationPlayer
+	if src_anim_player == null:
+		instance.queue_free()
+		return
+
+	var src_lib: AnimationLibrary = src_anim_player.get_animation_library(&"")
+	if src_lib and src_lib.has_animation(&"mixamo_com"):
+		var anim: Animation = src_lib.get_animation(&"mixamo_com")
+		var lib: AnimationLibrary = anim_player.get_animation_library(&"")
+		if lib:
+			lib.add_animation(anim_name, anim)
+
+	instance.queue_free()
+
+
+func _find_child_of_type(node: Node, type_name: String) -> Node:
+	if node.get_class() == type_name:
+		return node
+	for child in node.get_children():
+		var found: Node = _find_child_of_type(child, type_name)
+		if found:
+			return found
+	return null
+
+
+func play_animation(anim_name: StringName, blend: float = 0.2) -> void:
+	if anim_player == null:
+		return
+	if anim_player.current_animation == anim_name:
+		return
+	anim_player.play(anim_name, blend)
 
 
 func get_save_data() -> Dictionary:

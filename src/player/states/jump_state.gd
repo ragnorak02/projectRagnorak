@@ -37,6 +37,8 @@ func process_physics(delta: float) -> StringName:
 func process_input(event: InputEvent) -> StringName:
 	if event.is_action_pressed(&"attack"):
 		return &"JumpAttack"
+	if event.is_action_pressed(&"dodge") and player.dodge_ready:
+		return &"Dodge"
 	if event.is_action_pressed(&"jump") and player.has_double_jump and not player._double_jump_used:
 		player._double_jump_used = true
 		player.velocity.y = jump_force * 0.85

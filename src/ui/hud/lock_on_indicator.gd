@@ -67,6 +67,7 @@ func _add_arm(pos: Vector2, arm_size: Vector2) -> void:
 
 func _connect_signals() -> void:
 	Events.lock_on_target_acquired.connect(_on_target_acquired)
+	Events.lock_on_target_switched.connect(_on_target_switched)
 	Events.lock_on_target_lost.connect(_on_target_lost)
 
 
@@ -83,6 +84,17 @@ func _on_target_acquired(target: Node3D) -> void:
 	_indicator.scale = Vector2(1.5, 1.5)
 	_pulse_tween = create_tween()
 	_pulse_tween.tween_property(_indicator, "scale", Vector2.ONE, 0.2) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+
+func _on_target_switched(new_target: Node3D) -> void:
+	_target = new_target
+	# Pulse on switch for clear feedback
+	if _pulse_tween and _pulse_tween.is_running():
+		_pulse_tween.kill()
+	_indicator.scale = Vector2(1.3, 1.3)
+	_pulse_tween = create_tween()
+	_pulse_tween.tween_property(_indicator, "scale", Vector2.ONE, 0.15) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/abilities/ability_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"heal"
+display_name = "Heal"
+description = "Restores HP to an ally."
+ability_type = 5
+mp_cost = 18.0
+atb_cost = 20.0
+cooldown = 4.0
+cast_time = 0.7
+damage = 35.0
+animation_name = &""
+effect_scene = null
+icon = null

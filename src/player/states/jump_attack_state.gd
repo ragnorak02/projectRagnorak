@@ -6,10 +6,11 @@ var _timer: float = 0.0
 var _hit_active: bool = false
 
 @export var attack_duration: float = 0.5
-@export var downward_force: float = 15.0
+@export var downward_force: float = 20.0
+@export var forward_tracking: float = 5.0
 @export var hit_window_start: float = 0.05
 @export var hit_window_end: float = 0.4
-@export var damage: float = 18.0
+@export var damage: float = 22.0
 
 
 func enter(_msg: Dictionary = {}) -> void:
@@ -20,7 +21,12 @@ func enter(_msg: Dictionary = {}) -> void:
 	if player.is_locked_on:
 		player.face_lock_target(1.0)
 
-	AttackVFX.spawn(player.get_parent(), 4, player.global_position + Vector3(0, 0.5, 0), -player.global_basis.z)
+	# Forward tracking toward target for more satisfying hits
+	var forward_dir := -player.global_basis.z.normalized()
+	player.velocity.x = forward_dir.x * forward_tracking
+	player.velocity.z = forward_dir.z * forward_tracking
+
+	AttackVFX.spawn(player.get_parent(), 4, player.global_position + Vector3(0, 0.5, 0), forward_dir)
 	AudioManager.play_sfx_varied("jump_attack")
 
 

@@ -1,6 +1,10 @@
 extends State
 
-@export var strafe_speed: float = 6.0
+@export var strafe_speed: float = 7.0
+
+
+func enter(_msg: Dictionary = {}) -> void:
+	player.play_animation(&"walk")
 
 
 func process_physics(delta: float) -> StringName:

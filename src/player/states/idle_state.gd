@@ -4,7 +4,7 @@ extends State
 
 
 func enter(_msg: Dictionary = {}) -> void:
-	pass
+	player.play_animation(&"idle")
 
 
 func process_physics(delta: float) -> StringName:
