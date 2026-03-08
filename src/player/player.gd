@@ -39,6 +39,10 @@ var _ledge_wall_normal: Vector3 = Vector3.ZERO
 var _nearby_interactables: Array[Node3D] = []
 var _current_interactable: Node3D = null
 
+# Traversal abilities
+var has_double_jump: bool = false
+var _double_jump_used: bool = false
+
 var current_hp: float = 100.0
 var max_hp: float = 100.0
 var current_mp: float = 50.0
@@ -87,6 +91,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
+	else:
+		_double_jump_used = false
 
 	# Jump buffer countdown
 	if _jump_buffer_timer > 0.0:

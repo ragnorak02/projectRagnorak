@@ -1014,9 +1014,9 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 # Current Focus
 
-Current Phase: Macro Phase 12 — World & Traversal
-Current Task: Build zone transition system and world structure
-Next Milestone: World & traversal system complete (item 310)
+Current Phase: Macro Phase 13 — Party System
+Current Task: Add party members and AI companion logic
+Next Milestone: Party system complete with team attacks (item 340)
 
 ## Completed Phases
 - Phase 1 — Foundation & Project Setup (items 1-20)
@@ -1030,6 +1030,7 @@ Next Milestone: World & traversal system complete (item 310)
 - Phase 9 — Inventory & Equipment (items 201-230)
 - Phase 10 — Quests & NPC Interaction (items 231-255)
 - Phase 11 — Save System (items 256-280)
+- Phase 12 — World & Traversal (items 281-310)
 
 ---
 

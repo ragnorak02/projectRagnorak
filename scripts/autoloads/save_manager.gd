@@ -316,6 +316,12 @@ func _zone_id_to_scene(zone_id: String) -> String:
 			return "res://scenes/menus/main_menu.tscn"
 		"test_arena":
 			return "res://scenes/test/test_arena.tscn"
+		"town_hub":
+			return "res://scenes/zones/town_hub.tscn"
+		"field_zone":
+			return "res://scenes/zones/field_zone.tscn"
+		"dungeon_zone":
+			return "res://scenes/zones/dungeon_zone.tscn"
 		_:
 			# Future zones: res://scenes/zones/{zone_id}.tscn
 			var zone_path := "res://scenes/zones/%s.tscn" % zone_id
