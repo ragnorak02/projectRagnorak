@@ -2,20 +2,20 @@
   "schemaVersion": 1,
   "gameId": "projectRagnorak",
   "title": "Project Ragnorak",
-  "lastUpdated": "2026-03-08T16:30:00Z",
+  "lastUpdated": "2026-03-08T19:15:00Z",
 
   "health": {
-    "progressPercent": 36,
-    "buildVersion": "0.0.14-dev",
-    "assetStage": "placeholder"
+    "progressPercent": 38,
+    "buildVersion": "0.0.15-dev",
+    "assetStage": "early"
   },
 
   "phase": {
-    "macroPhase": 14,
-    "macroPhaseLabel": "Audio & VFX",
-    "status": "complete",
+    "macroPhase": 15,
+    "macroPhaseLabel": "Polish, QA & Regression",
+    "status": "in_progress",
     "currentGoal": "Phase 15 — Polish, QA, and Regression",
-    "currentTask": "Combat polish, UX/accessibility, performance, regression tests",
+    "currentTask": "UX/accessibility, performance profiling, regression tests (combat polish done)",
     "nextMilestone": "Polish & QA complete (item 400)"
   },
 
@@ -52,11 +52,12 @@
     "phase11_save_system": true,
     "phase12_world_traversal": true,
     "phase13_party_system": true,
-    "phase14_audio_vfx": true
+    "phase14_audio_vfx": true,
+    "phase15_polish_qa": "in_progress"
   },
 
   "milestones": {
-    "firstGraphicsPass": false,
+    "firstGraphicsPass": true,
     "controllerIntegration": true,
     "coreGameplayLoop": true,
     "verticalSlice": false,

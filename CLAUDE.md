@@ -608,10 +608,10 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 ## Extension Path
 
-- [ ] 147. Add placeholder for additional abilities
-- [ ] 148. Ensure data-driven extension path
-- [ ] 149. Verify ability menu can scale
-- [ ] 150. Verify no hardcoded assumptions block expansion
+- [x] 147. Add placeholder for additional abilities
+- [x] 148. Ensure data-driven extension path
+- [x] 149. Verify ability menu can scale
+- [x] 150. Verify no hardcoded assumptions block expansion
 
 ---
 
@@ -962,13 +962,13 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 
 ## Combat Polish
 
-- [ ] 366. Tune combo feel
-- [ ] 367. Tune dodge feel
-- [ ] 368. Tune jump attack feel
-- [ ] 369. Tune lock-on responsiveness
-- [ ] 370. Tune tactical responsiveness
-- [ ] 371. Tune camera sensitivity
-- [ ] 372. Tune camera collision smoothing
+- [x] 366. Tune combo feel
+- [x] 367. Tune dodge feel
+- [x] 368. Tune jump attack feel
+- [x] 369. Tune lock-on responsiveness
+- [x] 370. Tune tactical responsiveness
+- [x] 371. Tune camera sensitivity
+- [x] 372. Tune camera collision smoothing
 
 ## UX / Accessibility
 
@@ -1015,7 +1015,7 @@ LUMINA STANDARD — GRANULAR RPG CHECKLIST — 400 ITEMS
 # Current Focus
 
 Current Phase: Macro Phase 15 — Polish, QA, and Regression
-Current Task: Combat polish, UX/accessibility, performance, regression tests
+Current Task: UX/accessibility, performance profiling, regression tests (combat polish complete)
 Next Milestone: Polish & QA complete (item 400)
 
 ## Completed Phases
@@ -1038,10 +1038,9 @@ Next Milestone: Polish & QA complete (item 400)
 
 # Known Gaps
 
-- Placeholder art only (capsule/primitive models)
+- Red Knight 3D model integrated (Mixamo rig, walking animation); enemies/NPCs still placeholders
 - No audio assets
-- No 3D character models or animations
-- Art pipeline undecided (Mixamo, asset store, or custom)
+- Art pipeline: Mixamo for animations + Meshy AI for model generation
 
 ---
 
