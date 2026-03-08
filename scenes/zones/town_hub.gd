@@ -17,13 +17,13 @@ func _setup_zone() -> void:
 	_add_ground(Color(0.25, 0.35, 0.2))
 
 	# Quest giver NPC
-	_add_npc("Elder Hwan", Vector3(4, 0, -3), [
+	_add_npc("Elder Hwan", Vector3(4, 0, -3), Color(0.7, 0.5, 0.2), [
 		{"speaker": "Elder Hwan", "text": "Welcome, traveler. The forest spirits are restless."},
 		{"speaker": "Elder Hwan", "text": "Seek the ancient shrine in the field beyond."},
 	])
 
 	# Merchant NPC
-	_add_npc("Merchant Soo", Vector3(-3, 0, -5), [
+	_add_npc("Merchant Soo", Vector3(-3, 0, -5), Color(0.2, 0.6, 0.4), [
 		{"speaker": "Merchant Soo", "text": "I have wares if you have coin."},
 		{"speaker": "Merchant Soo", "text": "Come back when you find rare materials."},
 	])
@@ -31,9 +31,8 @@ func _setup_zone() -> void:
 	# Portal to field zone
 	_add_portal("Field Exit", Vector3(0, 0, -12), "field_zone", Vector3(0, 1, 10))
 
-	# Portal to dungeon (requires progression flag)
-	_add_portal("Dungeon Gate", Vector3(10, 0, 0), "dungeon_zone", Vector3(0, 1, 10),
-		"shrine_activated", "The dungeon gate is sealed.")
+	# Portal to dungeon (unlocked for now)
+	_add_portal("Dungeon Gate", Vector3(10, 0, 0), "dungeon_zone", Vector3(0, 1, 10))
 
 
 func _add_ground(color: Color) -> void:
@@ -56,7 +55,7 @@ func _add_ground(color: Color) -> void:
 	add_child(body)
 
 
-func _add_npc(npc_name: String, pos: Vector3, pages: Array) -> void:
+func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array) -> void:
 	var npc := Area3D.new()
 	npc.set_script(NpcInteractable)
 	npc.npc_name = npc_name
@@ -71,18 +70,30 @@ func _add_npc(npc_name: String, pos: Vector3, pages: Array) -> void:
 	# Visual capsule
 	var mesh := MeshInstance3D.new()
 	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.3
-	capsule.height = 1.6
+	capsule.radius = 0.35
+	capsule.height = 1.7
 	mesh.mesh = capsule
-	mesh.position.y = 0.8
+	mesh.position.y = 0.85
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.3, 0.5, 0.8)
+	mat.albedo_color = color
 	mesh.material_override = mat
 	npc.add_child(mesh)
 
-	npc.global_position = pos
-	npc.position.y = 0.0
+	# Floating name label
+	var label_3d := Label3D.new()
+	label_3d.text = npc_name
+	label_3d.position.y = 2.0
+	label_3d.font_size = 32
+	label_3d.modulate = Color(1.0, 0.95, 0.8)
+	label_3d.outline_modulate = Color(0, 0, 0, 0.8)
+	label_3d.outline_size = 4
+	label_3d.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label_3d.no_depth_test = true
+	npc.add_child(label_3d)
+
+	# Add to tree FIRST, then set position
 	add_child(npc)
+	npc.global_position = pos
 
 
 func _add_portal(portal_name: String, pos: Vector3, target_zone: String,
@@ -113,5 +124,18 @@ func _add_portal(portal_name: String, pos: Vector3, target_zone: String,
 	mesh.material_override = mat
 	portal.add_child(mesh)
 
-	portal.global_position = pos
+	# Portal name label
+	var label_3d := Label3D.new()
+	label_3d.text = portal_name
+	label_3d.position.y = 3.3
+	label_3d.font_size = 28
+	label_3d.modulate = Color(1.0, 0.85, 0.5)
+	label_3d.outline_modulate = Color(0, 0, 0, 0.8)
+	label_3d.outline_size = 4
+	label_3d.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label_3d.no_depth_test = true
+	portal.add_child(label_3d)
+
+	# Add to tree FIRST, then set position
 	add_child(portal)
+	portal.global_position = pos

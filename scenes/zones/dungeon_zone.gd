@@ -84,8 +84,8 @@ func _add_portal(portal_name: String, pos: Vector3, target_zone: String,
 	mesh.material_override = mat
 	portal.add_child(mesh)
 
-	portal.global_position = pos
 	add_child(portal)
+	portal.global_position = pos
 
 
 func _add_switch_puzzle() -> void:
@@ -104,8 +104,8 @@ func _add_switch_puzzle() -> void:
 	l1col.shape = l1shape
 	lever1.add_child(l1col)
 	_add_lever_visual(lever1)
-	lever1.global_position = Vector3(-5, 0, -10)
 	add_child(lever1)
+	lever1.global_position = Vector3(-5, 0, -10)
 
 	# Lever 2
 	var lever2 := Area3D.new()
@@ -117,8 +117,8 @@ func _add_switch_puzzle() -> void:
 	l2col.shape = l2shape
 	lever2.add_child(l2col)
 	_add_lever_visual(lever2)
-	lever2.global_position = Vector3(5, 0, -10)
 	add_child(lever2)
+	lever2.global_position = Vector3(5, 0, -10)
 
 	# Reward chest (hidden until puzzle solved)
 	var chest := _create_chest(Vector3(0, 0, -20))
@@ -177,8 +177,8 @@ func _create_chest(pos: Vector3) -> Node:
 	mesh.material_override = mat
 	chest.add_child(mesh)
 
-	chest.global_position = pos
 	add_child(chest)
+	chest.global_position = pos
 	return chest
 
 
@@ -200,5 +200,5 @@ func _add_hidden_area(area_id: String, pos: Vector3, message: String) -> void:
 	col.shape = shape
 	area.add_child(col)
 
-	area.global_position = pos
 	add_child(area)
+	area.global_position = pos

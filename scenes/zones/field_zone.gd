@@ -24,9 +24,8 @@ func _setup_zone() -> void:
 	# Portal back to town
 	_add_portal("Return to Town", Vector3(0, 0, 12), "town_hub", Vector3(0, 1, -10))
 
-	# Portal to dungeon (gated)
-	_add_portal("Shrine Entrance", Vector3(0, 0, -25), "dungeon_zone", Vector3(0, 1, 10),
-		"shrine_activated", "The shrine entrance is sealed.")
+	# Portal to dungeon (unlocked for now)
+	_add_portal("Shrine Entrance", Vector3(0, 0, -25), "dungeon_zone", Vector3(0, 1, 10))
 
 	# Chest with items (exploration reward)
 	_add_chest(Vector3(-8, 0, -6))
@@ -89,8 +88,8 @@ func _add_portal(portal_name: String, pos: Vector3, target_zone: String,
 	mesh.material_override = mat
 	portal.add_child(mesh)
 
-	portal.global_position = pos
 	add_child(portal)
+	portal.global_position = pos
 
 
 func _add_chest(pos: Vector3) -> void:
@@ -117,8 +116,8 @@ func _add_chest(pos: Vector3) -> void:
 	mesh.material_override = mat
 	chest.add_child(mesh)
 
-	chest.global_position = pos
 	add_child(chest)
+	chest.global_position = pos
 
 
 func _add_hidden_area(area_id: String, pos: Vector3, message: String) -> void:
@@ -133,5 +132,5 @@ func _add_hidden_area(area_id: String, pos: Vector3, message: String) -> void:
 	col.shape = shape
 	area.add_child(col)
 
-	area.global_position = pos
 	add_child(area)
+	area.global_position = pos
