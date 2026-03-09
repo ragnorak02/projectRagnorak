@@ -47,14 +47,15 @@ func _physics_process(_delta: float) -> void:
 	var t := 1.0 - exp(-follow_speed * real_delta)
 	global_position = global_position.lerp(follow_target.global_position, t)
 
-	# Controller camera input
+	# Controller camera input (scaled by user sensitivity multiplier)
 	var cam_input := InputManager.get_camera_vector()
+	var sens: float = InputManager.controller_camera_sensitivity
 	var in_tactical: bool = GameManager.current_state == GameManager.GameState.TACTICAL_MODE
 
 	# During tactical mode, camera is always free orbit even if a target is highlighted
 	if not _is_locked_on or in_tactical:
-		_yaw -= cam_input.x * yaw_speed * real_delta
-	_pitch -= cam_input.y * pitch_speed * real_delta
+		_yaw -= cam_input.x * yaw_speed * sens * real_delta
+	_pitch -= cam_input.y * pitch_speed * sens * real_delta
 	_pitch = clampf(_pitch, min_pitch, max_pitch)
 
 	if _is_locked_on and is_instance_valid(_lock_target) and not in_tactical:

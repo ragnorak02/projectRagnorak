@@ -5,6 +5,7 @@ extends CanvasLayer
 
 const QuestLogScript := preload("res://src/ui/menus/quest_log.gd")
 const SaveLoadMenuScript := preload("res://src/ui/menus/save_load_menu.gd")
+const SettingsMenuScript := preload("res://src/ui/menus/settings_menu.gd")
 
 # --- Colors ---
 const OVERLAY_COLOR := Color(0.0, 0.0, 0.0, 0.7)
@@ -23,7 +24,7 @@ const MENU_ITEMS: Array[Dictionary] = [
 	{ "id": MenuItem.SAVE_GAME, "label": "Save Game", "available": true },
 	{ "id": MenuItem.INVENTORY, "label": "Inventory", "available": false },
 	{ "id": MenuItem.QUEST_LOG, "label": "Quest Log", "available": true },
-	{ "id": MenuItem.SETTINGS, "label": "Settings", "available": false },
+	{ "id": MenuItem.SETTINGS, "label": "Settings", "available": true },
 	{ "id": MenuItem.RETURN_TO_TITLE, "label": "Return to Title", "available": true },
 ]
 
@@ -40,6 +41,7 @@ var _item_labels: Array[Label] = []
 var _placeholder_label: Label
 var _quest_log: Node = null
 var _save_load_menu: Node = null
+var _settings_menu: Node = null
 
 
 func _ready() -> void:
@@ -211,7 +213,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	# Confirm selection
-	if event.is_action_pressed(&"attack") or event.is_action_pressed(&"ui_accept"):
+	if event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
 		_confirm_selection()
 		get_viewport().set_input_as_handled()
 		return
@@ -301,6 +303,8 @@ func _confirm_selection() -> void:
 			_open_save_menu()
 		MenuItem.QUEST_LOG:
 			_open_quest_log()
+		MenuItem.SETTINGS:
+			_open_settings()
 		MenuItem.RETURN_TO_TITLE:
 			_return_to_title()
 
@@ -326,6 +330,14 @@ func _open_quest_log() -> void:
 		add_child(_quest_log)
 
 	_quest_log.open_log(quest_sys)
+
+
+func _open_settings() -> void:
+	if _settings_menu == null:
+		_settings_menu = CanvasLayer.new()
+		_settings_menu.set_script(SettingsMenuScript)
+		add_child(_settings_menu)
+	_settings_menu.open_menu()
 
 
 func _return_to_title() -> void:

@@ -2,6 +2,7 @@
 extends Control
 
 const SaveLoadMenuScript := preload("res://src/ui/menus/save_load_menu.gd")
+const SettingsMenuScript := preload("res://src/ui/menus/settings_menu.gd")
 
 @onready var new_game_btn: Button = $VBox/NewGame
 @onready var continue_btn: Button = $VBox/Continue
@@ -10,6 +11,7 @@ const SaveLoadMenuScript := preload("res://src/ui/menus/save_load_menu.gd")
 @onready var exit_btn: Button = $VBox/Exit
 
 var _save_load_menu: Node = null
+var _settings_menu: Node = null
 
 
 func _ready() -> void:
@@ -61,7 +63,12 @@ func _on_load() -> void:
 
 
 func _on_options() -> void:
-	pass
+	AudioManager.play_sfx_named("menu_confirm")
+	if _settings_menu == null:
+		_settings_menu = CanvasLayer.new()
+		_settings_menu.set_script(SettingsMenuScript)
+		add_child(_settings_menu)
+	_settings_menu.open_menu()
 
 
 func _on_exit() -> void:

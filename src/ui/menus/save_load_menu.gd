@@ -72,7 +72,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if _confirming_overwrite:
-		if event.is_action_pressed(&"attack") or event.is_action_pressed(&"ui_accept"):
+		if event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
 			_execute_save(_slot_ids[_selected_index])
 			_confirming_overwrite = false
 			_confirm_panel.visible = false
@@ -93,7 +93,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(&"move_down") or event.is_action_pressed(&"ui_down"):
 		_move_selection(1)
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"attack") or event.is_action_pressed(&"ui_accept"):
+	elif event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
 		_confirm_slot()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"dodge") or event.is_action_pressed(&"ui_cancel") \

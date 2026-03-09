@@ -89,7 +89,7 @@ func _process_category_input(event: InputEvent) -> StringName:
 		Events.tactical_slot_changed.emit(_category_index)
 
 	# Confirm category → ability phase
-	if event.is_action_pressed(&"attack") or event.is_action_pressed(&"ui_accept"):
+	if event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
 		_current_category = _category_index as Category
 		_selected_slot = 0
 		_phase = Phase.ABILITY_SELECT
@@ -131,7 +131,7 @@ func _process_ability_input(event: InputEvent) -> StringName:
 			Events.tactical_slot_changed.emit(_selected_slot)
 
 	# Confirm ability → target phase
-	if event.is_action_pressed(&"attack") or event.is_action_pressed(&"ui_accept"):
+	if event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
 		_confirm_ability()
 
 	return &""
@@ -158,7 +158,7 @@ func _process_target_input(event: InputEvent) -> StringName:
 		_cycle_target(1)
 
 	# Confirm target → execute
-	if event.is_action_pressed(&"attack") or event.is_action_pressed(&"ui_accept"):
+	if event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
 		_confirm_target()
 
 	return &""

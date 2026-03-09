@@ -362,7 +362,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	# Track quest
-	if event.is_action_pressed(&"attack") or event.is_action_pressed(&"ui_accept"):
+	if event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
 		_track_selected()
 		get_viewport().set_input_as_handled()
 		return

@@ -17,6 +17,7 @@ InputManager="*res://scripts/autoloads/input_manager.gd"
 AudioManager="*res://scripts/autoloads/audio_manager.gd"
 SaveManager="*res://scripts/autoloads/save_manager.gd"
 DebugFlags="*res://scripts/autoloads/debug_flags.gd"
+SettingsManager="*res://scripts/autoloads/settings_manager.gd"
 
 [display]
 

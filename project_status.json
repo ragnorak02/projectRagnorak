@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "gameId": "projectRagnorak",
   "title": "Project Ragnorak",
-  "lastUpdated": "2026-03-08T19:15:00Z",
+  "lastUpdated": "2026-03-08T22:00:00Z",
 
   "health": {
     "progressPercent": 38,
@@ -15,7 +15,7 @@
     "macroPhaseLabel": "Polish, QA & Regression",
     "status": "in_progress",
     "currentGoal": "Phase 15 — Polish, QA, and Regression",
-    "currentTask": "UX/accessibility, performance profiling, regression tests (combat polish done)",
+    "currentTask": "Performance profiling, regression tests (combat polish + UX/accessibility done)",
     "nextMilestone": "Polish & QA complete (item 400)"
   },
 
@@ -31,7 +31,7 @@
     "achievementsSystem": "missing",
     "testScripts": "active",
     "saveSystem": "complete",
-    "settingsMenu": "placeholder",
+    "settingsMenu": "complete",
     "audio": "hooks_only",
     "vfx": "complete",
     "worldSystem": "complete",
@@ -67,7 +67,7 @@
 
   "testing": {
     "testCommand": "tests/run-tests.bat",
-    "lastRunAt": "2026-03-08T16:30:00Z",
+    "lastRunAt": "2026-03-08T22:00:00Z",
     "status": "pass",
     "smokeTests": 35,
     "phase6Tests": 111,
@@ -79,8 +79,9 @@
     "phase12Tests": 65,
     "phase13Tests": 64,
     "phase14Tests": 67,
-    "totalTests": 621,
-    "notes": "All 621 tests passing (35 smoke + 111 P6 + 23 P7 + 65 P8 + 56 P9 + 72 P10 + 63 P11 + 65 P12 + 64 P13 + 67 P14)"
+    "phase15Tests": 68,
+    "totalTests": 689,
+    "notes": "All 689 tests passing (35 smoke + 111 P6 + 23 P7 + 65 P8 + 56 P9 + 72 P10 + 63 P11 + 65 P12 + 64 P13 + 67 P14 + 68 P15)"
   },
 
   "links": {
