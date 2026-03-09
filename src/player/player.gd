@@ -117,15 +117,21 @@ func _physics_process(delta: float) -> void:
 
 	# ATB fills over time during combat
 	if current_atb < max_atb:
+		var old_atb := current_atb
 		current_atb = minf(current_atb + atb_fill_rate * delta, max_atb)
-		Events.player_atb_changed.emit(current_atb, max_atb)
+		# Only emit when crossing a visible threshold (1% of max) to avoid per-frame signal spam
+		if int(current_atb) != int(old_atb) or current_atb >= max_atb:
+			Events.player_atb_changed.emit(current_atb, max_atb)
 
 	# MP passive regen after delay
 	if _mp_regen_timer > 0.0:
 		_mp_regen_timer -= delta
 	elif current_mp < max_mp:
+		var old_mp := current_mp
 		current_mp = minf(current_mp + mp_regen_rate * delta, max_mp)
-		Events.player_mp_changed.emit(current_mp, max_mp)
+		# Only emit when value visibly changes (integer part) to reduce signal noise
+		if int(current_mp) != int(old_mp) or current_mp >= max_mp:
+			Events.player_mp_changed.emit(current_mp, max_mp)
 
 	move_and_slide()
 
