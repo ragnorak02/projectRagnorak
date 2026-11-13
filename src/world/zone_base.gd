@@ -9,6 +9,10 @@ const CombatHudScript := preload("res://src/ui/hud/combat_hud.gd")
 const ControlBarScript := preload("res://src/ui/hud/control_bar.gd")
 const TacticalMenuScript := preload("res://src/ui/hud/tactical_menu.gd")
 const LockOnIndicatorScript := preload("res://src/ui/hud/lock_on_indicator.gd")
+const TargetBarScript := preload("res://src/ui/hud/target_bar.gd")
+const TacticalOverlayScript := preload("res://src/ui/hud/tactical_overlay.gd")
+const BattleBannerScript := preload("res://src/ui/hud/battle_banner.gd")
+const MinimapScript := preload("res://src/ui/hud/minimap.gd")
 const InteractionPromptScript := preload("res://src/ui/hud/interaction_prompt.gd")
 const QuestTrackerScript := preload("res://src/ui/hud/quest_tracker.gd")
 const PauseMenuScript := preload("res://src/ui/menus/pause_menu.gd")
@@ -93,7 +97,7 @@ func _setup_zone() -> void:
 func _spawn_hud() -> void:
 	var hud_scripts: Array = [
 		CombatHudScript, ControlBarScript, TacticalMenuScript,
-		LockOnIndicatorScript, InteractionPromptScript, QuestTrackerScript,
+		LockOnIndicatorScript, TargetBarScript, TacticalOverlayScript, BattleBannerScript, InteractionPromptScript, QuestTrackerScript, MinimapScript,
 		DialogueUiScript, PauseMenuScript, SaveFeedbackScript, LoadingScreenScript,
 	]
 	for script in hud_scripts:

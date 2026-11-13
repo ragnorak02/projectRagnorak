@@ -1,11 +1,16 @@
-[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://resources/characters/party_member_data.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/abilities/fire_bolt.tres" id="a0"]
+[ext_resource type="Resource" path="res://resources/abilities/ice_freeze.tres" id="a1"]
+[ext_resource type="Resource" path="res://resources/abilities/heal.tres" id="a2"]
+[ext_resource type="Resource" path="res://resources/abilities/sword_slash.tres" id="a3"]
+[ext_resource type="Resource" path="res://resources/abilities/plunge_strike.tres" id="a4"]
 
 [resource]
 script = ExtResource("1")
 member_id = &"hero"
-display_name = "Hero"
+display_name = "Amaro"
 max_hp = 100.0
 max_mp = 50.0
 max_atb = 100.0
@@ -15,3 +20,5 @@ attack_damage = 15.0
 move_speed = 8.0
 capsule_color = Color(0.3, 0.5, 0.8, 1)
 traversal_flags = []
+unique_ability_id = &"arcane_stance"
+default_abilities = Array[Resource]([ExtResource("a0"), ExtResource("a1"), ExtResource("a2"), ExtResource("a3"), ExtResource("a4")])

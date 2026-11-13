@@ -11,6 +11,9 @@ var _base_time_scale: float = 1.0
 
 signal game_state_changed(old_state: GameState, new_state: GameState)
 
+## Command Menu (tactical mode) time scale. v3: 0.05 (was 0.1) — "real slow".
+const TACTICAL_TIME_SCALE := 0.05
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -27,7 +30,7 @@ func change_state(new_state: GameState) -> void:
 		GameState.PAUSED:
 			get_tree().paused = true
 		GameState.TACTICAL_MODE:
-			_push_time_scale("tactical", 0.1)
+			_push_time_scale("tactical", TACTICAL_TIME_SCALE)
 		_:
 			if previous_state == GameState.PAUSED:
 				get_tree().paused = false
@@ -45,8 +48,14 @@ func exit_tactical_mode() -> void:
 		change_state(GameState.PLAYING)
 
 
+## Hit-stop never uses a true 0 time scale: stepping physics with delta 0
+## produces NaN transforms on active RigidBody3Ds (e.g. a crate dropped on hit).
+## 0.01 for ~65ms is visually indistinguishable from a full freeze.
+const HIT_STOP_SCALE := 0.01
+
+
 func hit_stop(duration_ms: float = 65.0) -> void:
-	_push_time_scale("hit_stop", 0.0)
+	_push_time_scale("hit_stop", HIT_STOP_SCALE)
 	await get_tree().create_timer(duration_ms / 1000.0, true, false, true).timeout
 	_pop_time_scale("hit_stop")
 

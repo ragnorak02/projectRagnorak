@@ -131,7 +131,7 @@ func test_hero_resource_loads() -> void:
 func test_companion_resource_loads() -> void:
 	var res = load("res://resources/characters/companion.tres")
 	_assert(res != null and res.get("member_id") == &"companion"
-		and res.get("display_name") == "Yuna",
+		and res.get("display_name") == "Taighe",
 		"Companion resource loads with correct ID and name")
 
 

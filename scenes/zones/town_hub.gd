@@ -1,61 +1,223 @@
-## Town Hub — first town with NPCs, quest givers, and zone exits.
+## Town Hub — Starting village built from medieval village megakit assets.
+## Layout: Main road running south→north, town square in the center,
+## buildings on both sides, guard tower at the north gate.
 extends "res://src/world/zone_base.gd"
 
-const EnemyScene := preload("res://src/enemies/enemy.tscn")
 const NpcInteractable := preload("res://src/interaction/npc_interactable.gd")
+## v5 placeholder NPC model (un-rigged Hunyuan mesh, RiglessVisual).
+const PirateModel := preload("res://assets/models/characters/pirate_female1.glb")
 const ChestInteractable := preload("res://src/interaction/chest_interactable.gd")
 const ZonePortal := preload("res://src/interaction/zone_portal.gd")
+const CarryableCrateScene := preload("res://src/interaction/carryable_crate.tscn")
+
 
 
 func _ready() -> void:
 	zone_id = "town_hub"
+	spawn_position = Vector3(0, 1, 8)
 	super._ready()
 
 
 func _setup_zone() -> void:
-	# Add a ground plane
-	_add_ground(Color(0.25, 0.35, 0.2))
+	_build_terrain()
+	_build_roads()
+	_build_structures()
+	_build_props()
+	_place_npcs()
+	_place_portals()
 
-	# Quest giver NPC
-	_add_npc("Elder Hwan", Vector3(4, 0, -3), Color(0.7, 0.5, 0.2), [
-		{"speaker": "Elder Hwan", "text": "Welcome, traveler. The forest spirits are restless."},
-		{"speaker": "Elder Hwan", "text": "Seek the ancient shrine in the field beyond."},
+
+# ── Terrain ────────────────────────────────────────────────────────────────────
+
+func _build_terrain() -> void:
+	# Large grass ground plane
+	TownBuilder.add_ground_plane(self, 100.0, Color(0.22, 0.32, 0.15))
+
+	# Invisible boundary walls so player doesn't walk off the map
+	TownBuilder.add_invisible_wall(self, Vector3(0, 2, -55), Vector3(100, 6, 1))   # north
+	TownBuilder.add_invisible_wall(self, Vector3(0, 2, 15), Vector3(100, 6, 1))    # south
+	TownBuilder.add_invisible_wall(self, Vector3(-30, 2, -20), Vector3(1, 6, 80))  # west
+	TownBuilder.add_invisible_wall(self, Vector3(30, 2, -20), Vector3(1, 6, 80))   # east
+
+
+# ── Roads & Paths ──────────────────────────────────────────────────────────────
+
+func _build_roads() -> void:
+	# Main road running south (Z=8) to north (Z=-48), 3 tiles wide (6m)
+	TownBuilder.lay_road(self, Vector3(0, 0.01, 8), 30, 3, Vector3.BACK, "Floor_Brick")
+
+	# Town square — wider paved area around Z=-20
+	TownBuilder.lay_square(self, Vector3(0, 0.01, -20), 8, 6, "Floor_UnevenBrick")
+
+	# East side path toward dungeon gate
+	TownBuilder.lay_road(self, Vector3(4, 0.01, -8), 8, 2, Vector3.RIGHT, "Floor_Brick")
+
+	# West path to residential area
+	TownBuilder.lay_road(self, Vector3(-4, 0.01, -12), 5, 2, Vector3.LEFT, "Floor_Brick")
+
+
+# ── Structures ─────────────────────────────────────────────────────────────────
+
+func _build_structures() -> void:
+	# ── SOUTH AREA (near spawn) ──
+
+	# House A — small residential, east of road
+	# 4x4m (2 segs × 2 segs), door faces west toward road
+	TownBuilder.build_house(self, Vector3(6, 0, 2), 2, 2, 0.0, 3, 0,
+		"plaster", true, false)
+
+	# House B — small residential, west of road
+	# 4x4m, door faces east toward road
+	TownBuilder.build_house(self, Vector3(-10, 0, 2), 2, 2, 0.0, 1, 0,
+		"plaster", false, false)
+
+	# ── SOUTH-CENTER AREA ──
+
+	# General Store — medium, east side
+	# 4x6m (2w × 3d), door faces west
+	TownBuilder.build_house(self, Vector3(6, 0, -10), 2, 3, 0.0, 3, 1,
+		"plaster", false, true)
+
+	# House C — west side
+	# 4x4m, door faces east
+	TownBuilder.build_house(self, Vector3(-10, 0, -10), 2, 2, 0.0, 1, 0,
+		"brick", true, false)
+
+	# ── TOWN SQUARE AREA (Z = -20) ──
+
+	# Tavern / Inn — large building, west side of square
+	# 6x8m (3w × 4d), door faces east toward square
+	TownBuilder.build_house(self, Vector3(-18, 0, -26), 3, 4, 0.0, 1, 1,
+		"plaster", true, true)
+
+	# Weapon Shop — medium, east side of square
+	# 4x6m (2w × 3d), door faces west toward square
+	TownBuilder.build_house(self, Vector3(8, 0, -24), 2, 3, 0.0, 3, 1,
+		"brick", false, false)
+
+	# ── NORTH AREA ──
+
+	# Elder's House — medium, prominent building east of road
+	# 4x6m (2w × 3d), door faces west, has balcony
+	TownBuilder.build_house(self, Vector3(6, 0, -38), 2, 3, 0.0, 3, 0,
+		"plaster", true, true)
+
+	# House D — small, west of road
+	TownBuilder.build_house(self, Vector3(-10, 0, -36), 2, 2, 0.0, 1, 0,
+		"plaster", false, false)
+
+	# Guard Tower — near north gate, brick
+	TownBuilder.build_tower(self, Vector3(8, 0, -46))
+
+	# House E — small, further west
+	TownBuilder.build_house(self, Vector3(-10, 0, -46), 2, 2, 0.0, 1, 0,
+		"brick", false, false)
+
+
+# ── Props & Decoration ─────────────────────────────────────────────────────────
+
+func _build_props() -> void:
+	# Town square decorations
+	TownBuilder.place(self, "Prop_Wagon", Vector3(-3, 0, -19), 25, true)
+	TownBuilder.place(self, "Prop_Crate", Vector3(3, 0, -18), 0.0, true)
+	TownBuilder.place(self, "Prop_Crate", Vector3(3.5, 0, -19.2), 45, true)
+	TownBuilder.place(self, "Prop_Crate", Vector3(2.5, 1.06, -18.5), 15, true)  # stacked
+
+	# Liftable crates (single, ground level). The stack above stays static.
+	_add_carryable_crate(Vector3(2, 0, 3))      # near spawn
+	_add_carryable_crate(Vector3(1.5, 0, -14))  # square, south edge
+
+	# Scattered bricks near construction / elder's house
+	TownBuilder.place(self, "Prop_Brick1", Vector3(5, 0, -35))
+	TownBuilder.place(self, "Prop_Brick2", Vector3(5.5, 0, -35.3), 30)
+	TownBuilder.place(self, "Prop_Brick3", Vector3(4.8, 0, -34.5), 60)
+
+	# Wooden fences along paths
+	# East side of south road
+	TownBuilder.place_fence_line(self, Vector3(4, 0, 4), 4, Vector3.BACK)
+	# West side of south road
+	TownBuilder.place_fence_line(self, Vector3(-4, 0, 4), 4, Vector3.BACK)
+	# Around town square edges
+	TownBuilder.place_fence_line(self, Vector3(-8, 0, -16), 3, Vector3.BACK)
+	TownBuilder.place_fence_line(self, Vector3(6, 0, -16), 3, Vector3.BACK)
+
+	# Metal fences near guard tower
+	TownBuilder.place(self, "Prop_MetalFence_Ornament", Vector3(6, 0, -44))
+	TownBuilder.place(self, "Prop_MetalFence_Ornament", Vector3(14, 0, -44))
+
+	# Vines on some buildings
+	TownBuilder.add_vines(self, [
+		Vector3(-17, 1.5, -24),   # tavern wall
+		Vector3(-17, 2.0, -28),   # tavern wall higher
+		Vector3(7, 1.5, -37),     # elder's house
 	])
 
-	# Merchant NPC
-	_add_npc("Merchant Soo", Vector3(-3, 0, -5), Color(0.2, 0.6, 0.4), [
-		{"speaker": "Merchant Soo", "text": "I have wares if you have coin."},
-		{"speaker": "Merchant Soo", "text": "Come back when you find rare materials."},
+	# Exterior stairs at tavern entrance
+	TownBuilder.place(self, "Stairs_Exterior_Platform", Vector3(-12, 0, -22))
+
+	# Support beams at weapon shop
+	TownBuilder.place(self, "Prop_Support", Vector3(8, 0, -22))
+
+	# Exterior border stones along square
+	TownBuilder.place(self, "Prop_ExteriorBorder_Straight1", Vector3(-6, 0, -16))
+	TownBuilder.place(self, "Prop_ExteriorBorder_Straight2", Vector3(4, 0, -16))
+	TownBuilder.place(self, "Prop_ExteriorBorder_Corner", Vector3(-6, 0, -24))
+
+
+# ── NPCs ───────────────────────────────────────────────────────────────────────
+
+func _place_npcs() -> void:
+	# Elder Hwan — near his house
+	_add_npc("Elder Hwan", Vector3(4, 0, -36), Color(0.7, 0.5, 0.2), [
+		{"speaker": "Elder Hwan", "text": "Welcome to Millhaven, traveler. Times grow uncertain."},
+		{"speaker": "Elder Hwan", "text": "The Lumina reactors hum louder each day. Something stirs."},
+		{"speaker": "Elder Hwan", "text": "Seek the ancient shrine beyond the northern gate."},
 	])
 
-	# Portal to field zone
-	_add_portal("Field Exit", Vector3(0, 0, -12), "field_zone", Vector3(0, 1, 10))
+	# Merchant Soo — at the general store
+	_add_npc("Merchant Soo", Vector3(4, 0, -8), Color(0.2, 0.6, 0.4), [
+		{"speaker": "Merchant Soo", "text": "Welcome! I deal in provisions and curiosities."},
+		{"speaker": "Merchant Soo", "text": "Bring me rare materials from the wilds."},
+	], PirateModel)
 
-	# Portal to dungeon (unlocked for now)
-	_add_portal("Dungeon Gate", Vector3(10, 0, 0), "dungeon_zone", Vector3(0, 1, 10))
+	# Innkeeper — at the tavern entrance
+	_add_npc("Innkeeper Mira", Vector3(-12, 0, -22), Color(0.6, 0.3, 0.3), [
+		{"speaker": "Innkeeper Mira", "text": "Rest here and recover your strength."},
+		{"speaker": "Innkeeper Mira", "text": "Soldiers passed through this morning. Headed north."},
+	])
+
+	# Blacksmith — at weapon shop
+	_add_npc("Smith Oren", Vector3(6, 0, -22), Color(0.4, 0.3, 0.25), [
+		{"speaker": "Smith Oren", "text": "Need a blade sharpened? I'm your man."},
+		{"speaker": "Smith Oren", "text": "Bring me ores and I'll forge something worthy."},
+	])
+
+	# Guard — near the north gate / tower
+	_add_npc("Guard Captain", Vector3(4, 0, -46), Color(0.35, 0.35, 0.45), [
+		{"speaker": "Guard Captain", "text": "The northern fields are dangerous. Stay alert."},
+		{"speaker": "Guard Captain", "text": "Report any monster sightings to me."},
+	])
+
+	# Villager — walking in the square
+	_add_npc("Villager", Vector3(-2, 0, -20), Color(0.5, 0.45, 0.35), [
+		{"speaker": "Villager", "text": "Have you seen the lights from the reactor at night?"},
+		{"speaker": "Villager", "text": "They say the coastal facility is the biggest one yet."},
+	])
 
 
-func _add_ground(color: Color) -> void:
-	var mesh_inst := MeshInstance3D.new()
-	var plane := PlaneMesh.new()
-	plane.size = Vector2(40, 40)
-	mesh_inst.mesh = plane
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mesh_inst.material_override = mat
-	add_child(mesh_inst)
+# ── Portals ────────────────────────────────────────────────────────────────────
 
-	var body := StaticBody3D.new()
-	var col := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(40, 0.1, 40)
-	col.shape = shape
-	col.position.y = -0.05
-	body.add_child(col)
-	add_child(body)
+func _place_portals() -> void:
+	# North gate → field zone
+	_add_portal("Northern Gate", Vector3(0, 0, -50), "field_zone", Vector3(0, 1, 10))
+
+	# East path → dungeon zone
+	_add_portal("Dungeon Entrance", Vector3(20, 0, -8), "dungeon_zone", Vector3(0, 1, 10))
 
 
-func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array) -> void:
+# ── NPC / Portal Helpers (unchanged from original) ────────────────────────────
+
+func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array, model: PackedScene = null) -> void:
 	var npc := Area3D.new()
 	npc.set_script(NpcInteractable)
 	npc.npc_name = npc_name
@@ -67,7 +229,7 @@ func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array) -> voi
 	col.shape = shape
 	npc.add_child(col)
 
-	# Visual capsule
+	# Visual capsule (placeholder until character models)
 	var mesh := MeshInstance3D.new()
 	var capsule := CapsuleMesh.new()
 	capsule.radius = 0.35
@@ -78,20 +240,39 @@ func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array) -> voi
 	mat.albedo_color = color
 	mesh.material_override = mat
 	npc.add_child(mesh)
+	if model != null:
+		# Un-rigged model replaces the capsule; idle bob only (NPCs don't move).
+		mesh.visible = false
+		var rv: Node3D = load("res://src/characters/rigless_visual.gd").new()
+		rv.name = "RiglessVisual"
+		rv.set(&"model_scene", model)
+		rv.set(&"fit_height", 1.7)
+		rv.set(&"model_yaw_offset_deg", 180.0)
+		npc.add_child(rv)
 
 	# Floating name label
+	# Name plate (UI Package N): fixed on-screen size (~24px tall at any distance,
+	# so it can never fill the screen when the camera is close), style-kit font,
+	# dim text with an outline, and a self-fade between 18m and 22m.
 	var label_3d := Label3D.new()
 	label_3d.text = npc_name
-	label_3d.position.y = 2.0
-	label_3d.font_size = 32
-	label_3d.modulate = Color(1.0, 0.95, 0.8)
-	label_3d.outline_modulate = Color(0, 0, 0, 0.8)
-	label_3d.outline_size = 4
+	label_3d.position.y = 2.1
+	label_3d.font = UIStyle.font_body_bold()
+	label_3d.font_size = 48
+	label_3d.fixed_size = true
+	label_3d.pixel_size = 0.00052
+	label_3d.modulate = UIStyle.TEXT.lerp(UIStyle.TEXT_DIM, 0.35)
+	label_3d.outline_modulate = Color(0.0, 0.02, 0.04, 0.85)
+	label_3d.outline_size = 12
 	label_3d.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label_3d.no_depth_test = true
+	label_3d.visibility_range_begin = 0.6
+	label_3d.visibility_range_begin_margin = 0.6
+	label_3d.visibility_range_end = 22.0
+	label_3d.visibility_range_end_margin = 4.0
+	label_3d.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	npc.add_child(label_3d)
 
-	# Add to tree FIRST, then set position
 	add_child(npc)
 	npc.global_position = pos
 
@@ -108,12 +289,12 @@ func _add_portal(portal_name: String, pos: Vector3, target_zone: String,
 		portal.locked_message = locked_msg
 
 	var col := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(3, 3, 1)
-	col.shape = shape
+	var box_shape := BoxShape3D.new()
+	box_shape.size = Vector3(3, 3, 1)
+	col.shape = box_shape
 	portal.add_child(col)
 
-	# Visual marker
+	# Visual arch marker
 	var mesh := MeshInstance3D.new()
 	var box := BoxMesh.new()
 	box.size = Vector3(3, 3, 0.3)
@@ -124,18 +305,36 @@ func _add_portal(portal_name: String, pos: Vector3, target_zone: String,
 	mesh.material_override = mat
 	portal.add_child(mesh)
 
-	# Portal name label
+	# Portal label
+	# Portal plate (UI Package N): fixed on-screen size, header font, gold text,
+	# self-fade beyond ~30m so far gates don't clutter the view.
 	var label_3d := Label3D.new()
 	label_3d.text = portal_name
 	label_3d.position.y = 3.3
-	label_3d.font_size = 28
-	label_3d.modulate = Color(1.0, 0.85, 0.5)
-	label_3d.outline_modulate = Color(0, 0, 0, 0.8)
-	label_3d.outline_size = 4
+	label_3d.font = UIStyle.font_header_medium()
+	label_3d.font_size = 48
+	label_3d.fixed_size = true
+	label_3d.pixel_size = 0.00058
+	label_3d.modulate = UIStyle.GOLD
+	label_3d.outline_modulate = Color(0.0, 0.02, 0.04, 0.85)
+	label_3d.outline_size = 12
 	label_3d.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label_3d.no_depth_test = true
+	label_3d.visibility_range_begin = 0.6
+	label_3d.visibility_range_begin_margin = 0.6
+	label_3d.visibility_range_end = 30.0
+	label_3d.visibility_range_end_margin = 5.0
+	label_3d.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	portal.add_child(label_3d)
 
-	# Add to tree FIRST, then set position
 	add_child(portal)
 	portal.global_position = pos
+
+
+## Liftable crate (Package H). Single, ground-level crates only.
+func _add_carryable_crate(pos: Vector3, rot_y: float = 0.0) -> Node3D:
+	var crate: Node3D = CarryableCrateScene.instantiate()
+	add_child(crate)
+	crate.global_position = pos
+	crate.rotation.y = deg_to_rad(rot_y)
+	return crate

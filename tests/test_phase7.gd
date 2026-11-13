@@ -5,6 +5,9 @@ var _passed: int = 0
 var _failed: int = 0
 var _total: int = 0
 
+## Command Menu (tactical) time scale, v3: 0.05 (was 0.1).
+const TACTICAL_SCALE := 0.05
+
 
 func _ready() -> void:
 	print("=== Phase 7: Tactical Mode System Tests ===")
@@ -47,7 +50,7 @@ func _run_tests() -> void:
 	_section("GAME MANAGER TACTICAL MODE")
 	test_game_manager_enter_tactical_changes_state()
 	test_game_manager_exit_tactical_restores_playing()
-	test_time_scale_pushed_to_01_during_tactical()
+	test_time_scale_pushed_to_005_during_tactical()
 	test_time_scale_popped_on_exit()
 	test_game_manager_state_signal_emitted()
 	test_tactical_mode_double_enter_safe()
@@ -150,14 +153,34 @@ func test_time_scale_restored_after_exit() -> void:
 	var script = load("res://scripts/autoloads/game_manager.gd")
 	var source := script.source_code as String
 
-	var pushes_on_enter: bool = source.contains('_push_time_scale("tactical", 0.1)')
+	# v3 (battle_system_v3_plan T4): tactical scale is 0.05, as a literal or a
+	# named const ("I want it real slow").
+	var pushed_value := _tactical_push_value(source)
+	var pushes_on_enter: bool = is_equal_approx(pushed_value, TACTICAL_SCALE)
 	var pops_on_exit: bool = source.contains('_pop_time_scale("tactical")')
 
 	if pushes_on_enter and pops_on_exit:
-		_pass("Time scale pushed on tactical enter and popped on exit")
+		_pass("Time scale pushed (0.05) on tactical enter and popped on exit")
 	else:
-		_fail("Time scale pushed on tactical enter and popped on exit",
-			"push=%s pop=%s" % [str(pushes_on_enter), str(pops_on_exit)])
+		_fail("Time scale pushed (0.05) on tactical enter and popped on exit",
+			"push value=%s pop=%s" % [str(pushed_value), str(pops_on_exit)])
+
+
+## Value passed to _push_time_scale("tactical", X): a float literal or a const
+## defined in the same source. Returns -1.0 if not found.
+func _tactical_push_value(source: String) -> float:
+	var re := RegEx.new()
+	re.compile('_push_time_scale\\(\\s*"tactical"\\s*,\\s*([A-Za-z_][A-Za-z_0-9]*|[0-9.]+)\\s*\\)')
+	var m := re.search(source)
+	if m == null:
+		return -1.0
+	var arg := m.get_string(1)
+	if arg.is_valid_float():
+		return arg.to_float()
+	var cre := RegEx.new()
+	cre.compile("const\\s+%s\\s*(:\\s*float\\s*)?:?=\\s*([0-9.]+)" % arg)
+	var cm := cre.search(source)
+	return cm.get_string(2).to_float() if cm else -1.0
 
 
 func test_tactical_allowed_from_idle() -> void:
@@ -234,7 +257,7 @@ func test_game_manager_exit_tactical_restores_playing() -> void:
 	GameManager.change_state(original_state)
 
 
-func test_time_scale_pushed_to_01_during_tactical() -> void:
+func test_time_scale_pushed_to_005_during_tactical() -> void:
 	var original_state = GameManager.current_state
 	var original_scale: float = Engine.time_scale
 	GameManager.change_state(GameManager.GameState.PLAYING)
@@ -247,10 +270,10 @@ func test_time_scale_pushed_to_01_during_tactical() -> void:
 	Engine.time_scale = original_scale
 	GameManager.change_state(original_state)
 
-	if is_equal_approx(tactical_scale, 0.1):
-		_pass("Engine.time_scale is 0.1 during tactical mode")
+	if is_equal_approx(tactical_scale, TACTICAL_SCALE):
+		_pass("Engine.time_scale is 0.05 during tactical mode")
 	else:
-		_fail("Engine.time_scale is 0.1 during tactical mode",
+		_fail("Engine.time_scale is 0.05 during tactical mode",
 			"time_scale was %s" % str(tactical_scale))
 
 
@@ -298,7 +321,7 @@ func test_tactical_mode_double_enter_safe() -> void:
 	GameManager.enter_tactical_mode()  # Second call should be a no-op
 
 	var state_ok: bool = GameManager.current_state == GameManager.GameState.TACTICAL_MODE
-	var scale_ok: bool = is_equal_approx(Engine.time_scale, 0.1)
+	var scale_ok: bool = is_equal_approx(Engine.time_scale, TACTICAL_SCALE)
 
 	GameManager.exit_tactical_mode()
 	var restored_ok: bool = is_equal_approx(Engine.time_scale, 1.0)

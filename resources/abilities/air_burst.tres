@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/abilities/ability_data.gd" id="1"]
+[ext_resource type="Script" path="res://src/effects/abilities/air_burst.gd" id="2"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"air_burst"
+display_name = "Air Burst"
+description = "A radial wind pulse bursts out around Taighe in mid-air."
+ability_type = 2
+mp_cost = 10.0
+atb_cost = 50.0
+cooldown = 2.0
+cast_time = 0.35
+damage = 22.0
+animation_name = &""
+effect_scene = null
+icon = null
+range = 5.0
+targeting = 1
+effect_script = ExtResource("2")
+stagger = 20.0
+aerial_only = true
+owner_member = Array[StringName]([&"companion"])

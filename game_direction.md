@@ -3,7 +3,7 @@
 ## Identity
 
 Working Title: Project Ragnorak
-Genre: Korean Fantasy Hybrid Action RPG
+Genre: Fantasy Hybrid Action RPG
 Engine: Godot 4.6
 Camera: Freely rotatable third-person
 Platform: PC
@@ -64,7 +64,7 @@ Town hub
 
 ## Art Direction
 
-- Korean fantasy aesthetic
+- Fantasy aesthetic
 - Dark but vibrant color palette
 - Placeholder assets during development
 - Equipment visual changes planned for later phases

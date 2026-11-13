@@ -14,12 +14,27 @@ var _phase: CastPhase = CastPhase.START
 var _ability_data: AbilityData = null
 var _effect_spawned: bool = false
 var _explicit_target: Node3D = null  # Target selected in tactical menu
+## v4 X: "Fire Forward" from the Command Menu — ignore lock-on, aim along the
+## camera's flat forward. Set by aim_forward() right after enter(); cleared on exit.
+var _forward_aim: bool = false
+## v5 BB6: Plunge Strike dive (AbilityData.CasterMotion.PLUNGE).
+const PLUNGE_SPEED := 28.0
+const PLUNGE_MAX_CARRY := 14.0   # m/s horizontal toward a chosen target
+const PLUNGE_TIMEOUT := 1.5
+var _plunging: bool = false
+var _plunge_velocity: Vector3 = Vector3.ZERO
+var _plunge_timer: float = 0.0
+## v5 BB: last effect_script node spawned (read by tests/HUD; may be freed).
+var last_effect: Node3D = null
 
 
 func enter(msg: Dictionary = {}) -> void:
 	_timer = 0.0
 	_phase = CastPhase.START
 	_effect_spawned = false
+	_forward_aim = false
+	_plunging = false
+	_plunge_timer = 0.0
 	_ability_data = msg.get("ability_data") as AbilityData
 	_explicit_target = msg.get("target") as Node3D
 
@@ -34,16 +49,28 @@ func enter(msg: Dictionary = {}) -> void:
 
 	player.velocity = Vector3.ZERO
 
-	# Face the target at cast start
+	# Face the target at cast start. Untargeted (no explicit target, not locked
+	# on — e.g. an offensive spell cast with no enemies): aim along the camera's
+	# flat forward on controller, otherwise keep the player's current facing.
 	var aim_target := _get_aim_target()
 	if aim_target and is_instance_valid(aim_target) and aim_target != player:
 		var dir := (aim_target.global_position - player.global_position)
 		dir.y = 0.0
 		if dir.length() > 0.1:
 			player.basis = Basis.looking_at(dir.normalized())
+	elif aim_target == null and InputManager.is_using_controller():
+		var cam := player.get_viewport().get_camera_3d()
+		if cam:
+			var fwd := -cam.global_basis.z
+			fwd.y = 0.0
+			if fwd.length() > 0.1:
+				player.basis = Basis.looking_at(fwd.normalized())
 
 	Events.ability_cast_started.emit(_ability_data)
 	AudioManager.play_sfx_named("spell_cast")
+	# v5 EE: cosmetic RiglessVisual cue (no-op without one / before CC's helper).
+	if player.has_method(&"_rigless_cue"):
+		player._rigless_cue(&"cast")
 
 	if DebugFlags.DEBUG_COMBAT:
 		var name_str := _ability_data.display_name if _ability_data else "unknown"
@@ -55,10 +82,29 @@ func exit() -> void:
 	_ability_data = null
 	_effect_spawned = false
 	_explicit_target = null
+	_forward_aim = false
+	_plunging = false
+
+
+## v4 X: Command Menu "Fire Forward". Called by TacticalIdleState right after a
+## successful untargeted request (this state has already entered). Drops any
+## explicit/lock-on aim for this cast and faces the camera's flat forward on
+## every device; the projectile then flies along the player's facing.
+func aim_forward() -> void:
+	_forward_aim = true
+	_explicit_target = null
+	var cam := player.get_viewport().get_camera_3d() if player.is_inside_tree() else null
+	if cam:
+		var fwd := -cam.global_basis.z
+		fwd.y = 0.0
+		if fwd.length() > 0.1:
+			player.basis = Basis.looking_at(fwd.normalized())
 
 
 func process_physics(delta: float) -> StringName:
 	_timer += delta
+	if _plunging:
+		return _process_plunge(delta)
 	player.velocity = Vector3.ZERO
 
 	match _phase:
@@ -75,10 +121,49 @@ func process_physics(delta: float) -> StringName:
 				if DebugFlags.DEBUG_COMBAT:
 					var name_str := _ability_data.display_name if _ability_data else "unknown"
 					print("AbilityState: Cast completed — %s" % name_str)
-				if player.is_locked_on:
-					return &"LockOnIdle"
-				return &"Idle"
+				return _follow_up_state()
 
+	return &""
+
+
+## After the cast: still airborne (v5 aerial casts) -> Fall, else as before.
+func _follow_up_state() -> StringName:
+	if not player.is_on_floor():
+		return &"Fall"
+	if player.is_locked_on:
+		return &"LockOnIdle"
+	return &"Idle"
+
+
+## v5 BB6 Plunge Strike: dive until landing (or timeout), then the impact
+## effect, then the normal completion (signal + follow-up state).
+func _start_plunge() -> void:
+	_plunging = true
+	_plunge_timer = 0.0
+	var carry := Vector3.ZERO
+	var t := _get_aim_target()
+	if t and is_instance_valid(t) and t != player:
+		var flat := t.global_position - player.global_position
+		flat.y = 0.0
+		var height := maxf(player.global_position.y - t.global_position.y, 0.5)
+		var fall_time := height / PLUNGE_SPEED
+		carry = flat / maxf(fall_time, 0.05)
+		if carry.length() > PLUNGE_MAX_CARRY:
+			carry = carry.normalized() * PLUNGE_MAX_CARRY
+	_plunge_velocity = Vector3(carry.x, -PLUNGE_SPEED, carry.z)
+	player.velocity = _plunge_velocity
+
+
+func _process_plunge(delta: float) -> StringName:
+	_plunge_timer += delta
+	if player.is_on_floor() or _plunge_timer >= PLUNGE_TIMEOUT:
+		_plunging = false
+		player.velocity = Vector3.ZERO
+		_spawn_script_effect()
+		_phase = CastPhase.RECOVERY
+		Events.ability_cast_completed.emit(_ability_data)
+		return _follow_up_state()
+	player.velocity = _plunge_velocity
 	return &""
 
 
@@ -97,7 +182,9 @@ func interrupt() -> void:
 
 
 func _get_aim_target() -> Node3D:
-	# Priority: explicit target > lock-on target > null
+	# Priority: Fire Forward (none) > explicit target > lock-on target > null
+	if _forward_aim:
+		return null
 	if _explicit_target and is_instance_valid(_explicit_target):
 		return _explicit_target
 	if player.is_locked_on and is_instance_valid(player.lock_on_target):
@@ -119,30 +206,75 @@ func _spawn_effect() -> void:
 		_apply_heal()
 		return
 
+	# v5 BB6: caster dive first (impact spawns on landing).
+	if _ability_data.caster_motion == AbilityData.CasterMotion.PLUNGE:
+		_start_plunge()
+		return
+
+	# v5 BB: AT_TARGET / caster-centred effects (src/effects/abilities/*.gd).
+	if _ability_data.effect_script != null:
+		_spawn_script_effect()
+		return
+
 	if _ability_data.effect_scene == null:
 		# No effect scene — apply damage directly for melee/self abilities
 		_apply_direct_damage()
 		return
 
 	var effect: Node3D = _ability_data.effect_scene.instantiate()
-	player.get_tree().current_scene.add_child(effect)
 
-	# Position effect at player, aimed toward target
-	effect.global_position = player.global_position + Vector3(0, 1.0, 0)
-
+	# Build the spawn transform BEFORE add_child: projectiles read their travel
+	# direction from global_basis in _ready(). Previously the basis was set after
+	# add_child, so _ready() saw identity and untargeted spells always flew
+	# world -Z regardless of facing.
+	var origin: Vector3 = player.global_position + Vector3(0, 1.0, 0)
 	var aim_target := _get_aim_target()
-	if aim_target and is_instance_valid(aim_target):
-		var dir: Vector3 = (aim_target.global_position + Vector3(0, 1.0, 0) - effect.global_position).normalized()
-		effect.look_at(effect.global_position + dir)
-		if effect.has_method("set_target"):
-			effect.set_target(aim_target)
+	var aim_valid: bool = aim_target != null and is_instance_valid(aim_target)
+	var dir: Vector3
+	if aim_valid:
+		dir = aim_target.global_position + Vector3(0, 1.0, 0) - origin
 	else:
-		# Fallback: fire in player's facing direction
-		effect.global_basis = player.global_basis
+		dir = -player.global_basis.z  # Untargeted: player's facing
+	if dir.length() < 0.01:
+		dir = -player.global_basis.z
+	var spawn_xform := Transform3D(Basis.looking_at(dir.normalized()), origin)
+
+	var parent: Node = player.get_tree().current_scene
+	if parent == null:
+		parent = player.get_parent()
+	var parent_xform: Transform3D = (parent as Node3D).global_transform if parent is Node3D else Transform3D.IDENTITY
+	effect.transform = parent_xform.affine_inverse() * spawn_xform
+	parent.add_child(effect)
+
+	if aim_valid and effect.has_method("set_target"):
+		effect.set_target(aim_target)
 
 	if effect.has_method("set_damage"):
 		effect.set_damage(_ability_data.damage)
 
+	Events.ability_effect_spawned.emit(effect, _ability_data)
+
+
+## v5 BB: instantiate AbilityData.effect_script (Node3D) in the current scene
+## and hand it caster / target / ability / aim direction (see ability_fx.gd).
+func _spawn_script_effect() -> void:
+	if _ability_data == null or _ability_data.effect_script == null:
+		return
+	var aim_target := _get_aim_target()
+	var aim_valid: bool = aim_target != null and is_instance_valid(aim_target) and aim_target != player
+	var aim_dir: Vector3 = -player.global_basis.z
+	if aim_valid:
+		aim_dir = aim_target.global_position - player.global_position
+	var effect := Node3D.new()
+	effect.name = "AbilityFX_%s" % String(_ability_data.ability_id)
+	effect.set_script(_ability_data.effect_script)
+	var parent: Node = player.get_tree().current_scene
+	if parent == null:
+		parent = player.get_parent()
+	parent.add_child(effect)
+	if effect.has_method(&"setup"):
+		effect.setup(player, aim_target if aim_valid else null, _ability_data, aim_dir)
+	last_effect = effect
 	Events.ability_effect_spawned.emit(effect, _ability_data)
 
 

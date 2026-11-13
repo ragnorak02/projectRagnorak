@@ -14,10 +14,15 @@ var _direction: Vector3 = Vector3.BACK
 func enter(_msg: Dictionary = {}) -> void:
 	_timer = 0.0
 	player.start_dodge_cooldown()
+	# v3: dodge resets the light/heavy combo string.
+	if player.combo:
+		player.combo.reset(&"dodge")
 
 	# Spawn ghost afterimage at start position
 	DodgeVFX.spawn(player.get_parent(), player.global_position, -player.global_basis.z)
 	AudioManager.play_sfx_named("dodge")
+	if player.has_method(&"_rigless_cue"):
+		player._rigless_cue(&"dodge")  # v5 EE cue (no-op without a RiglessVisual)
 
 	var input := InputManager.get_movement_vector()
 	if input.length() > 0.1:
@@ -45,4 +50,16 @@ func process_physics(delta: float) -> StringName:
 	player.velocity.x = _direction.x * dodge_speed * decay
 	player.velocity.z = _direction.z * dodge_speed * decay
 
+	return &""
+
+
+## Releases go to BOTH components (hold detection needs them), so a hold that
+## started before the dodge never strands a pending charge. The dodge is
+## committed: any state they return is ignored (the combo was reset on enter).
+func process_input(event: InputEvent) -> StringName:
+	if event.is_action_released(&"attack"):
+		if player.stance:
+			player.stance.handle_attack_release()
+		if player.combo:
+			player.combo.on_attack_released()
 	return &""

@@ -234,10 +234,11 @@ func test_main_menu_sets_main_menu_state() -> void:
 
 func test_main_menu_handles_controller_confirm() -> void:
 	var source := _get_source("res://scenes/menus/main_menu.gd")
-	var has_jump := source.contains('"jump"') or source.contains('&"jump"')
-	var has_interact := source.contains('"interact"') or source.contains('&"interact"')
-	_assert(has_jump or has_interact,
-		"Main menu handles Xbox A/Y button confirmation")
+	# Controller remap: menus confirm with ui_accept (A), never jump/interact.
+	var has_accept := source.contains('"ui_accept"') or source.contains('&"ui_accept"')
+	var has_jump := source.contains('is_action_pressed(&"jump")') or source.contains('is_action_pressed("jump")')
+	_assert(has_accept and not has_jump,
+		"Main menu handles Xbox A confirmation via ui_accept (not jump)")
 
 
 # ========== CATEGORY 3: PAUSE MENU ==========
@@ -323,14 +324,18 @@ func test_pause_menu_dpad_down_navigation() -> void:
 
 func test_pause_menu_attack_confirms() -> void:
 	var source := _get_source("res://src/ui/menus/pause_menu.gd")
-	_assert(source.contains('"attack"') or source.contains('&"attack"'),
-		"Pause menu uses attack (X button) to confirm selection")
+	# Controller remap: menus confirm with ui_accept (A), not attack.
+	_assert(source.contains('"ui_accept"') or source.contains('&"ui_accept"'),
+		"Pause menu uses ui_accept (A button) to confirm selection")
 
 
 func test_pause_menu_dodge_cancels() -> void:
 	var source := _get_source("res://src/ui/menus/pause_menu.gd")
-	_assert(source.contains('"dodge"') or source.contains('&"dodge"'),
-		"Pause menu uses dodge (B button) to cancel/resume")
+	# Controller remap: menus back out with ui_cancel (B), never dodge.
+	var has_cancel := source.contains('"ui_cancel"') or source.contains('&"ui_cancel"')
+	var has_dodge := source.contains('is_action_pressed(&"dodge")') or source.contains('is_action_pressed("dodge")')
+	_assert(has_cancel and not has_dodge,
+		"Pause menu uses ui_cancel (B button) to cancel/resume, not dodge")
 
 
 func test_main_menu_controller_a_confirm() -> void:

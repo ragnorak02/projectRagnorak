@@ -1,3 +1,7 @@
+## Diving jump attack (legacy free-roam Jump + X).
+## v5 DD: airborne attacks are now the air combo (MeleeStrike air mode, holds
+## altitude). JumpState / FallState only route here for a player without a
+## ComboComponent; kept for that fallback and for the tactical block test.
 extends State
 
 const AttackVFX = preload("res://src/effects/attack_vfx.gd")
@@ -28,6 +32,8 @@ func enter(_msg: Dictionary = {}) -> void:
 
 	AttackVFX.spawn(player.get_parent(), 4, player.global_position + Vector3(0, 0.5, 0), forward_dir)
 	AudioManager.play_sfx_varied("jump_attack")
+	if player.has_method(&"_rigless_cue"):
+		player._rigless_cue(&"attack")  # v5 EE cue (no-op without a RiglessVisual)
 
 
 func exit() -> void:

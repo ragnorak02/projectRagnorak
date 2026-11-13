@@ -1,11 +1,17 @@
-[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://resources/characters/party_member_data.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/abilities/water_geyser.tres" id="a0"]
+[ext_resource type="Resource" path="res://resources/abilities/wind_crescent.tres" id="a1"]
+[ext_resource type="Resource" path="res://resources/abilities/ice_freeze.tres" id="a2"]
+[ext_resource type="Resource" path="res://resources/abilities/heal.tres" id="a3"]
+[ext_resource type="Resource" path="res://resources/abilities/air_burst.tres" id="a4"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/princess1.glb" id="m1"]
 
 [resource]
 script = ExtResource("1")
 member_id = &"companion"
-display_name = "Yuna"
+display_name = "Taighe"
 max_hp = 80.0
 max_mp = 70.0
 max_atb = 100.0
@@ -15,3 +21,7 @@ attack_damage = 12.0
 move_speed = 7.0
 capsule_color = Color(0.8, 0.4, 0.5, 1)
 traversal_flags = ["has_wall_break"]
+unique_ability_id = &"super_jump"
+model_scene = ExtResource("m1")
+rigless = true
+default_abilities = Array[Resource]([ExtResource("a0"), ExtResource("a1"), ExtResource("a2"), ExtResource("a3"), ExtResource("a4")])

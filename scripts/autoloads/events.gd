@@ -83,6 +83,28 @@ signal zone_exiting(zone_id: StringName)
 signal interaction_available(interactable: Node3D)
 signal interaction_cleared
 
+# --- Carry / Throw ---
+signal carry_started(obj: Node3D)
+signal carry_ended(obj: Node3D, reason: StringName)  # reason: put_down, thrown, hit, forced
+signal carryable_in_range(obj: Node3D)
+
+# --- Battle System v3 ---
+signal battle_mode_changed(in_battle: bool)
+signal combo_step(step: int, kind: StringName)  # kind: &"light" / &"heavy"
+signal combo_finisher(kind: StringName, radius: float)
+signal stance_changed(member_id: StringName, stance: StringName)
+signal enemy_staggered(enemy: Node3D)
+# --- Battle v4 (manual toggle, minimap) ---
+## Emitted when the player toggles Battle Mode by hand (View button / F).
+signal battle_mode_manual_toggled(in_battle: bool)
+## Like enemy_damaged, plus who dealt it (the node passed to take_damage: the
+## player hitbox owner, a projectile, a thrown crate, a companion...). May be null.
+signal enemy_hit(enemy: Node3D, amount: float, source: Node3D)
+# --- v5 ---
+## Target step: whether the highlighted target is within the selected ability's
+## range. (null, true) = reset. Reticle and target bar dim when out of range.
+signal tactical_target_reach(target: Node3D, in_range: bool)
+
 # --- UI ---
 signal ui_menu_opened(menu_name: StringName)
 signal ui_menu_closed(menu_name: StringName)

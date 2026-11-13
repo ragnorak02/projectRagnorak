@@ -1,0 +1,672 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 2400" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#111827"/>
+    </linearGradient>
+    <!-- State color gradients -->
+    <linearGradient id="state1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#065f46"/>
+      <stop offset="100%" style="stop-color:#047857"/>
+    </linearGradient>
+    <linearGradient id="state2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#92400e"/>
+      <stop offset="100%" style="stop-color:#b45309"/>
+    </linearGradient>
+    <linearGradient id="state3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7e22ce"/>
+      <stop offset="100%" style="stop-color:#9333ea"/>
+    </linearGradient>
+    <!-- Node styles -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <!-- Hub town pattern -->
+    <pattern id="hubPattern" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="none"/>
+      <circle cx="4" cy="4" r="1" fill="rgba(255,255,255,0.08)"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1800" height="2400" fill="url(#bg)"/>
+
+  <!-- Grid lines -->
+  <g stroke="rgba(255,255,255,0.03)" stroke-width="1">
+    <line x1="0" y1="400" x2="1800" y2="400"/>
+    <line x1="0" y1="800" x2="1800" y2="800"/>
+    <line x1="0" y1="1200" x2="1800" y2="1200"/>
+    <line x1="0" y1="1600" x2="1800" y2="1600"/>
+    <line x1="0" y1="2000" x2="1800" y2="2000"/>
+    <line x1="450" y1="0" x2="450" y2="2400"/>
+    <line x1="900" y1="0" x2="900" y2="2400"/>
+    <line x1="1350" y1="0" x2="1350" y2="2400"/>
+  </g>
+
+  <!-- ==================== TITLE ==================== -->
+  <text x="900" y="55" text-anchor="middle" fill="#f59e0b" font-size="36" font-weight="bold" letter-spacing="6">RAGNORAK — WORLD ATLAS</text>
+  <text x="900" y="82" text-anchor="middle" fill="#9ca3af" font-size="16" letter-spacing="2">HUB-SPOKE TOPOLOGY · 24 ZONES · 3 WORLD STATES · 7 BOSSES</text>
+  <line x1="300" y1="95" x2="1500" y2="95" stroke="#f59e0b" stroke-width="1" opacity="0.4"/>
+
+  <!-- ==================== LEGEND ==================== -->
+  <g transform="translate(50, 115)">
+    <rect x="0" y="0" width="1700" height="75" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+    <!-- Zone types -->
+    <text x="20" y="22" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">ZONE TYPES</text>
+    <rect x="20" y="32" width="16" height="16" rx="3" fill="#f59e0b" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="42" y="45" fill="#d1d5db" font-size="12">Hub Town</text>
+    <rect x="110" y="32" width="16" height="16" rx="3" fill="#3b82f6" stroke="#60a5fa" stroke-width="1"/>
+    <text x="132" y="45" fill="#d1d5db" font-size="12">Field</text>
+    <rect x="180" y="32" width="16" height="16" rx="3" fill="#ef4444" stroke="#f87171" stroke-width="1"/>
+    <text x="202" y="45" fill="#d1d5db" font-size="12">Dungeon</text>
+    <rect x="270" y="32" width="16" height="16" rx="3" fill="#06b6d4" stroke="#22d3ee" stroke-width="1"/>
+    <text x="292" y="45" fill="#d1d5db" font-size="12">Reactor</text>
+
+    <!-- World states -->
+    <text x="420" y="22" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">WORLD STATES</text>
+    <rect x="420" y="32" width="16" height="16" rx="3" fill="#047857"/>
+    <text x="442" y="45" fill="#6ee7b7" font-size="12">State 1 — Calm</text>
+    <rect x="560" y="32" width="16" height="16" rx="3" fill="#b45309"/>
+    <text x="582" y="45" fill="#fcd34d" font-size="12">State 2 — Tension</text>
+    <rect x="720" y="32" width="16" height="16" rx="3" fill="#9333ea"/>
+    <text x="742" y="45" fill="#c4b5fd" font-size="12">State 3 — Corruption</text>
+
+    <!-- Markers -->
+    <text x="920" y="22" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">MARKERS</text>
+    <text x="920" y="46" fill="#ef4444" font-size="18">★</text>
+    <text x="940" y="45" fill="#d1d5db" font-size="12">Boss</text>
+    <text x="990" y="46" fill="#a78bfa" font-size="16">⬡</text>
+    <text x="1010" y="45" fill="#d1d5db" font-size="12">Traversal Gate</text>
+    <text x="1120" y="46" fill="#34d399" font-size="16">●</text>
+    <text x="1140" y="45" fill="#d1d5db" font-size="12">Party Join</text>
+    <text x="1230" y="46" fill="#fbbf24" font-size="14">⚡</text>
+    <text x="1248" y="45" fill="#d1d5db" font-size="12">Ragnorak Event</text>
+
+    <!-- Connection types -->
+    <text x="1380" y="22" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">CONNECTIONS</text>
+    <line x1="1380" y1="40" x2="1430" y2="40" stroke="#6b7280" stroke-width="2"/>
+    <text x="1438" y="45" fill="#d1d5db" font-size="12">Path</text>
+    <line x1="1490" y1="40" x2="1540" y2="40" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="1548" y="45" fill="#d1d5db" font-size="12">Story Gate</text>
+    <line x1="1620" y1="40" x2="1670" y2="40" stroke="#f472b6" stroke-width="2" stroke-dasharray="3,3"/>
+    <text x="1678" y="45" fill="#d1d5db" font-size="12">Traversal</text>
+  </g>
+
+  <!-- ==================== STATE 1: UNDER CALM SKIES ==================== -->
+  <g transform="translate(0, 210)">
+    <!-- State 1 header bar -->
+    <rect x="50" y="0" width="1700" height="36" rx="4" fill="url(#state1)" opacity="0.3"/>
+    <rect x="50" y="0" width="6" height="36" rx="3" fill="#34d399"/>
+    <text x="72" y="24" fill="#6ee7b7" font-size="16" font-weight="bold" letter-spacing="2">STATE 1 — EARLY ERA: "UNDER CALM SKIES"</text>
+    <text x="1580" y="24" fill="#6ee7b7" font-size="13" opacity="0.7">Levels 1-8 · Military Enemies · Pastoral Tone</text>
+
+    <!-- ===== HUB 1: MILLHAVEN ===== -->
+    <!-- Hub label -->
+    <text x="560" y="75" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="bold" letter-spacing="2" opacity="0.6">HUB 1</text>
+
+    <!-- Zone: Millhaven (Hub Town) -->
+    <rect x="445" y="85" width="230" height="90" rx="8" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="445" y="85" width="230" height="90" rx="8" fill="url(#hubPattern)"/>
+    <rect x="445" y="85" width="230" height="4" rx="2" fill="#f59e0b"/>
+    <text x="560" y="112" text-anchor="middle" fill="#fbbf24" font-size="17" font-weight="bold">MILLHAVEN</text>
+    <text x="560" y="130" text-anchor="middle" fill="#9ca3af" font-size="11">Start Hub · town_hub</text>
+    <text x="560" y="148" text-anchor="middle" fill="#6b7280" font-size="10">Inn · Store · Blacksmith · Militia</text>
+    <text x="560" y="163" text-anchor="middle" fill="#34d399" font-size="11">● Taighe joins (after Shrine)</text>
+
+    <!-- Zone: Greenhollow Fields -->
+    <rect x="145" y="225" width="200" height="75" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="245" y="252" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">Greenhollow Fields</text>
+    <text x="245" y="268" text-anchor="middle" fill="#9ca3af" font-size="10">Field · field_zone · ~8 enemies</text>
+    <text x="245" y="283" text-anchor="middle" fill="#6b7280" font-size="10">Watchtower (soft gate Lv5+)</text>
+
+    <!-- Zone: Millhaven Shrine -->
+    <rect x="145" y="340" width="200" height="75" rx="6" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="245" y="367" text-anchor="middle" fill="#f87171" font-size="14" font-weight="bold">Millhaven Shrine</text>
+    <text x="245" y="383" text-anchor="middle" fill="#9ca3af" font-size="10">Dungeon · dungeon_zone</text>
+    <text x="245" y="398" text-anchor="middle" fill="#6b7280" font-size="10">Crystal puzzle · Automaton mini-boss</text>
+
+    <!-- Zone: Tidewatch Road -->
+    <rect x="795" y="85" width="200" height="75" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="895" y="112" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">Tidewatch Road</text>
+    <text x="895" y="128" text-anchor="middle" fill="#9ca3af" font-size="10">Field · Coastal cliff road</text>
+    <text x="895" y="143" text-anchor="middle" fill="#6b7280" font-size="10">Checkpoint · Ambush encounter</text>
+
+    <!-- Zone: Tidewatch Cave (traversal gated) -->
+    <rect x="795" y="200" width="200" height="70" rx="6" fill="rgba(239,68,68,0.08)" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6,3" filter="url(#shadow)"/>
+    <text x="895" y="224" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">Tidewatch Cave</text>
+    <text x="895" y="240" text-anchor="middle" fill="#a78bfa" font-size="10">⬡ Traversal: double_jump</text>
+    <text x="895" y="255" text-anchor="middle" fill="#6b7280" font-size="10">Optional · Lore + Equipment</text>
+
+    <!-- Connections for Hub 1 -->
+    <!-- Millhaven → Greenhollow -->
+    <line x1="445" y1="145" x2="345" y2="230" stroke="#6b7280" stroke-width="2"/>
+    <!-- Greenhollow → Shrine -->
+    <line x1="245" y1="300" x2="245" y2="340" stroke="#6b7280" stroke-width="2"/>
+    <!-- Millhaven → Tidewatch Road -->
+    <line x1="675" y1="125" x2="795" y2="120" stroke="#6b7280" stroke-width="2"/>
+    <!-- Tidewatch Road → Tidewatch Cave -->
+    <line x1="895" y1="160" x2="895" y2="200" stroke="#f472b6" stroke-width="2" stroke-dasharray="3,3"/>
+
+    <!-- ===== STORY GATE: Millhaven → Ironhaven ===== -->
+    <!-- Story gate arrow from Tidewatch to Ironhaven -->
+    <line x1="995" y1="120" x2="1130" y2="120" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
+    <polygon points="1130,115 1145,120 1130,125" fill="#a78bfa"/>
+    <text x="1060" y="110" text-anchor="middle" fill="#a78bfa" font-size="9" font-style="italic">story_ironhaven_unlocked</text>
+
+    <!-- ===== HUB 2: IRONHAVEN ===== -->
+    <text x="1350" y="75" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="bold" letter-spacing="2" opacity="0.6">HUB 2</text>
+
+    <rect x="1235" y="85" width="230" height="90" rx="8" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1235" y="85" width="230" height="90" rx="8" fill="url(#hubPattern)"/>
+    <rect x="1235" y="85" width="230" height="4" rx="2" fill="#f59e0b"/>
+    <text x="1350" y="112" text-anchor="middle" fill="#fbbf24" font-size="17" font-weight="bold">IRONHAVEN</text>
+    <text x="1350" y="130" text-anchor="middle" fill="#9ca3af" font-size="11">Port City · ironhaven</text>
+    <text x="1350" y="148" text-anchor="middle" fill="#6b7280" font-size="10">Forge · Harbor · Military HQ</text>
+    <text x="1350" y="163" text-anchor="middle" fill="#fcd34d" font-size="10">Transitions to State 2</text>
+
+    <!-- Zone: Irondeep Mines -->
+    <rect x="1450" y="225" width="200" height="85" rx="6" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="1550" y="252" text-anchor="middle" fill="#f87171" font-size="14" font-weight="bold">Irondeep Mines</text>
+    <text x="1550" y="268" text-anchor="middle" fill="#9ca3af" font-size="10">Dungeon · irondeep_mines</text>
+    <text x="1550" y="283" text-anchor="middle" fill="#ef4444" font-size="11">★ BOSS: Mine Overseer Grendl</text>
+    <text x="1550" y="296" text-anchor="middle" fill="#6b7280" font-size="9">500 HP · Drill arm (breakable) · 2 phases</text>
+
+    <!-- Ironhaven → Irondeep -->
+    <line x1="1400" y1="175" x2="1500" y2="225" stroke="#6b7280" stroke-width="2"/>
+  </g>
+
+  <!-- ==================== STATE 2: THE IRON MANDATE ==================== -->
+  <g transform="translate(0, 680)">
+    <!-- State 2 header bar -->
+    <rect x="50" y="0" width="1700" height="36" rx="4" fill="url(#state2)" opacity="0.3"/>
+    <rect x="50" y="0" width="6" height="36" rx="3" fill="#fbbf24"/>
+    <text x="72" y="24" fill="#fcd34d" font-size="16" font-weight="bold" letter-spacing="2">STATE 2 — RISING TENSION: "THE IRON MANDATE"</text>
+    <text x="1480" y="24" fill="#fcd34d" font-size="13" opacity="0.7">Levels 8-18 · Elite Military · Escalating Conflict</text>
+
+    <!-- Zone: Ashveil Pass -->
+    <rect x="145" y="60" width="200" height="75" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="245" y="85" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">Ashveil Pass</text>
+    <text x="245" y="101" text-anchor="middle" fill="#9ca3af" font-size="10">Field · Mountain pass</text>
+    <text x="245" y="117" text-anchor="middle" fill="#6b7280" font-size="10">Elite Soldiers · Sniper Drones</text>
+
+    <!-- Zone: Ashveil Aerie (traversal gated) -->
+    <rect x="145" y="180" width="200" height="80" rx="6" fill="rgba(239,68,68,0.08)" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6,3" filter="url(#shadow)"/>
+    <text x="245" y="204" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">Ashveil Aerie</text>
+    <text x="245" y="220" text-anchor="middle" fill="#a78bfa" font-size="10">⬡ Traversal: wall_run + glide</text>
+    <text x="245" y="236" text-anchor="middle" fill="#34d399" font-size="10">● Sera joins (Wind Dancer)</text>
+    <text x="245" y="249" text-anchor="middle" fill="#6b7280" font-size="9">Wind puzzles · Sidequest reward</text>
+
+    <!-- Ashveil Pass → Aerie -->
+    <line x1="245" y1="135" x2="245" y2="180" stroke="#f472b6" stroke-width="2" stroke-dasharray="3,3"/>
+
+    <!-- Connection from Hub 2 area to Ashveil -->
+    <line x1="345" y1="95" x2="520" y2="50" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
+    <polygon points="518,44 535,50 518,55" fill="#a78bfa"/>
+    <text x="430" y="58" text-anchor="middle" fill="#a78bfa" font-size="9" font-style="italic">story_ashveil_open</text>
+
+    <!-- Ironhaven reference arrow (from above) -->
+    <rect x="520" y="30" width="160" height="40" rx="5" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,2"/>
+    <text x="600" y="55" text-anchor="middle" fill="#f59e0b" font-size="11" opacity="0.6">← IRONHAVEN (Hub 2)</text>
+
+    <!-- Zone: Coastal Reactor Approach -->
+    <rect x="545" y="110" width="210" height="70" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="650" y="135" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">Coastal Approach</text>
+    <text x="650" y="151" text-anchor="middle" fill="#9ca3af" font-size="10">Field · coastal_approach</text>
+    <text x="650" y="167" text-anchor="middle" fill="#6b7280" font-size="10">Security perimeter · Tidal pools</text>
+
+    <!-- Zone: Seaward Reactor -->
+    <rect x="545" y="225" width="210" height="90" rx="6" fill="rgba(6,182,212,0.12)" stroke="#06b6d4" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="545" y="225" width="210" height="4" rx="2" fill="#06b6d4"/>
+    <text x="650" y="252" text-anchor="middle" fill="#22d3ee" font-size="14" font-weight="bold">Seaward Reactor</text>
+    <text x="650" y="268" text-anchor="middle" fill="#67e8f9" font-size="10">REACTOR 1 · Ocean-cooled</text>
+    <text x="650" y="284" text-anchor="middle" fill="#ef4444" font-size="11">★ BOSS: Reactor Warden Aquos</text>
+    <text x="650" y="302" text-anchor="middle" fill="#6b7280" font-size="9">700 HP · Water mechanics · Rising tide</text>
+
+    <!-- Coastal → Seaward -->
+    <line x1="650" y1="180" x2="650" y2="225" stroke="#6b7280" stroke-width="2"/>
+    <!-- Ironhaven ref → Coastal -->
+    <line x1="630" y1="70" x2="640" y2="110" stroke="#6b7280" stroke-width="2"/>
+
+    <!-- ===== HUB 3: FROSTMERE ===== -->
+    <text x="1100" y="60" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="bold" letter-spacing="2" opacity="0.6">HUB 3</text>
+
+    <rect x="985" y="70" width="230" height="90" rx="8" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="985" y="70" width="230" height="90" rx="8" fill="url(#hubPattern)"/>
+    <rect x="985" y="70" width="230" height="4" rx="2" fill="#f59e0b"/>
+    <text x="1100" y="97" text-anchor="middle" fill="#fbbf24" font-size="17" font-weight="bold">FROSTMERE</text>
+    <text x="1100" y="115" text-anchor="middle" fill="#9ca3af" font-size="11">Glacial Harbor · frostmere</text>
+    <text x="1100" y="133" text-anchor="middle" fill="#34d399" font-size="11">● Kael joins (Shield Guardian)</text>
+    <text x="1100" y="148" text-anchor="middle" fill="#6b7280" font-size="10">Reactor district · Research station</text>
+
+    <!-- Story gate: Seaward → Frostmere -->
+    <line x1="755" y1="260" x2="985" y2="130" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="870" y="180" text-anchor="middle" fill="#a78bfa" font-size="9" font-style="italic">story_frostmere_unlocked</text>
+
+    <!-- Ashveil → Frostmere -->
+    <line x1="345" y1="85" x2="985" y2="100" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.4"/>
+
+    <!-- Zone: Glacier Shelf Route -->
+    <rect x="1300" y="70" width="200" height="75" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="1400" y="95" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">Glacier Shelf</text>
+    <text x="1400" y="111" text-anchor="middle" fill="#9ca3af" font-size="10">Field · glacier_shelf</text>
+    <text x="1400" y="127" text-anchor="middle" fill="#ef4444" font-size="10">★ Optional Boss: Frostmere Colossus</text>
+
+    <!-- Frostmere → Glacier Shelf -->
+    <line x1="1215" y1="110" x2="1300" y2="105" stroke="#6b7280" stroke-width="2"/>
+
+    <!-- Zone: Glacial Vault (traversal) -->
+    <rect x="1530" y="70" width="200" height="70" rx="6" fill="rgba(239,68,68,0.08)" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6,3" filter="url(#shadow)"/>
+    <text x="1630" y="94" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">Glacial Vault</text>
+    <text x="1630" y="110" text-anchor="middle" fill="#a78bfa" font-size="10">⬡ Traversal: glide</text>
+    <text x="1630" y="126" text-anchor="middle" fill="#6b7280" font-size="9">Ancient research · Ability upgrade</text>
+
+    <!-- Glacier → Vault -->
+    <line x1="1500" y1="100" x2="1530" y2="100" stroke="#f472b6" stroke-width="2" stroke-dasharray="3,3"/>
+
+    <!-- Zone: Shattered Coast -->
+    <rect x="985" y="205" width="200" height="70" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="1085" y="230" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">Shattered Coast</text>
+    <text x="1085" y="246" text-anchor="middle" fill="#9ca3af" font-size="10">Field · Frozen coastline</text>
+    <text x="1085" y="262" text-anchor="middle" fill="#6b7280" font-size="10">Deep section (Lv18+ soft gate)</text>
+
+    <!-- Frostmere → Shattered Coast -->
+    <line x1="1085" y1="160" x2="1085" y2="205" stroke="#6b7280" stroke-width="2"/>
+
+    <!-- Zone: Submerged Ruins (traversal) -->
+    <rect x="1250" y="210" width="200" height="70" rx="6" fill="rgba(239,68,68,0.08)" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6,3" filter="url(#shadow)"/>
+    <text x="1350" y="234" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">Submerged Ruins</text>
+    <text x="1350" y="250" text-anchor="middle" fill="#a78bfa" font-size="10">⬡ double_jump + wall_run</text>
+    <text x="1350" y="266" text-anchor="middle" fill="#fbbf24" font-size="9">Lumina Stabilizer Alpha</text>
+
+    <!-- Shattered → Submerged -->
+    <line x1="1185" y1="240" x2="1250" y2="240" stroke="#f472b6" stroke-width="2" stroke-dasharray="3,3"/>
+
+    <!-- ===== ABYSSAL REACTOR — RAGNORAK ===== -->
+    <rect x="920" y="340" width="250" height="100" rx="8" fill="rgba(6,182,212,0.15)" stroke="#f59e0b" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="920" y="340" width="250" height="5" rx="2" fill="#f59e0b"/>
+    <!-- Pulsing border effect -->
+    <rect x="916" y="336" width="258" height="108" rx="10" fill="none" stroke="#f59e0b" stroke-width="1" opacity="0.3"/>
+    <text x="1045" y="370" text-anchor="middle" fill="#22d3ee" font-size="16" font-weight="bold">Abyssal Reactor</text>
+    <text x="1045" y="388" text-anchor="middle" fill="#67e8f9" font-size="11">REACTOR 2 · Deep underwater · Glacial cooling</text>
+    <text x="1045" y="410" text-anchor="middle" fill="#fbbf24" font-size="16">⚡ RAGNORAK TRIGGERS HERE ⚡</text>
+    <text x="1045" y="428" text-anchor="middle" fill="#6b7280" font-size="10">Lumina core destabilizes · World transforms</text>
+
+    <!-- Story gate: Frostmere → Abyssal -->
+    <line x1="1060" y1="160" x2="1050" y2="340" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="1020" y="260" fill="#a78bfa" font-size="9" font-style="italic">story_abyssal_clearance</text>
+  </g>
+
+  <!-- ==================== STATE TRANSITION ARROW ==================== -->
+  <g transform="translate(750, 1150)">
+    <rect x="0" y="0" width="300" height="50" rx="25" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2"/>
+    <text x="150" y="20" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="bold">RAGNORAK EVENT</text>
+    <text x="150" y="38" text-anchor="middle" fill="#f59e0b" font-size="11">World State 2 → 3</text>
+    <line x1="150" y1="50" x2="150" y2="80" stroke="#f59e0b" stroke-width="2"/>
+    <polygon points="143,78 150,92 157,78" fill="#f59e0b"/>
+  </g>
+
+  <!-- ==================== STATE 3: THE LUMINOUS CORRUPTION ==================== -->
+  <g transform="translate(0, 1260)">
+    <!-- State 3 header bar -->
+    <rect x="50" y="0" width="1700" height="36" rx="4" fill="url(#state3)" opacity="0.3"/>
+    <rect x="50" y="0" width="6" height="36" rx="3" fill="#a78bfa"/>
+    <text x="72" y="24" fill="#c4b5fd" font-size="16" font-weight="bold" letter-spacing="2">STATE 3 — POST-RAGNORAK: "THE LUMINOUS CORRUPTION"</text>
+    <text x="1480" y="24" fill="#c4b5fd" font-size="13" opacity="0.7">Levels 18-30 · Corrupted Enemies · Light/Dark Unlock</text>
+
+    <!-- ===== HUB 4: VEILWATCH ===== -->
+    <text x="500" y="68" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="bold" letter-spacing="2" opacity="0.6">HUB 4</text>
+
+    <rect x="385" y="78" width="230" height="100" rx="8" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="385" y="78" width="230" height="100" rx="8" fill="url(#hubPattern)"/>
+    <rect x="385" y="78" width="230" height="4" rx="2" fill="#f59e0b"/>
+    <text x="500" y="105" text-anchor="middle" fill="#fbbf24" font-size="17" font-weight="bold">VEILWATCH</text>
+    <text x="500" y="123" text-anchor="middle" fill="#9ca3af" font-size="11">Resistance Camp · veilwatch</text>
+    <text x="500" y="141" text-anchor="middle" fill="#34d399" font-size="11">● Varn joins (Lumina Engineer)</text>
+    <text x="500" y="157" text-anchor="middle" fill="#6b7280" font-size="10">Ward Workshop · Scavenger Vendor</text>
+    <text x="500" y="170" text-anchor="middle" fill="#a78bfa" font-size="9">Auto-unlocked after Ragnorak</text>
+
+    <!-- Zone: Corruption Scar -->
+    <rect x="720" y="78" width="220" height="100" rx="6" fill="rgba(59,130,246,0.12)" stroke="#9333ea" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="830" y="103" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">Corruption Scar</text>
+    <text x="830" y="119" text-anchor="middle" fill="#9ca3af" font-size="10">Field · corruption_scar</text>
+    <text x="830" y="135" text-anchor="middle" fill="#ef4444" font-size="11">★ BOSS: Corrupted Guardian</text>
+    <text x="830" y="150" text-anchor="middle" fill="#6b7280" font-size="9">800 HP · 3 phases · Shrinking arena</text>
+    <text x="830" y="166" text-anchor="middle" fill="#fbbf24" font-size="10">☀ LIGHT ELEMENT UNLOCKS</text>
+
+    <!-- Veilwatch → Corruption Scar -->
+    <line x1="615" y1="128" x2="720" y2="128" stroke="#6b7280" stroke-width="2"/>
+
+    <!-- Zone: Fallen Ironhaven -->
+    <rect x="145" y="225" width="220" height="100" rx="6" fill="rgba(59,130,246,0.12)" stroke="#9333ea" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="255" y="250" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">Fallen Ironhaven</text>
+    <text x="255" y="266" text-anchor="middle" fill="#9ca3af" font-size="10">Ruined City · fallen_ironhaven</text>
+    <text x="255" y="282" text-anchor="middle" fill="#ef4444" font-size="11">★ BOSS: Corrupted Commander</text>
+    <text x="255" y="297" text-anchor="middle" fill="#6b7280" font-size="9">900 HP · Military → Corruption transform</text>
+    <text x="255" y="313" text-anchor="middle" fill="#7c3aed" font-size="10">◐ DARK ELEMENT UNLOCKS</text>
+
+    <!-- Veilwatch → Fallen Ironhaven -->
+    <line x1="440" y1="178" x2="320" y2="225" stroke="#6b7280" stroke-width="2"/>
+
+    <!-- Zone: Luminous Hollow -->
+    <rect x="1020" y="78" width="220" height="100" rx="6" fill="rgba(239,68,68,0.12)" stroke="#9333ea" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="1130" y="103" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">Luminous Hollow</text>
+    <text x="1130" y="119" text-anchor="middle" fill="#9ca3af" font-size="10">Dungeon (optional) · Crystal cavern</text>
+    <text x="1130" y="135" text-anchor="middle" fill="#ef4444" font-size="11">★ BOSS: Hollow Guardian</text>
+    <text x="1130" y="150" text-anchor="middle" fill="#6b7280" font-size="9">750 HP · Splits into 3 · Party coord.</text>
+    <text x="1130" y="166" text-anchor="middle" fill="#34d399" font-size="10">● Lyra joins (Spirit Channeler)</text>
+
+    <!-- Corruption Scar → Luminous Hollow -->
+    <line x1="940" y1="128" x2="1020" y2="128" stroke="#6b7280" stroke-width="2"/>
+
+    <!-- Zone: Greenhollow Corrupted (variant) -->
+    <rect x="480" y="240" width="190" height="60" rx="6" fill="rgba(59,130,246,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="4,3" filter="url(#shadow)"/>
+    <text x="575" y="262" text-anchor="middle" fill="#a78bfa" font-size="12">Greenhollow Corrupted</text>
+    <text x="575" y="278" text-anchor="middle" fill="#6b7280" font-size="9">State 3 variant · Same scene + overlay</text>
+
+    <!-- Zone: Millhaven Aftermath (variant) -->
+    <rect x="700" y="240" width="190" height="60" rx="6" fill="rgba(245,158,11,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="4,3" filter="url(#shadow)"/>
+    <text x="795" y="262" text-anchor="middle" fill="#a78bfa" font-size="12">Millhaven Aftermath</text>
+    <text x="795" y="278" text-anchor="middle" fill="#6b7280" font-size="9">State 3 variant · Damaged town</text>
+
+    <!-- ===== REACTOR CORE DESCENT — FINAL DUNGEON ===== -->
+    <rect x="370" y="370" width="260" height="120" rx="10" fill="rgba(6,182,212,0.15)" stroke="#ef4444" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="370" y="370" width="260" height="5" rx="2" fill="#ef4444"/>
+    <rect x="366" y="366" width="268" height="128" rx="12" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.3"/>
+    <text x="500" y="400" text-anchor="middle" fill="#22d3ee" font-size="16" font-weight="bold">Reactor Core Descent</text>
+    <text x="500" y="418" text-anchor="middle" fill="#67e8f9" font-size="11">REACTOR 3 · Original Lumina Source</text>
+    <text x="500" y="436" text-anchor="middle" fill="#ef4444" font-size="13" font-weight="bold">★ FINAL BOSS: Ragnorak Avatar</text>
+    <text x="500" y="454" text-anchor="middle" fill="#6b7280" font-size="10">2000 HP · 4 phases · All elements</text>
+    <text x="500" y="472" text-anchor="middle" fill="#f87171" font-size="10">Gravity shifts · Light/Dark split · Enrage</text>
+
+    <!-- Veilwatch → Reactor Core -->
+    <line x1="485" y1="178" x2="490" y2="370" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="455" y="290" fill="#a78bfa" font-size="9" font-style="italic">story_final_gate</text>
+    <text x="455" y="305" fill="#fbbf24" font-size="9">Requires 3 Stabilizers</text>
+  </g>
+
+  <!-- ==================== PARTY ROSTER ==================== -->
+  <g transform="translate(50, 1790)">
+    <rect x="0" y="0" width="820" height="230" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="28" fill="#f59e0b" font-size="16" font-weight="bold" letter-spacing="2">PARTY ROSTER</text>
+    <text x="220" y="28" fill="#6b7280" font-size="11">3 Active + 3 Reserve</text>
+
+    <!-- Amaro -->
+    <rect x="20" y="45" width="120" height="170" rx="6" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="80" y="68" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="bold">Amaro</text>
+    <text x="80" y="85" text-anchor="middle" fill="#9ca3af" font-size="10">Magic Knight</text>
+    <text x="80" y="102" text-anchor="middle" fill="#6b7280" font-size="9">Sword + Magic</text>
+    <text x="80" y="122" text-anchor="middle" fill="#047857" font-size="9">■ State 1</text>
+    <text x="80" y="138" text-anchor="middle" fill="#6b7280" font-size="9">Game Start</text>
+    <text x="80" y="158" text-anchor="middle" fill="#ef4444" font-size="9">Fire · Wind</text>
+    <text x="80" y="178" text-anchor="middle" fill="#9ca3af" font-size="9">Base Movement</text>
+    <text x="80" y="198" text-anchor="middle" fill="#fbbf24" font-size="9">★ Protagonist</text>
+
+    <!-- Taighe -->
+    <rect x="155" y="45" width="120" height="170" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="215" y="68" text-anchor="middle" fill="#60a5fa" font-size="13" font-weight="bold">Taighe</text>
+    <text x="215" y="85" text-anchor="middle" fill="#9ca3af" font-size="10">Elemental Mage</text>
+    <text x="215" y="102" text-anchor="middle" fill="#6b7280" font-size="9">Staff · Ranged</text>
+    <text x="215" y="122" text-anchor="middle" fill="#047857" font-size="9">■ State 1</text>
+    <text x="215" y="138" text-anchor="middle" fill="#6b7280" font-size="9">After Shrine</text>
+    <text x="215" y="158" text-anchor="middle" fill="#ef4444" font-size="9">Fire·Ice·Wind·Earth</text>
+    <text x="215" y="178" text-anchor="middle" fill="#9ca3af" font-size="9">Wall Break</text>
+
+    <!-- Kael -->
+    <rect x="290" y="45" width="120" height="170" rx="6" fill="rgba(234,179,8,0.1)" stroke="#eab308" stroke-width="1.5"/>
+    <text x="350" y="68" text-anchor="middle" fill="#facc15" font-size="13" font-weight="bold">Kael</text>
+    <text x="350" y="85" text-anchor="middle" fill="#9ca3af" font-size="10">Shield Guardian</text>
+    <text x="350" y="102" text-anchor="middle" fill="#6b7280" font-size="9">Shield + Mace</text>
+    <text x="350" y="122" text-anchor="middle" fill="#b45309" font-size="9">■ State 2</text>
+    <text x="350" y="138" text-anchor="middle" fill="#6b7280" font-size="9">Frostmere</text>
+    <text x="350" y="158" text-anchor="middle" fill="#ef4444" font-size="9">Earth · Ice</text>
+    <text x="350" y="178" text-anchor="middle" fill="#a78bfa" font-size="9">⬡ Double Jump</text>
+
+    <!-- Sera -->
+    <rect x="425" y="45" width="120" height="170" rx="6" fill="rgba(34,197,94,0.1)" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="485" y="68" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="bold">Sera</text>
+    <text x="485" y="85" text-anchor="middle" fill="#9ca3af" font-size="10">Wind Dancer</text>
+    <text x="485" y="102" text-anchor="middle" fill="#6b7280" font-size="9">Dual Daggers</text>
+    <text x="485" y="122" text-anchor="middle" fill="#b45309" font-size="9">■ State 2 (side)</text>
+    <text x="485" y="138" text-anchor="middle" fill="#6b7280" font-size="9">Ashveil Aerie</text>
+    <text x="485" y="158" text-anchor="middle" fill="#ef4444" font-size="9">Wind</text>
+    <text x="485" y="178" text-anchor="middle" fill="#a78bfa" font-size="9">⬡ Glide</text>
+
+    <!-- Varn -->
+    <rect x="560" y="45" width="120" height="170" rx="6" fill="rgba(168,85,247,0.1)" stroke="#a855f7" stroke-width="1.5"/>
+    <text x="620" y="68" text-anchor="middle" fill="#c084fc" font-size="13" font-weight="bold">Varn</text>
+    <text x="620" y="85" text-anchor="middle" fill="#9ca3af" font-size="10">Lumina Engineer</text>
+    <text x="620" y="102" text-anchor="middle" fill="#6b7280" font-size="9">Magitech Gauntlet</text>
+    <text x="620" y="122" text-anchor="middle" fill="#9333ea" font-size="9">■ State 3</text>
+    <text x="620" y="138" text-anchor="middle" fill="#6b7280" font-size="9">Veilwatch</text>
+    <text x="620" y="158" text-anchor="middle" fill="#ef4444" font-size="9">Fire · Earth</text>
+    <text x="620" y="178" text-anchor="middle" fill="#a78bfa" font-size="9">⬡ Wall Run</text>
+
+    <!-- Lyra -->
+    <rect x="695" y="45" width="120" height="170" rx="6" fill="rgba(236,72,153,0.1)" stroke="#ec4899" stroke-width="1.5"/>
+    <text x="755" y="68" text-anchor="middle" fill="#f472b6" font-size="13" font-weight="bold">Lyra</text>
+    <text x="755" y="85" text-anchor="middle" fill="#9ca3af" font-size="10">Spirit Channeler</text>
+    <text x="755" y="102" text-anchor="middle" fill="#6b7280" font-size="9">Crystal Focus</text>
+    <text x="755" y="122" text-anchor="middle" fill="#9333ea" font-size="9">■ State 3 (side)</text>
+    <text x="755" y="138" text-anchor="middle" fill="#6b7280" font-size="9">Luminous Hollow</text>
+    <text x="755" y="158" text-anchor="middle" fill="#ef4444" font-size="9">Light · Dark</text>
+    <text x="755" y="178" text-anchor="middle" fill="#9ca3af" font-size="9">Element Mastery</text>
+  </g>
+
+  <!-- ==================== REACTOR DIAGRAM ==================== -->
+  <g transform="translate(900, 1790)">
+    <rect x="0" y="0" width="850" height="230" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="28" fill="#06b6d4" font-size="16" font-weight="bold" letter-spacing="2">LUMINA REACTORS</text>
+    <text x="260" y="28" fill="#6b7280" font-size="11">Cooling Lore Hierarchy</text>
+
+    <!-- Reactor 1 -->
+    <rect x="20" y="50" width="250" height="80" rx="6" fill="rgba(6,182,212,0.08)" stroke="#06b6d4" stroke-width="1"/>
+    <text x="145" y="72" text-anchor="middle" fill="#22d3ee" font-size="13" font-weight="bold">1. Seaward Reactor</text>
+    <text x="145" y="90" text-anchor="middle" fill="#6b7280" font-size="10">Cooling: Ocean water intake</text>
+    <text x="145" y="106" text-anchor="middle" fill="#6b7280" font-size="10">Depth: Surface / partially submerged</text>
+    <text x="145" y="122" text-anchor="middle" fill="#b45309" font-size="10">State 2 · Mid-sized</text>
+
+    <!-- Arrow -->
+    <line x1="270" y1="90" x2="300" y2="90" stroke="#06b6d4" stroke-width="1.5"/>
+    <polygon points="298,85 312,90 298,95" fill="#06b6d4"/>
+
+    <!-- Reactor 2 -->
+    <rect x="310" y="50" width="250" height="80" rx="6" fill="rgba(6,182,212,0.12)" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="435" y="72" text-anchor="middle" fill="#22d3ee" font-size="13" font-weight="bold">2. Abyssal Reactor</text>
+    <text x="435" y="90" text-anchor="middle" fill="#6b7280" font-size="10">Cooling: Deep ocean + glacial melt</text>
+    <text x="435" y="106" text-anchor="middle" fill="#6b7280" font-size="10">Depth: Deep underwater</text>
+    <text x="435" y="122" text-anchor="middle" fill="#f59e0b" font-size="10">⚡ RAGNORAK ORIGIN · Largest</text>
+
+    <!-- Arrow -->
+    <line x1="560" y1="90" x2="590" y2="90" stroke="#06b6d4" stroke-width="1.5"/>
+    <polygon points="588,85 602,90 588,95" fill="#06b6d4"/>
+
+    <!-- Reactor 3 -->
+    <rect x="600" y="50" width="230" height="80" rx="6" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="715" y="72" text-anchor="middle" fill="#f87171" font-size="13" font-weight="bold">3. Reactor Core</text>
+    <text x="715" y="90" text-anchor="middle" fill="#6b7280" font-size="10">Cooling: Geothermal deep earth</text>
+    <text x="715" y="106" text-anchor="middle" fill="#6b7280" font-size="10">Depth: Far underground</text>
+    <text x="715" y="122" text-anchor="middle" fill="#ef4444" font-size="10">★ FINAL DUNGEON · The Source</text>
+
+    <!-- Depth scale -->
+    <text x="20" y="155" fill="#9ca3af" font-size="11" font-weight="bold">DEPTH PROGRESSION</text>
+    <rect x="20" y="165" width="810" height="12" rx="6" fill="rgba(6,182,212,0.05)"/>
+    <rect x="20" y="165" width="250" height="12" rx="6" fill="rgba(6,182,212,0.2)"/>
+    <rect x="270" y="165" width="290" height="12" fill="rgba(6,182,212,0.35)"/>
+    <rect x="560" y="165" width="270" height="12" rx="0 6 6 0" fill="rgba(239,68,68,0.3)"/>
+    <text x="145" y="175" text-anchor="middle" fill="#67e8f9" font-size="8">Surface</text>
+    <text x="415" y="175" text-anchor="middle" fill="#67e8f9" font-size="8">Deep Underwater</text>
+    <text x="695" y="175" text-anchor="middle" fill="#fca5a5" font-size="8">Ancient Underground</text>
+
+    <!-- Power scale -->
+    <text x="20" y="200" fill="#9ca3af" font-size="11" font-weight="bold">POWER OUTPUT</text>
+    <rect x="20" y="210" width="810" height="8" rx="4" fill="rgba(245,158,11,0.05)"/>
+    <rect x="20" y="210" width="200" height="8" rx="4" fill="rgba(245,158,11,0.3)"/>
+    <rect x="20" y="210" width="500" height="8" fill="rgba(245,158,11,0.3)"/>
+    <rect x="20" y="210" width="810" height="8" rx="4" fill="rgba(245,158,11,0.2)"/>
+    <text x="100" y="217" text-anchor="middle" fill="#fcd34d" font-size="7">LOW</text>
+    <text x="350" y="217" text-anchor="middle" fill="#fcd34d" font-size="7">MAXIMUM</text>
+    <text x="700" y="217" text-anchor="middle" fill="#fca5a5" font-size="7">CORRUPTED / INFINITE</text>
+  </g>
+
+  <!-- ==================== QUEST SUMMARY ==================== -->
+  <g transform="translate(50, 2060)">
+    <rect x="0" y="0" width="820" height="160" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="28" fill="#34d399" font-size="16" font-weight="bold" letter-spacing="2">QUEST SUMMARY</text>
+    <text x="210" y="28" fill="#6b7280" font-size="11">49 Total Quests</text>
+
+    <!-- Quest type bars -->
+    <text x="20" y="55" fill="#fbbf24" font-size="12">Main Story</text>
+    <rect x="140" y="43" width="360" height="16" rx="3" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="1"/>
+    <text x="330" y="55" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="bold">18 quests · Critical path · Levels 1-30</text>
+
+    <text x="20" y="80" fill="#60a5fa" font-size="12">Side Quests</text>
+    <rect x="140" y="68" width="320" height="16" rx="3" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="1"/>
+    <text x="310" y="80" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="bold">16 quests · Hub towns · Equipment + Gold</text>
+
+    <text x="20" y="105" fill="#4ade80" font-size="12">Exploration</text>
+    <rect x="140" y="93" width="140" height="16" rx="3" fill="rgba(34,197,94,0.2)" stroke="#22c55e" stroke-width="1"/>
+    <text x="215" y="105" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="bold">7 quests · Field discovery</text>
+
+    <text x="20" y="130" fill="#f87171" font-size="12">Dungeon</text>
+    <rect x="140" y="118" width="160" height="16" rx="3" fill="rgba(239,68,68,0.2)" stroke="#ef4444" stroke-width="1"/>
+    <text x="225" y="130" text-anchor="middle" fill="#f87171" font-size="11" font-weight="bold">8 quests · 1 per dungeon</text>
+
+    <!-- State distribution -->
+    <text x="560" y="55" fill="#9ca3af" font-size="11" font-weight="bold">BY STATE</text>
+    <rect x="560" y="65" width="60" height="20" rx="3" fill="rgba(4,120,87,0.3)"/>
+    <text x="590" y="79" text-anchor="middle" fill="#6ee7b7" font-size="10">S1: 12</text>
+    <rect x="630" y="65" width="70" height="20" rx="3" fill="rgba(180,83,9,0.3)"/>
+    <text x="665" y="79" text-anchor="middle" fill="#fcd34d" font-size="10">S2: 20</text>
+    <rect x="710" y="65" width="70" height="20" rx="3" fill="rgba(147,51,234,0.3)"/>
+    <text x="745" y="79" text-anchor="middle" fill="#c4b5fd" font-size="10">S3: 17</text>
+
+    <text x="560" y="110" fill="#9ca3af" font-size="11" font-weight="bold">BOSSES</text>
+    <text x="560" y="130" fill="#ef4444" font-size="12">★ 5 required + 2 optional = 7 total</text>
+    <text x="560" y="145" fill="#6b7280" font-size="10">Total boss HP: 5,250</text>
+  </g>
+
+  <!-- ==================== ENEMY SUMMARY ==================== -->
+  <g transform="translate(900, 2060)">
+    <rect x="0" y="0" width="850" height="160" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="28" fill="#ef4444" font-size="16" font-weight="bold" letter-spacing="2">ENEMY BESTIARY</text>
+    <text x="210" y="28" fill="#6b7280" font-size="11">27 Types</text>
+
+    <!-- Pre-Ragnorak -->
+    <text x="20" y="55" fill="#fcd34d" font-size="12" font-weight="bold">Pre-Ragnorak (States 1-2)</text>
+    <text x="20" y="73" fill="#6b7280" font-size="10">Garrison Soldier · Shield Guard · Rifleman · Patrol Drone</text>
+    <text x="20" y="88" fill="#6b7280" font-size="10">Heavy Trooper · Combat Medic · Automaton · Tactical Officer</text>
+    <text x="20" y="103" fill="#b45309" font-size="10">+ Elites: Ironclad Sgt · Sniper Drone · Reactor Sentinel · Frost Trooper</text>
+
+    <!-- Post-Ragnorak -->
+    <text x="20" y="125" fill="#c4b5fd" font-size="12" font-weight="bold">Post-Ragnorak (State 3)</text>
+    <text x="20" y="143" fill="#6b7280" font-size="10">Corrupted Soldier · Lumina Wraith · Crystal Stalker · Corruption Spewer</text>
+    <text x="20" y="155" fill="#6b7280" font-size="10">Hollow Beast · Spirit Mender · Corrupted Automaton · Void Sentinel</text>
+
+    <!-- Element effectiveness -->
+    <rect x="530" y="45" width="300" height="105" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    <text x="545" y="63" fill="#9ca3af" font-size="10" font-weight="bold">KEY WEAKNESSES</text>
+    <text x="545" y="80" fill="#ef4444" font-size="10">🔥 Fire — Machines, Ice enemies, Corruption</text>
+    <text x="545" y="95" fill="#60a5fa" font-size="10">❄ Ice — Heavy Troopers, Corrupted Automatons</text>
+    <text x="545" y="110" fill="#4ade80" font-size="10">💨 Wind — Shield Guards, Officers</text>
+    <text x="545" y="125" fill="#a3752c" font-size="10">⛰ Earth — Aerial enemies, Crystal Stalkers</text>
+    <text x="545" y="140" fill="#fbbf24" font-size="10">☀ Light — ALL corruption enemies (+50-75%)</text>
+  </g>
+
+  <!-- ==================== PROGRESSION FLOW ==================== -->
+  <g transform="translate(50, 2250)">
+    <rect x="0" y="0" width="1700" height="120" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="850" y="24" text-anchor="middle" fill="#f59e0b" font-size="14" font-weight="bold" letter-spacing="3">CRITICAL PATH FLOW</text>
+
+    <!-- Flow nodes -->
+    <rect x="20" y="45" width="100" height="50" rx="4" fill="rgba(4,120,87,0.2)" stroke="#047857" stroke-width="1"/>
+    <text x="70" y="65" text-anchor="middle" fill="#6ee7b7" font-size="9" font-weight="bold">Millhaven</text>
+    <text x="70" y="80" text-anchor="middle" fill="#6b7280" font-size="8">Lv 1-4</text>
+
+    <text x="132" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="148" y="45" width="100" height="50" rx="4" fill="rgba(4,120,87,0.2)" stroke="#047857" stroke-width="1"/>
+    <text x="198" y="65" text-anchor="middle" fill="#6ee7b7" font-size="9" font-weight="bold">Shrine</text>
+    <text x="198" y="80" text-anchor="middle" fill="#34d399" font-size="8">Taighe ●</text>
+
+    <text x="260" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="276" y="45" width="100" height="50" rx="4" fill="rgba(4,120,87,0.2)" stroke="#047857" stroke-width="1"/>
+    <text x="326" y="65" text-anchor="middle" fill="#6ee7b7" font-size="9" font-weight="bold">Tidewatch</text>
+    <text x="326" y="80" text-anchor="middle" fill="#6b7280" font-size="8">Lv 5-7</text>
+
+    <text x="388" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="404" y="45" width="100" height="50" rx="4" fill="rgba(180,83,9,0.2)" stroke="#b45309" stroke-width="1"/>
+    <text x="454" y="65" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="bold">Ironhaven</text>
+    <text x="454" y="80" text-anchor="middle" fill="#6b7280" font-size="8">Lv 7-8</text>
+
+    <text x="516" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="532" y="45" width="100" height="50" rx="4" fill="rgba(180,83,9,0.2)" stroke="#b45309" stroke-width="1"/>
+    <text x="582" y="62" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="bold">Irondeep</text>
+    <text x="582" y="76" text-anchor="middle" fill="#ef4444" font-size="8">★ Grendl</text>
+    <text x="582" y="88" text-anchor="middle" fill="#6b7280" font-size="7">Lv 8-10</text>
+
+    <text x="644" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="660" y="45" width="100" height="50" rx="4" fill="rgba(180,83,9,0.2)" stroke="#b45309" stroke-width="1"/>
+    <text x="710" y="62" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="bold">Seaward</text>
+    <text x="710" y="76" text-anchor="middle" fill="#ef4444" font-size="8">★ Aquos</text>
+    <text x="710" y="88" text-anchor="middle" fill="#6b7280" font-size="7">Lv 11-13</text>
+
+    <text x="772" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="788" y="45" width="100" height="50" rx="4" fill="rgba(180,83,9,0.2)" stroke="#b45309" stroke-width="1"/>
+    <text x="838" y="65" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="bold">Frostmere</text>
+    <text x="838" y="80" text-anchor="middle" fill="#34d399" font-size="8">Kael ●</text>
+
+    <text x="900" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="916" y="40" width="110" height="60" rx="4" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="2"/>
+    <text x="971" y="60" text-anchor="middle" fill="#fbbf24" font-size="9" font-weight="bold">Abyssal</text>
+    <text x="971" y="75" text-anchor="middle" fill="#f59e0b" font-size="9">⚡ RAGNORAK</text>
+    <text x="971" y="90" text-anchor="middle" fill="#6b7280" font-size="7">Lv 16-18</text>
+
+    <text x="1038" y="72" fill="#f59e0b" font-size="14" font-weight="bold">→</text>
+
+    <rect x="1054" y="45" width="100" height="50" rx="4" fill="rgba(147,51,234,0.2)" stroke="#9333ea" stroke-width="1"/>
+    <text x="1104" y="65" text-anchor="middle" fill="#c4b5fd" font-size="9" font-weight="bold">Veilwatch</text>
+    <text x="1104" y="80" text-anchor="middle" fill="#34d399" font-size="8">Varn ●</text>
+
+    <text x="1166" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="1182" y="45" width="100" height="50" rx="4" fill="rgba(147,51,234,0.2)" stroke="#9333ea" stroke-width="1"/>
+    <text x="1232" y="62" text-anchor="middle" fill="#c4b5fd" font-size="9" font-weight="bold">C. Scar</text>
+    <text x="1232" y="76" text-anchor="middle" fill="#ef4444" font-size="8">★ Guardian</text>
+    <text x="1232" y="88" text-anchor="middle" fill="#fbbf24" font-size="7">☀ Light</text>
+
+    <text x="1294" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="1310" y="45" width="100" height="50" rx="4" fill="rgba(147,51,234,0.2)" stroke="#9333ea" stroke-width="1"/>
+    <text x="1360" y="62" text-anchor="middle" fill="#c4b5fd" font-size="9" font-weight="bold">F. Ironhaven</text>
+    <text x="1360" y="76" text-anchor="middle" fill="#ef4444" font-size="8">★ Commander</text>
+    <text x="1360" y="88" text-anchor="middle" fill="#7c3aed" font-size="7">◐ Dark</text>
+
+    <text x="1422" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="1438" y="45" width="100" height="50" rx="4" fill="rgba(147,51,234,0.2)" stroke="#9333ea" stroke-width="1"/>
+    <text x="1488" y="65" text-anchor="middle" fill="#c4b5fd" font-size="9" font-weight="bold">Stabilizers</text>
+    <text x="1488" y="80" text-anchor="middle" fill="#fbbf24" font-size="8">3 locations</text>
+
+    <text x="1550" y="72" fill="#6b7280" font-size="14">→</text>
+
+    <rect x="1566" y="40" width="114" height="60" rx="4" fill="rgba(239,68,68,0.2)" stroke="#ef4444" stroke-width="2"/>
+    <text x="1623" y="58" text-anchor="middle" fill="#f87171" font-size="9" font-weight="bold">REACTOR CORE</text>
+    <text x="1623" y="73" text-anchor="middle" fill="#ef4444" font-size="9">★ Ragnorak Avatar</text>
+    <text x="1623" y="88" text-anchor="middle" fill="#6b7280" font-size="7">2000 HP · 4 Phases</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="900" y="2390" text-anchor="middle" fill="#4b5563" font-size="11" letter-spacing="1">RAGNORAK · LUMINA STUDIO · 24 ZONES · 49 QUESTS · 27 ENEMIES · 3 WORLD STATES</text>
+</svg>

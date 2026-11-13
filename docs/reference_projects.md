@@ -4,7 +4,7 @@ Projects in Z:\Development\lumina\ that inform Project Ragnorak's architecture.
 
 ## finalfantasy3d (Primary Reference)
 **Path**: Z:\Development\lumina\finalfantasy3d\
-**Type**: Korean Fantasy Isometric ARPG (Godot 4.6)
+**Type**: Fantasy Isometric ARPG (Godot 4.6)
 **Status**: Phase 1 complete — 61 scripts, 36 scenes, 15 player states
 
 ### Key Files to Study

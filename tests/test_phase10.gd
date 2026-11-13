@@ -270,8 +270,9 @@ func test_dialogue_has_text_label() -> void:
 
 func test_dialogue_supports_controller_advance() -> void:
 	var source := _get_source("res://src/ui/dialogue/dialogue_ui.gd")
-	_assert(source.contains('"jump"') or source.contains("ui_accept"),
-		"DialogueUI supports controller advance (A button / jump)")
+	# Controller remap: A advances via ui_accept; jump (now Y) must not advance.
+	_assert(source.contains("ui_accept") and not source.contains('is_action_pressed(&"jump")'),
+		"DialogueUI supports controller advance (A button via ui_accept)")
 
 
 func test_dialogue_supports_keyboard_advance() -> void:
@@ -506,8 +507,8 @@ func test_quest_log_has_detail_panel() -> void:
 func test_quest_log_controller_nav() -> void:
 	var source := _get_source("res://src/ui/menus/quest_log.gd")
 	_assert(source.contains('"move_up"') and source.contains('"move_down"')
-		and source.contains('"attack"'),
-		"Quest Log supports controller navigation (D-pad + A)")
+		and source.contains('"ui_accept"'),
+		"Quest Log supports controller navigation (D-pad + A via ui_accept)")
 
 
 func test_quest_log_keyboard_nav() -> void:

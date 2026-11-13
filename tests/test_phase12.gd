@@ -508,10 +508,10 @@ func test_return_paths_exist() -> void:
 
 
 func test_world_nav_controller() -> void:
-	# Zone portals use interact action (Y button on controller)
+	# Zone portals use interact (keyboard E / controller B)
 	var source := _get_source("res://src/interaction/zone_portal.gd")
 	_assert(source.contains("func interact("),
-		"Zone portals activated via interact action (controller Y)")
+		"Zone portals activated via interact (E / B)")
 
 
 func test_world_nav_keyboard() -> void:

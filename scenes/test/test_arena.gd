@@ -9,6 +9,10 @@ const CombatHudScript := preload("res://src/ui/hud/combat_hud.gd")
 const ControlBarScript := preload("res://src/ui/hud/control_bar.gd")
 const TacticalMenuScript := preload("res://src/ui/hud/tactical_menu.gd")
 const LockOnIndicatorScript := preload("res://src/ui/hud/lock_on_indicator.gd")
+const TargetBarScript := preload("res://src/ui/hud/target_bar.gd")
+const TacticalOverlayScript := preload("res://src/ui/hud/tactical_overlay.gd")
+const BattleBannerScript := preload("res://src/ui/hud/battle_banner.gd")
+const MinimapScript := preload("res://src/ui/hud/minimap.gd")
 const InteractionPromptScript := preload("res://src/ui/hud/interaction_prompt.gd")
 const QuestTrackerScript := preload("res://src/ui/hud/quest_tracker.gd")
 const PauseMenuScript := preload("res://src/ui/menus/pause_menu.gd")
@@ -59,6 +63,22 @@ func _ready() -> void:
 	add_child(lock_indicator)
 
 	# Add interaction prompt
+	var target_bar := CanvasLayer.new()
+	target_bar.set_script(TargetBarScript)
+	add_child(target_bar)
+
+	var tactical_overlay := CanvasLayer.new()
+	tactical_overlay.set_script(TacticalOverlayScript)
+	add_child(tactical_overlay)
+
+	var battle_banner := CanvasLayer.new()
+	battle_banner.set_script(BattleBannerScript)
+	add_child(battle_banner)
+	# Add minimap (top-right)
+	var minimap := CanvasLayer.new()
+	minimap.set_script(MinimapScript)
+	add_child(minimap)
+
 	var interact_prompt := CanvasLayer.new()
 	interact_prompt.set_script(InteractionPromptScript)
 	add_child(interact_prompt)

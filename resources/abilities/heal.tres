@@ -16,3 +16,5 @@ damage = 35.0
 animation_name = &""
 effect_scene = null
 icon = null
+range = 15.0
+targeting = 2

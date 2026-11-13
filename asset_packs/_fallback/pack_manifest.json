@@ -1,0 +1,324 @@
+{
+  "pack_id": "_fallback",
+  "display_name": "Built-in Fallback",
+  "version": "1.0.0",
+  "author": "ProjectRagnorak",
+  "tags": ["fallback"],
+  "cell_size": [2.0, 2.0, 2.0],
+  "tiles": {
+    "floor_stone": {
+      "type": "procedural",
+      "shape": "plane",
+      "size": [2.0, 2.0],
+      "color": [0.45, 0.42, 0.38, 1.0],
+      "collision": "auto",
+      "tags": ["floor", "stone"]
+    },
+    "floor_wood": {
+      "type": "procedural",
+      "shape": "plane",
+      "size": [2.0, 2.0],
+      "color": [0.55, 0.35, 0.18, 1.0],
+      "collision": "auto",
+      "tags": ["floor", "wood"]
+    },
+    "floor_dirt": {
+      "type": "procedural",
+      "shape": "plane",
+      "size": [2.0, 2.0],
+      "color": [0.4, 0.3, 0.2, 1.0],
+      "collision": "auto",
+      "tags": ["floor", "dirt"]
+    },
+    "floor_grass": {
+      "type": "procedural",
+      "shape": "plane",
+      "size": [2.0, 2.0],
+      "color": [0.25, 0.45, 0.2, 1.0],
+      "collision": "auto",
+      "tags": ["floor", "grass"]
+    },
+    "floor_tile": {
+      "type": "procedural",
+      "shape": "plane",
+      "size": [2.0, 2.0],
+      "color": [0.6, 0.55, 0.5, 1.0],
+      "collision": "auto",
+      "tags": ["floor", "tile"]
+    },
+    "floor_marble": {
+      "type": "procedural",
+      "shape": "plane",
+      "size": [2.0, 2.0],
+      "color": [0.85, 0.83, 0.8, 1.0],
+      "collision": "auto",
+      "tags": ["floor", "marble"]
+    },
+    "wall_stone": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 2.0, 0.3],
+      "color": [0.5, 0.48, 0.43, 1.0],
+      "collision": "auto",
+      "tags": ["wall", "stone"]
+    },
+    "wall_brick": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 2.0, 0.3],
+      "color": [0.6, 0.3, 0.25, 1.0],
+      "collision": "auto",
+      "tags": ["wall", "brick"]
+    },
+    "wall_wood": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 2.0, 0.3],
+      "color": [0.5, 0.33, 0.15, 1.0],
+      "collision": "auto",
+      "tags": ["wall", "wood"]
+    },
+    "wall_plaster": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 2.0, 0.3],
+      "color": [0.8, 0.75, 0.65, 1.0],
+      "collision": "auto",
+      "tags": ["wall", "plaster"]
+    },
+    "wall_half": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 1.0, 0.3],
+      "color": [0.5, 0.48, 0.43, 1.0],
+      "collision": "auto",
+      "tags": ["wall", "half"]
+    },
+    "door_arch": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 2.5, 0.3],
+      "color": [0.55, 0.35, 0.2, 1.0],
+      "collision": "none",
+      "tags": ["door"]
+    },
+    "door_frame": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [1.2, 2.2, 0.2],
+      "color": [0.45, 0.3, 0.15, 1.0],
+      "collision": "none",
+      "tags": ["door"]
+    },
+    "window_frame": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [1.0, 1.0, 0.15],
+      "color": [0.4, 0.5, 0.6, 1.0],
+      "collision": "none",
+      "tags": ["window"]
+    },
+    "stairs_stone": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 0.25, 2.0],
+      "color": [0.5, 0.48, 0.43, 1.0],
+      "collision": "auto",
+      "tags": ["stairs", "stone"]
+    },
+    "stairs_wood": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 0.25, 2.0],
+      "color": [0.55, 0.35, 0.18, 1.0],
+      "collision": "auto",
+      "tags": ["stairs", "wood"]
+    },
+    "ramp_stone": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 0.5, 2.0],
+      "color": [0.5, 0.48, 0.43, 1.0],
+      "collision": "auto",
+      "tags": ["stairs", "ramp"]
+    },
+    "pillar_stone": {
+      "type": "procedural",
+      "shape": "cylinder",
+      "size": [0.3, 2.0, 0.3],
+      "color": [0.55, 0.52, 0.48, 1.0],
+      "collision": "auto",
+      "tags": ["pillar", "stone"]
+    },
+    "pillar_wood": {
+      "type": "procedural",
+      "shape": "cylinder",
+      "size": [0.25, 2.0, 0.25],
+      "color": [0.5, 0.33, 0.15, 1.0],
+      "collision": "auto",
+      "tags": ["pillar", "wood"]
+    },
+    "pillar_crumbled": {
+      "type": "procedural",
+      "shape": "cylinder",
+      "size": [0.35, 1.2, 0.35],
+      "color": [0.4, 0.38, 0.35, 1.0],
+      "collision": "auto",
+      "tags": ["pillar", "crumbled"]
+    },
+    "ceiling_stone": {
+      "type": "procedural",
+      "shape": "plane",
+      "size": [2.0, 2.0],
+      "color": [0.4, 0.38, 0.35, 1.0],
+      "collision": "none",
+      "tags": ["ceiling", "stone"]
+    },
+    "roof_tile": {
+      "type": "procedural",
+      "shape": "plane",
+      "size": [2.0, 2.0],
+      "color": [0.6, 0.25, 0.15, 1.0],
+      "collision": "none",
+      "tags": ["ceiling", "roof"]
+    },
+    "prop_barrel": {
+      "type": "procedural",
+      "shape": "cylinder",
+      "size": [0.35, 0.8, 0.35],
+      "color": [0.5, 0.33, 0.15, 1.0],
+      "collision": "auto",
+      "tags": ["prop", "barrel"]
+    },
+    "prop_crate": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [0.7, 0.7, 0.7],
+      "color": [0.55, 0.4, 0.2, 1.0],
+      "collision": "auto",
+      "tags": ["prop", "crate"]
+    },
+    "prop_table": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [1.2, 0.8, 0.6],
+      "color": [0.45, 0.3, 0.15, 1.0],
+      "collision": "auto",
+      "tags": ["prop", "table"]
+    },
+    "prop_bench": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [1.4, 0.5, 0.4],
+      "color": [0.5, 0.33, 0.15, 1.0],
+      "collision": "auto",
+      "tags": ["prop", "bench"]
+    },
+    "prop_lantern": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [0.2, 0.4, 0.2],
+      "color": [0.9, 0.75, 0.3, 1.0],
+      "collision": "none",
+      "tags": ["prop", "lantern", "light"]
+    },
+    "prop_torch": {
+      "type": "procedural",
+      "shape": "cylinder",
+      "size": [0.05, 0.6, 0.05],
+      "color": [0.9, 0.5, 0.1, 1.0],
+      "collision": "none",
+      "tags": ["prop", "torch", "light"]
+    },
+    "prop_tree": {
+      "type": "procedural",
+      "shape": "cylinder",
+      "size": [0.5, 3.0, 0.5],
+      "color": [0.2, 0.5, 0.15, 1.0],
+      "collision": "auto",
+      "tags": ["prop", "tree", "nature"]
+    },
+    "prop_bush": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [0.8, 0.6, 0.8],
+      "color": [0.15, 0.4, 0.12, 1.0],
+      "collision": "none",
+      "tags": ["prop", "bush", "nature"]
+    },
+    "prop_rock": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [0.6, 0.4, 0.5],
+      "color": [0.45, 0.43, 0.4, 1.0],
+      "collision": "auto",
+      "tags": ["prop", "rock"]
+    },
+    "prop_fence": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 1.0, 0.1],
+      "color": [0.5, 0.33, 0.15, 1.0],
+      "collision": "auto",
+      "tags": ["prop", "fence"]
+    },
+    "bridge_wood": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 0.15, 2.0],
+      "color": [0.5, 0.33, 0.15, 1.0],
+      "collision": "auto",
+      "tags": ["bridge", "wood"]
+    },
+    "bridge_stone": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 0.2, 2.0],
+      "color": [0.5, 0.48, 0.43, 1.0],
+      "collision": "auto",
+      "tags": ["bridge", "stone"]
+    },
+    "platform_stone": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 0.5, 2.0],
+      "color": [0.5, 0.48, 0.43, 1.0],
+      "collision": "auto",
+      "tags": ["platform", "stone"]
+    },
+    "ledge_stone": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [2.0, 0.3, 0.5],
+      "color": [0.48, 0.45, 0.4, 1.0],
+      "collision": "auto",
+      "tags": ["ledge", "stone"]
+    }
+  },
+  "prefabs": {
+    "npc_stand": {
+      "type": "procedural",
+      "shape": "capsule",
+      "size": [0.35, 1.7],
+      "color": [0.6, 0.5, 0.4, 1.0]
+    },
+    "chest_visual": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [0.6, 0.4, 0.4],
+      "color": [0.7, 0.55, 0.2, 1.0]
+    },
+    "portal_arch": {
+      "type": "procedural",
+      "shape": "box",
+      "size": [3.0, 3.0, 0.3],
+      "color": [0.6, 0.4, 0.2, 1.0]
+    },
+    "lever_visual": {
+      "type": "procedural",
+      "shape": "cylinder",
+      "size": [0.1, 1.0],
+      "color": [0.5, 0.5, 0.5, 1.0]
+    }
+  }
+}

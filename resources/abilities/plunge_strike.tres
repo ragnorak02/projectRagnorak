@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/abilities/ability_data.gd" id="1"]
+[ext_resource type="Script" path="res://src/effects/abilities/plunge_impact.gd" id="2"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"plunge_strike"
+display_name = "Plunge Strike"
+description = "Dive blade-first from the air; the landing shockwave hits nearby foes."
+ability_type = 0
+mp_cost = 0.0
+atb_cost = 50.0
+cooldown = 2.0
+cast_time = 0.3
+damage = 34.0
+animation_name = &""
+effect_scene = null
+icon = null
+range = 14.0
+targeting = 1
+effect_script = ExtResource("2")
+stagger = 30.0
+aerial_only = true
+caster_motion = 1
+owner_member = Array[StringName]([&"hero"])

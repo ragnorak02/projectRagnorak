@@ -3,11 +3,19 @@
 extends "res://src/world/zone_base.gd"
 
 const EnemyScene := preload("res://src/enemies/enemy.tscn")
+## v5 placeholder enemy models (un-rigged Hunyuan meshes, RiglessVisual).
+## Spawns alternate between them; names match the model.
+const ENEMY_MODELS := [
+	["Kobold", preload("res://assets/models/characters/kobold_female1.glb")],
+	["Kobold Queen", preload("res://assets/models/characters/kobold_queen1.glb")],
+]
+var _enemy_spawn_count: int = 0
 const LeverInteractable := preload("res://src/interaction/lever_interactable.gd")
 const SwitchPuzzle := preload("res://src/interaction/switch_puzzle.gd")
 const ZonePortal := preload("res://src/interaction/zone_portal.gd")
 const ChestInteractable := preload("res://src/interaction/chest_interactable.gd")
 const HiddenArea := preload("res://src/interaction/hidden_area.gd")
+const CarryableCrateScene := preload("res://src/interaction/carryable_crate.tscn")
 
 
 func _ready() -> void:
@@ -28,6 +36,10 @@ func _setup_zone() -> void:
 
 	# Switch puzzle — two levers unlock a reward chest
 	_add_switch_puzzle()
+
+	# Liftable crates (Package H): throw them at the enemies
+	_add_carryable_crate(Vector3(2, 0, 6))
+	_add_carryable_crate(Vector3(-2, 0, -4), 20)
 
 	# Hidden area deeper in dungeon
 	_add_hidden_area("dungeon_secret", Vector3(12, 0, -20), "Discovered: Secret Chamber!")
@@ -55,6 +67,10 @@ func _add_ground(color: Color) -> void:
 
 func _add_enemy(pos: Vector3) -> void:
 	var enemy := EnemyScene.instantiate()
+	var pick: Array = ENEMY_MODELS[_enemy_spawn_count % ENEMY_MODELS.size()]
+	_enemy_spawn_count += 1
+	enemy.display_name = pick[0]
+	enemy.rigless_model = pick[1]
 	add_child(enemy)
 	enemy.global_position = pos
 	enemy.global_position.y = 1.0
@@ -129,16 +145,15 @@ func _add_switch_puzzle() -> void:
 	var puzzle := Node3D.new()
 	puzzle.set_script(SwitchPuzzle)
 	puzzle.puzzle_id = "dungeon_gate"
-	puzzle.levers = [
-		puzzle.get_path_to(lever1) if false else NodePath("../Lever1"),
-		NodePath("../Lever2"),
-	]
+	# Typed array: assigning an untyped [] literal to Array[NodePath] errors at runtime.
+	var lever_paths: Array[NodePath] = [NodePath("../Lever1"), NodePath("../Lever2")]
+	puzzle.levers = lever_paths
 	puzzle.target = NodePath("../RewardChest")
 	puzzle.name = "DungeonPuzzle"
 	add_child(puzzle)
 
 	# Connect lever paths properly after tree is built
-	puzzle.levers = [NodePath("../Lever1"), NodePath("../Lever2")]
+	puzzle.levers = lever_paths
 
 
 func _add_lever_visual(lever: Node) -> void:
@@ -159,7 +174,7 @@ func _create_chest(pos: Vector3) -> Node:
 	var chest := Area3D.new()
 	chest.set_script(ChestInteractable)
 	chest.name = "RewardChest"
-	chest.contents = []
+	# (contents left at the typed default; assigning an untyped [] errors at runtime)
 
 	var col := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
@@ -202,3 +217,12 @@ func _add_hidden_area(area_id: String, pos: Vector3, message: String) -> void:
 
 	add_child(area)
 	area.global_position = pos
+
+
+## Liftable crate (Package H). Single, ground-level crates only.
+func _add_carryable_crate(pos: Vector3, rot_y: float = 0.0) -> Node3D:
+	var crate: Node3D = CarryableCrateScene.instantiate()
+	add_child(crate)
+	crate.global_position = pos
+	crate.rotation.y = deg_to_rad(rot_y)
+	return crate

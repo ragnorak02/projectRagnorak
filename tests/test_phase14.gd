@@ -536,8 +536,10 @@ func test_target_indicator_visibility() -> void:
 
 func test_controller_prompts_readable() -> void:
 	var source := _get_source("res://src/ui/hud/interaction_prompt.gd")
-	_assert(source.contains("is_using_controller") and source.contains("[Y]")
-		and source.contains("[E]"),
+	# Controls v2: interact is B on controller / E on keyboard; the hint comes from
+	# SettingsManager.get_action_label(&"interact", is_using_controller()).
+	_assert(source.contains("is_using_controller") and source.contains("get_action_label")
+		and source.contains("interact") and not source.contains('"[A]"') and not source.contains('"[Y]"'),
 		"Interaction prompt shows controller/keyboard context-appropriate hints")
 
 

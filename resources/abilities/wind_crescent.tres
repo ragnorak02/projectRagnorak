@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/abilities/ability_data.gd" id="1"]
+[ext_resource type="Script" path="res://src/effects/abilities/wind_crescent.gd" id="2"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"wind_crescent"
+display_name = "Wind Crescent"
+description = "Three crescent air blades form over the target and slash in sequence."
+ability_type = 2
+mp_cost = 14.0
+atb_cost = 50.0
+cooldown = 3.0
+cast_time = 0.7
+damage = 27.0
+animation_name = &""
+effect_scene = null
+icon = null
+range = 14.0
+targeting = 1
+effect_script = ExtResource("2")
+stagger = 6.0
+owner_member = Array[StringName]([&"companion"])

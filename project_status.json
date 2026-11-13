@@ -2,32 +2,37 @@
   "schemaVersion": 1,
   "gameId": "projectRagnorak",
   "title": "Project Ragnorak",
-  "lastUpdated": "2026-03-09T12:00:00Z",
-
+  "lastUpdated": "2026-11-13T19:02Z",
   "health": {
-    "progressPercent": 38,
-    "buildVersion": "0.0.15-dev",
-    "assetStage": "early"
+    "progressPercent": 45,
+    "buildVersion": "0.0.16-dev",
+    "assetStage": "early",
+    "sharedAssetSync": {
+      "eligible": 1,
+      "synced": 1,
+      "outdated": 0,
+      "conflicts": 0,
+      "lastSync": "2026-03-14T21:59:21Z"
+    }
   },
-
   "phase": {
     "macroPhase": 15,
     "macroPhaseLabel": "Polish, QA & Regression",
     "status": "in_progress",
     "currentGoal": "Phase 15 — Polish, QA, and Regression",
-    "currentTask": "Regression tests, final validation (combat polish + UX + performance done)",
-    "nextMilestone": "Polish & QA complete (item 400)"
+    "currentTask": "Battle v3-v5 done (modes, combos, stagger, stance, party switch, air combat, spell ranges, minimap, options, rigless models); next: v6 polish (docs/plans/v6_next_session_plan.md)",
+    "nextMilestone": "v6 polish + Phase 15 regression items 385-400"
   },
-
   "tech": {
     "engine": "Godot",
     "engineVersion": "4.6",
-    "languages": ["GDScript"],
+    "languages": [
+      "GDScript"
+    ],
     "graphicsType": "3D"
   },
-
   "features": {
-    "controllerSupport": "partial",
+    "controllerSupport": "complete",
     "achievementsSystem": "missing",
     "testScripts": "active",
     "saveSystem": "complete",
@@ -37,7 +42,6 @@
     "worldSystem": "complete",
     "partySystem": "complete"
   },
-
   "completedPhases": {
     "phase1_foundation": true,
     "phase2_locomotion": true,
@@ -55,7 +59,6 @@
     "phase14_audio_vfx": true,
     "phase15_polish_qa": "in_progress"
   },
-
   "milestones": {
     "firstGraphicsPass": true,
     "controllerIntegration": true,
@@ -64,11 +67,10 @@
     "contentComplete": false,
     "productionReady": false
   },
-
   "testing": {
     "testCommand": "tests/run-tests.bat",
-    "lastRunAt": "2026-03-09T12:00:00Z",
-    "status": "pass",
+    "lastRunAt": "2026-11-13T19:02Z",
+    "status": "warning",
     "smokeTests": 35,
     "phase6Tests": 111,
     "phase7Tests": 23,
@@ -81,12 +83,19 @@
     "phase14Tests": 67,
     "phase15Tests": 68,
     "performanceTests": 65,
-    "totalTests": 754,
-    "notes": "All 754 tests passing (35 smoke + 111 P6 + 23 P7 + 65 P8 + 56 P9 + 72 P10 + 63 P11 + 65 P12 + 64 P13 + 67 P14 + 68 P15 + 65 perf)"
+    "totalTests": 1603,
+    "notes": "1600/1603 passing. 3 known failures that predate v3: phase8 New Game loads town_hub not test_arena; phase12 return portals; performance expects 7 autoloads (8 with AssetRegistry). Exit-time \"resources still in use\" warning in town scenes; test_ui_style segfaults on exit after reporting.",
+    "battleTests": 136,
+    "carryTests": 80,
+    "controlsTests": 236,
+    "uiStyleTests": 141,
+    "v4Tests": 96,
+    "v5Tests": 160,
+    "passedTests": 1600
   },
-
   "links": {
     "repo": null,
     "launcherId": "projectRagnorak"
-  }
+  },
+  "workMode": "in_progress"
 }

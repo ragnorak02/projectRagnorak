@@ -3,6 +3,16 @@
 extends Node
 
 const SETTINGS_PATH := "user://settings.json"
+## Bump whenever project.godot default bindings change. Saved "bindings" with a
+## missing or lower version are discarded on load so stale remaps can't override
+## the new defaults. Other settings (camera/audio/gameplay) are always kept.
+## v2 = 2026-11-12 controller remap (Command Menu on A, Jump on Y, D-pad fixes).
+## v3 = 2026-11-12 controls v2 (Dodge on LB, Interact on B, new Sprint on L3/Ctrl).
+## v4 = 2026-11-12 battle system v3 (Jump on A, Interact on Y, Dodge on B,
+##      tactical_mode keyboard-only Q, new unique_ability on R; controller
+##      Command/Unique access is routed per mode by player.gd).
+## v5 = 2026-11-13 battle v4 (new battle_toggle on View/Back + F).
+const BINDINGS_VERSION := 5
 
 # --- Camera ---
 var mouse_sensitivity: float = 0.002
@@ -16,6 +26,10 @@ var sfx_volume: float = 1.0
 # --- Gameplay ---
 var show_damage_numbers: bool = true
 var show_control_hints: bool = true
+## v5 Options page: minimap visibility and mode (true = rotates with the camera,
+## false = static north-up with the player arrow turning instead).
+var show_minimap: bool = true
+var minimap_rotate: bool = true
 
 # --- Signals ---
 signal settings_changed()
@@ -25,8 +39,9 @@ var _custom_bindings: Dictionary = {}
 
 # --- Actions that can be rebound ---
 const REBINDABLE_ACTIONS: Array[StringName] = [
-	&"jump", &"attack", &"dodge", &"interact",
-	&"tactical_mode", &"lock_on", &"pause", &"party_switch",
+	&"jump", &"attack", &"dodge", &"interact", &"sprint",
+	&"tactical_mode", &"unique_ability", &"lock_on", &"pause", &"party_switch",
+	&"battle_toggle",
 ]
 
 
@@ -52,7 +67,10 @@ func save_settings() -> void:
 		"gameplay": {
 			"show_damage_numbers": show_damage_numbers,
 			"show_control_hints": show_control_hints,
+			"show_minimap": show_minimap,
+			"minimap_rotate": minimap_rotate,
 		},
+		"bindings_version": BINDINGS_VERSION,
 		"bindings": _serialize_bindings(),
 	}
 	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
@@ -83,6 +101,16 @@ func load_settings() -> void:
 	var gp: Dictionary = d.get("gameplay", {})
 	show_damage_numbers = gp.get("show_damage_numbers", show_damage_numbers)
 	show_control_hints = gp.get("show_control_hints", show_control_hints)
+	show_minimap = bool(gp.get("show_minimap", show_minimap))
+	minimap_rotate = bool(gp.get("minimap_rotate", minimap_rotate))
+	var saved_version: int = int(d.get("bindings_version", 0))
+	if saved_version < BINDINGS_VERSION:
+		# Stale bindings from an older default layout: drop them and keep defaults.
+		_custom_bindings.clear()
+		if d.has("bindings"):
+			push_warning("SettingsManager: discarding saved bindings (version %d < %d)" % [saved_version, BINDINGS_VERSION])
+			save_settings()
+		return
 	var bindings: Dictionary = d.get("bindings", {})
 	_deserialize_bindings(bindings)
 
@@ -103,6 +131,8 @@ func reset_defaults() -> void:
 	sfx_volume = 1.0
 	show_damage_numbers = true
 	show_control_hints = true
+	show_minimap = true
+	minimap_rotate = true
 	InputMap.load_from_project_settings()
 	_custom_bindings.clear()
 	apply_settings()
@@ -124,6 +154,8 @@ func rebind_action(action: StringName, new_event: InputEvent) -> void:
 			break
 	InputMap.action_add_event(action, new_event)
 	_custom_bindings[String(action)] = _serialize_action_events(action)
+	# v5: glyphs / control hints listen to settings_changed, so refresh them now.
+	settings_changed.emit()
 
 
 func get_action_keyboard_text(action: StringName) -> String:
@@ -151,7 +183,45 @@ func get_action_controller_text(action: StringName) -> String:
 	return "---"
 
 
+## Returns the binding label(s) for an action on one device family.
+## controller=true -> joypad buttons/axes (e.g. "A", "RT", "D-Up/D-Down").
+## controller=false -> keyboard/mouse (e.g. "Q", "LMB").
+## Multiple distinct events are joined with "/". Returns "---" if unbound.
+func get_action_label(action: StringName, controller: bool) -> String:
+	if not InputMap.has_action(action):
+		return "---"
+	var labels: PackedStringArray = []
+	for event in InputMap.action_get_events(action):
+		var label := ""
+		if controller:
+			if event is InputEventJoypadButton:
+				label = _joy_button_name(event.button_index)
+			elif event is InputEventJoypadMotion:
+				label = _joy_axis_name(event.axis, event.axis_value)
+		else:
+			if event is InputEventKey:
+				var kc: int = event.keycode
+				if kc == 0:
+					kc = event.physical_keycode
+				label = _short_key_name(OS.get_keycode_string(kc)) if kc != 0 else "Key"
+			elif event is InputEventMouseButton:
+				label = _mouse_button_name(event.button_index)
+		if label != "" and not labels.has(label):
+			labels.append(label)
+	if labels.is_empty():
+		return "---"
+	return "/".join(labels)
+
+
 # --- Display helpers ---
+
+func _short_key_name(key_name: String) -> String:
+	match key_name:
+		"Escape": return "Esc"
+		"BracketLeft": return "["
+		"BracketRight": return "]"
+		_: return key_name
+
 
 func _mouse_button_name(index: int) -> String:
 	match index:
@@ -169,11 +239,11 @@ func _joy_button_name(index: int) -> String:
 		1: return "B"
 		2: return "X"
 		3: return "Y"
-		4: return "Back"
+		4: return "View"   # Xbox naming (Back on older pads)
 		5: return "Guide"
 		6: return "Start"
-		7: return "LS"
-		8: return "RS"
+		7: return "L3"  # left stick click
+		8: return "R3"  # right stick click
 		9: return "LB"
 		10: return "RB"
 		11: return "D-Up"
@@ -187,6 +257,8 @@ func _joy_axis_name(axis: int, value: float) -> String:
 	match axis:
 		4: return "LT"
 		5: return "RT"
+		0, 1: return "LS"
+		2, 3: return "RS"
 		_:
 			var dir := "+" if value > 0 else "-"
 			return "Axis%d%s" % [axis, dir]

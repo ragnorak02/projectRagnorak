@@ -1,8 +1,11 @@
 ## Quest log screen accessible from the pause menu.
 ## Shows active and completed quests with objectives.
 ## Navigable by controller and keyboard.
+## Visuals: "Lumina Frost" menu shell — header tab, glass list + detail panels,
+## footer glyph bar (UIStyle widgets).
 extends CanvasLayer
 
+# Legacy palette (the visual pass uses UIStyle colours)
 const BG_COLOR := Color(0.03, 0.06, 0.14, 0.95)
 const BORDER_COLOR := Color(0.3, 0.5, 0.9, 0.5)
 const TITLE_COLOR := Color(0.5, 0.7, 1.0)
@@ -13,6 +16,12 @@ const COMPLETE_COLOR := Color(0.3, 0.8, 0.3)
 const OBJECTIVE_COLOR := Color(0.7, 0.75, 0.85)
 const MARKER_COLOR := Color(0.9, 0.7, 0.3)
 
+const DONE_COLOR := Color("#5FD38A")   # objective/quest complete (fits the frost palette)
+const MARGIN_X := 96.0
+const CONTENT_TOP := 168.0
+const LIST_WIDTH := 600.0
+const FOOTER_H := 64.0
+
 var _is_open: bool = false
 var _selected_index: int = 0
 var _quest_entries: Array[Dictionary] = []
@@ -20,8 +29,10 @@ var _quest_system: Node = null
 
 var _root: Control
 var _overlay: ColorRect
-var _panel: PanelContainer
+var _panel: Control
+var _header: HeaderTab
 var _header_label: Label
+var _scroll: ScrollContainer
 var _list_container: VBoxContainer
 var _detail_panel: PanelContainer
 var _detail_title: Label
@@ -31,7 +42,10 @@ var _detail_type: Label
 var _detail_status: Label
 var _hint_label: Label
 var _empty_label: Label
-var _quest_rows: Array[PanelContainer] = []
+var _quest_rows: Array = []      # MenuRow per entry (plain Array: see UI kit notes)
+var _tracked_id: StringName = &""
+## Stick/D-pad/key navigation (v5 AA): one push = one step, hold = steady repeat.
+var _nav := MenuNav.new([&"move_up", &"ui_up"], [&"move_down", &"ui_down"], [], [])
 
 
 func _ready() -> void:
@@ -49,141 +63,150 @@ func _build_ui() -> void:
 
 	_overlay = ColorRect.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_overlay.color = Color(0.0, 0.0, 0.0, 0.8)
+	_overlay.color = Color(UIStyle.DIM_SCREEN, 0.94)   # full screen: hide the menu beneath
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_overlay)
 
-	# Main container: horizontal split (list | detail)
-	var hbox := HBoxContainer.new()
-	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	hbox.offset_left = 60
-	hbox.offset_right = -60
-	hbox.offset_top = 40
-	hbox.offset_bottom = -40
-	hbox.add_theme_constant_override("separation", 12)
-	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_root.add_child(hbox)
+	_panel = Control.new()
+	_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_panel)
+
+	# --- Header tab ---
+	_header = HeaderTab.new().setup("Quest Log", "")
+	_header.title_size = UIStyle.SIZE_L
+	_header.position = Vector2(MARGIN_X, 72)
+	_panel.add_child(_header)
+	_header_label = _header.get_title_label()
+
+	var rule := ColorRect.new()
+	rule.color = UIStyle.CYAN_DIM
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rule.anchor_right = 1.0
+	rule.offset_left = MARGIN_X
+	rule.offset_right = -MARGIN_X
+	rule.offset_top = 138
+	rule.offset_bottom = 139
+	_panel.add_child(rule)
 
 	# --- Left panel: quest list ---
-	var left_panel := PanelContainer.new()
-	left_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left_panel.size_flags_stretch_ratio = 0.4
-	left_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var left_style := _make_panel_style()
-	left_panel.add_theme_stylebox_override("panel", left_style)
-	hbox.add_child(left_panel)
+	var left_panel := SlantPanel.new()
+	left_panel.anchor_bottom = 1.0
+	left_panel.offset_left = MARGIN_X
+	left_panel.offset_right = MARGIN_X + LIST_WIDTH
+	left_panel.offset_top = CONTENT_TOP
+	left_panel.offset_bottom = -(FOOTER_H + 48)
+	left_panel.padding = 16
+	_panel.add_child(left_panel)
 
 	var left_vbox := VBoxContainer.new()
-	left_vbox.add_theme_constant_override("separation", 4)
+	left_vbox.add_theme_constant_override("separation", 10)
 	left_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	left_panel.add_child(left_vbox)
 
-	_header_label = Label.new()
-	_header_label.text = "QUEST LOG"
-	_header_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_header_label.add_theme_font_size_override("font_size", 20)
-	_header_label.add_theme_color_override("font_color", TITLE_COLOR)
-	_header_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	left_vbox.add_child(_header_label)
+	left_vbox.add_child(UIStyle.make_label("QUESTS", UIStyle.SIZE_M, UIStyle.GOLD, true))
 
-	var sep := HSeparator.new()
-	sep.add_theme_constant_override("separation", 6)
-	sep.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	left_vbox.add_child(sep)
-
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	left_vbox.add_child(scroll)
+	_scroll = ScrollContainer.new()
+	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	left_vbox.add_child(_scroll)
 
 	_list_container = VBoxContainer.new()
-	_list_container.add_theme_constant_override("separation", 2)
+	_list_container.add_theme_constant_override("separation", 6)
 	_list_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	scroll.add_child(_list_container)
+	_scroll.add_child(_list_container)
 
-	_empty_label = Label.new()
-	_empty_label.text = "No quests"
-	_empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_empty_label.add_theme_font_size_override("font_size", 14)
-	_empty_label.add_theme_color_override("font_color", DIM_COLOR)
-	_empty_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_empty_label = UIStyle.make_label("No quests yet. Talk to people around town.", UIStyle.SIZE_S, UIStyle.TEXT_DIM)
+	_empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_list_container.add_child(_empty_label)
 
 	# --- Right panel: quest detail ---
-	_detail_panel = PanelContainer.new()
-	_detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_detail_panel.size_flags_stretch_ratio = 0.6
-	_detail_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var right_style := _make_panel_style()
-	_detail_panel.add_theme_stylebox_override("panel", right_style)
-	hbox.add_child(_detail_panel)
+	_detail_panel = SlantPanel.new()
+	_detail_panel.anchor_right = 1.0
+	_detail_panel.anchor_bottom = 1.0
+	_detail_panel.offset_left = MARGIN_X + LIST_WIDTH + 32
+	_detail_panel.offset_right = -MARGIN_X
+	_detail_panel.offset_top = CONTENT_TOP
+	_detail_panel.offset_bottom = -(FOOTER_H + 48)
+	(_detail_panel as SlantPanel).slant_left = false
+	(_detail_panel as SlantPanel).slant_right = true
+	(_detail_panel as SlantPanel).padding = 24
+	_panel.add_child(_detail_panel)
 
 	var detail_vbox := VBoxContainer.new()
-	detail_vbox.add_theme_constant_override("separation", 8)
+	detail_vbox.add_theme_constant_override("separation", 12)
 	detail_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_detail_panel.add_child(detail_vbox)
 
-	_detail_title = Label.new()
-	_detail_title.add_theme_font_size_override("font_size", 22)
-	_detail_title.add_theme_color_override("font_color", TITLE_COLOR)
-	_detail_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	detail_vbox.add_child(_detail_title)
+	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 16)
+	title_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	detail_vbox.add_child(title_row)
 
-	_detail_type = Label.new()
-	_detail_type.add_theme_font_size_override("font_size", 12)
-	_detail_type.add_theme_color_override("font_color", MARKER_COLOR)
-	_detail_type.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_detail_title = UIStyle.make_label("", UIStyle.SIZE_L + 6, UIStyle.TEXT, true)
+	_detail_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_detail_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title_row.add_child(_detail_title)
+
+	_detail_status = UIStyle.make_label("", UIStyle.SIZE_S, UIStyle.GOLD, true)
+	_detail_status.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	title_row.add_child(_detail_status)
+
+	_detail_type = UIStyle.make_label("", UIStyle.SIZE_S, UIStyle.GOLD, true)
+	_detail_type.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_detail_type.add_theme_stylebox_override("normal", UIStyle.pill(UIStyle.GLASS_DEEP, UIStyle.GOLD_DIM, 12, 2))
 	detail_vbox.add_child(_detail_type)
 
-	var sep2 := HSeparator.new()
-	sep2.add_theme_constant_override("separation", 4)
-	sep2.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	detail_vbox.add_child(sep2)
-
-	_detail_desc = Label.new()
-	_detail_desc.add_theme_font_size_override("font_size", 15)
-	_detail_desc.add_theme_color_override("font_color", TEXT_COLOR)
+	_detail_desc = UIStyle.make_label("", UIStyle.SIZE_M, UIStyle.TEXT)
 	_detail_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_detail_desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	detail_vbox.add_child(_detail_desc)
 
-	var obj_header := Label.new()
-	obj_header.text = "Objectives"
-	obj_header.add_theme_font_size_override("font_size", 14)
-	obj_header.add_theme_color_override("font_color", TITLE_COLOR)
-	obj_header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var obj_gap := Control.new()
+	obj_gap.custom_minimum_size.y = 6
+	obj_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	detail_vbox.add_child(obj_gap)
+
+	var obj_header := UIStyle.make_label("OBJECTIVES", UIStyle.SIZE_M, UIStyle.GOLD, true)
 	detail_vbox.add_child(obj_header)
 
 	_detail_objectives = VBoxContainer.new()
-	_detail_objectives.add_theme_constant_override("separation", 4)
+	_detail_objectives.add_theme_constant_override("separation", 8)
 	_detail_objectives.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	detail_vbox.add_child(_detail_objectives)
 
-	_detail_status = Label.new()
-	_detail_status.add_theme_font_size_override("font_size", 13)
-	_detail_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	detail_vbox.add_child(_detail_status)
+	# --- Footer: status + glyph hints ---
+	var footer := PanelContainer.new()
+	footer.anchor_top = 1.0
+	footer.anchor_right = 1.0
+	footer.anchor_bottom = 1.0
+	footer.offset_top = -FOOTER_H - 24
+	footer.offset_bottom = -24
+	footer.offset_left = MARGIN_X
+	footer.offset_right = -MARGIN_X
+	footer.add_theme_stylebox_override("panel", UIStyle.glass_panel(12))
+	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.add_child(footer)
 
-	# Spacer
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	detail_vbox.add_child(spacer)
+	var fbox := HBoxContainer.new()
+	fbox.add_theme_constant_override("separation", 28)
+	fbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	footer.add_child(fbox)
 
-	# Hint
-	_hint_label = Label.new()
-	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint_label.add_theme_font_size_override("font_size", 11)
-	_hint_label.add_theme_color_override("font_color", DIM_COLOR)
-	_hint_label.text = "[A/Enter] Track    [B/Esc] Back"
-	_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	detail_vbox.add_child(_hint_label)
+	_hint_label = UIStyle.make_label("", UIStyle.SIZE_S, UIStyle.TEXT_DIM)
+	_hint_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_hint_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	fbox.add_child(_hint_label)
+	fbox.add_child(GlyphHint.create(&"ui_up", "Select", UIStyle.SIZE_S))
+	fbox.add_child(GlyphHint.create(&"ui_accept", "Track", UIStyle.SIZE_S))
+	fbox.add_child(GlyphHint.create(&"ui_cancel", "Back", UIStyle.SIZE_S))
 
 
 func open_log(quest_sys: Node) -> void:
 	_quest_system = quest_sys
 	_is_open = true
+	_nav.reset()
 	_refresh_list()
 	_show_log()
 
@@ -208,6 +231,7 @@ func _refresh_list() -> void:
 	if _quest_system == null:
 		_empty_label.visible = true
 		_clear_detail()
+		_update_header_counts()
 		return
 
 	# Active quests
@@ -234,51 +258,38 @@ func _refresh_list() -> void:
 	_selected_index = 0
 	_update_selection()
 	_update_detail()
+	_update_header_counts()
 
 
-func _create_quest_row(entry: Dictionary, _idx: int) -> PanelContainer:
-	var row := PanelContainer.new()
-	row.custom_minimum_size = Vector2(0, 32)
+func _create_quest_row(entry: Dictionary, _idx: int) -> Control:
+	var row := MenuRow.new()
+	row.focus_mode = Control.FOCUS_NONE   # cursor-driven (see _update_selection)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	var row_style := StyleBoxFlat.new()
-	row_style.bg_color = Color(0, 0, 0, 0)
-	row_style.corner_radius_top_left = 3
-	row_style.corner_radius_top_right = 3
-	row_style.corner_radius_bottom_left = 3
-	row_style.corner_radius_bottom_right = 3
-	row_style.content_margin_left = 8
-	row_style.content_margin_right = 8
-	row_style.content_margin_top = 4
-	row_style.content_margin_bottom = 4
-	row.add_theme_stylebox_override("panel", row_style)
-
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 15)
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.row_font_size = UIStyle.SIZE_M
+	row.custom_minimum_size = Vector2(0, 48)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	if entry["completed"]:
-		label.text = "[Done] %s" % String(entry["quest_id"])
-		label.add_theme_color_override("font_color", COMPLETE_COLOR)
+		row.text = String(entry["quest_id"]).replace("_", " ").capitalize()
+		row.right_text = "DONE"
+		row.unavailable = true   # greyed but still selectable for review
 	elif entry["data"] != null:
-		label.text = entry["data"].title
-		label.add_theme_color_override("font_color", TEXT_COLOR)
+		row.text = entry["data"].title
 	else:
-		label.text = String(entry["quest_id"])
-		label.add_theme_color_override("font_color", DIM_COLOR)
+		row.text = String(entry["quest_id"])
+		row.unavailable = true
 
-	row.add_child(label)
+	row.set_meta("quest_id", entry["quest_id"])
 	return row
 
 
 func _update_selection() -> void:
 	for i in _quest_rows.size():
-		var row: PanelContainer = _quest_rows[i]
-		var style := row.get_theme_stylebox("panel") as StyleBoxFlat
-		if i == _selected_index:
-			style.bg_color = HIGHLIGHT_BG
-		else:
-			style.bg_color = Color(0, 0, 0, 0)
+		var row: MenuRow = _quest_rows[i]
+		row.selected = i == _selected_index
+	if _selected_index >= 0 and _selected_index < _quest_rows.size() and _scroll:
+		_scroll.ensure_control_visible(_quest_rows[_selected_index])
+	_update_tracked_marks()
 
 
 func _update_detail() -> void:
@@ -289,11 +300,12 @@ func _update_detail() -> void:
 	var entry: Dictionary = _quest_entries[_selected_index]
 
 	if entry["completed"]:
-		_detail_title.text = String(entry["quest_id"])
+		_detail_title.text = String(entry["quest_id"]).replace("_", " ").capitalize()
 		_detail_type.text = ""
+		_detail_type.visible = false
 		_detail_desc.text = ""
 		_detail_status.text = "COMPLETED"
-		_detail_status.add_theme_color_override("font_color", COMPLETE_COLOR)
+		_detail_status.add_theme_color_override("font_color", DONE_COLOR)
 		_clear_objectives()
 		return
 
@@ -306,32 +318,45 @@ func _update_detail() -> void:
 	_detail_desc.text = data.description
 
 	var type_names := ["Story", "Side", "Exploration"]
-	_detail_type.text = type_names[data.quest_type] if data.quest_type < type_names.size() else "Quest"
+	_detail_type.text = (type_names[data.quest_type] if data.quest_type < type_names.size() else "Quest").to_upper()
+	_detail_type.visible = true
 
 	_detail_status.text = "IN PROGRESS"
-	_detail_status.add_theme_color_override("font_color", MARKER_COLOR)
+	_detail_status.add_theme_color_override("font_color", UIStyle.CYAN)
 
 	# Objectives
 	_clear_objectives()
 	var progress: Array = entry["progress"]
+	var current_idx: int = entry.get("current_objective_index", 0)
 	for i in data.objectives.size():
 		var obj: Resource = data.objectives[i]
 		var current: int = progress[i] if i < progress.size() else 0
 		var done: bool = current >= obj.target_count
-		var obj_label := Label.new()
-		obj_label.add_theme_font_size_override("font_size", 14)
-		obj_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
+		var text := ""
 		if obj.target_count > 1:
-			obj_label.text = "%s  (%d/%d)" % [obj.description, current, obj.target_count]
+			text = "%s  (%d/%d)" % [obj.description, current, obj.target_count]
 		else:
-			obj_label.text = "%s  %s" % [obj.description, "- Done" if done else ""]
+			text = "%s  %s" % [obj.description, "- Done" if done else ""]
+		_detail_objectives.add_child(_make_objective_line(text.strip_edges(), done, i == current_idx and not done))
 
-		if done:
-			obj_label.add_theme_color_override("font_color", COMPLETE_COLOR)
-		else:
-			obj_label.add_theme_color_override("font_color", OBJECTIVE_COLOR)
-		_detail_objectives.add_child(obj_label)
+
+func _make_objective_line(text: String, done: bool, is_current: bool) -> Control:
+	var line := HBoxContainer.new()
+	line.add_theme_constant_override("separation", 12)
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Bullet: a small diamond-ish square, coloured by state
+	var bullet := ColorRect.new()
+	bullet.custom_minimum_size = Vector2(10, 10)
+	bullet.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bullet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bullet.color = DONE_COLOR if done else (UIStyle.CYAN if is_current else UIStyle.TEXT_DISABLED)
+	line.add_child(bullet)
+	var col := DONE_COLOR if done else (UIStyle.TEXT if is_current else UIStyle.TEXT_DIM)
+	var obj_label := UIStyle.make_label(text, UIStyle.SIZE_M, col)
+	obj_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	obj_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	line.add_child(obj_label)
+	return line
 
 
 func _clear_objectives() -> void:
@@ -342,6 +367,7 @@ func _clear_objectives() -> void:
 func _clear_detail() -> void:
 	_detail_title.text = ""
 	_detail_type.text = ""
+	_detail_type.visible = false
 	_detail_desc.text = "Select a quest"
 	_detail_status.text = ""
 	_clear_objectives()
@@ -351,25 +377,24 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not _is_open:
 		return
 
-	if event.is_action_pressed(&"move_up") or event.is_action_pressed(&"ui_up"):
-		_move_selection(-1)
+	# Raw stick motion -> MenuNav (stepped in _process); D-pad / keys step here.
+	if _nav.consume_event(event):
 		get_viewport().set_input_as_handled()
 		return
-
-	if event.is_action_pressed(&"move_down") or event.is_action_pressed(&"ui_down"):
-		_move_selection(1)
+	var step := _nav.event_step(event)
+	if step.y != 0:
+		_move_selection(step.y)
 		get_viewport().set_input_as_handled()
 		return
 
 	# Track quest
-	if event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
+	if event.is_action_pressed(&"ui_accept"):
 		_track_selected()
 		get_viewport().set_input_as_handled()
 		return
 
 	# Back
-	if event.is_action_pressed(&"dodge") or event.is_action_pressed(&"ui_cancel") \
-			or event.is_action_pressed(&"pause"):
+	if event.is_action_pressed(&"ui_cancel") or event.is_action_pressed(&"pause"):
 		close_log()
 		get_viewport().set_input_as_handled()
 		return
@@ -392,27 +417,68 @@ func _track_selected() -> void:
 	_quest_system.set_tracked_quest(entry["quest_id"])
 
 
+# --- Visual helpers ---
+
+## Poll the tracked quest (read-only) so the "TRACKED" tag follows A presses.
+func _process(_delta: float) -> void:
+	if not _is_open:
+		return
+	var nav_step := _nav.poll()
+	if nav_step.y != 0:
+		_move_selection(nav_step.y)
+	if _quest_system == null:
+		return
+	if _current_tracked_id() != _tracked_id:
+		_update_tracked_marks()
+
+
+func _current_tracked_id() -> StringName:
+	if _quest_system == null or not _quest_system.has_method("get_tracked_quest"):
+		return &""
+	var t: Dictionary = _quest_system.get_tracked_quest()
+	return t.get("quest_id", &"")
+
+
+func _update_tracked_marks() -> void:
+	_tracked_id = _current_tracked_id()
+	var tracked_title := ""
+	for i in _quest_rows.size():
+		var row: MenuRow = _quest_rows[i]
+		var entry: Dictionary = _quest_entries[i] if i < _quest_entries.size() else {}
+		if entry.get("completed", false):
+			continue
+		var is_tracked: bool = _tracked_id != &"" and row.get_meta("quest_id", &"") == _tracked_id
+		row.right_text = "TRACKED" if is_tracked else ""
+		if is_tracked:
+			tracked_title = row.text
+	if _hint_label:
+		_hint_label.text = ("Tracking:  %s" % tracked_title) if tracked_title != "" else "No quest tracked"
+
+
+func _update_header_counts() -> void:
+	var active := 0
+	var done := 0
+	for e: Dictionary in _quest_entries:
+		if e["completed"]:
+			done += 1
+		else:
+			active += 1
+	_header.subtitle = "%d active  ·  %d completed" % [active, done]
+
+
 func _make_panel_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = BG_COLOR
-	s.border_color = BORDER_COLOR
-	s.border_width_left = 1
-	s.border_width_right = 1
-	s.border_width_top = 1
-	s.border_width_bottom = 1
-	s.corner_radius_top_left = 6
-	s.corner_radius_top_right = 6
-	s.corner_radius_bottom_left = 6
-	s.corner_radius_bottom_right = 6
-	s.content_margin_left = 14
-	s.content_margin_right = 14
-	s.content_margin_top = 10
-	s.content_margin_bottom = 10
-	return s
+	return UIStyle.glass_panel(14)
 
 
 func _show_log() -> void:
 	_root.visible = true
+	_overlay.modulate.a = 0.0
+	var tw := UIStyle.ui_tween(_overlay)
+	if tw:
+		tw.tween_property(_overlay, "modulate:a", 1.0, UIStyle.ANIM_TIME)
+	else:
+		_overlay.modulate.a = 1.0
+	UIStyle.fade_slide_in(_panel, Vector2.RIGHT, 0.16, 12.0)
 
 
 func _hide_log() -> void:

@@ -21,11 +21,41 @@ var anim_player: AnimationPlayer = null
 @onready var quest_system: Node = $QuestSystem
 var party_system: Node = null  # Assigned by zone/arena after spawn
 
+# Battle system v3 components (Package Q). Stubs until R (combo) / S (stance).
+@onready var battle_mode: BattleModeComponent = get_node_or_null(^"BattleModeComponent")
+@onready var combo: ComboComponent = get_node_or_null(^"ComboComponent")
+@onready var stance: StanceComponent = get_node_or_null(^"StanceComponent")
+## Fallback PartyMemberData when no PartySystem lists this node (test scenes).
+const DEFAULT_MEMBER_DATA_PATH := "res://resources/characters/hero.tres"
+var _default_member_data: Resource = null
+
+## Read-only: true while in Battle Mode (owned by BattleModeComponent).
+var in_battle: bool:
+	get:
+		return battle_mode != null and battle_mode.in_battle
+
 var is_locked_on: bool = false
 var lock_on_target: Node3D = null
 var dodge_ready: bool = true
 var _dodge_cooldown_timer: float = 0.0
 @export var dodge_cooldown_time: float = 0.45
+
+# Jump parameters (owned here so Jump/Fall and future Carry states share them)
+@export var jump_force: float = 12.0
+## Second (air) jump sets velocity.y to this value. It must be >= the rising
+## speed right after takeoff, otherwise a quick Y-Y press barely changes the arc
+## (v1 used jump_force * 0.85 = 10.2 < 12, which felt like "not registering").
+@export var double_jump_force: float = 12.0
+@export var air_control: float = 5.0
+@export var air_move_speed: float = 8.0
+
+# Sprint (Run) — ground speed multiplier while `sprint` is held in free locomotion.
+@export var sprint_multiplier: float = 1.6
+var _sprinting: bool = false
+## Read-only: true while Run (or a state that opts in) is applying sprint speed.
+var is_sprinting: bool:
+	get:
+		return _sprinting
 
 # Jump buffering
 var jump_buffer_time: float = 0.12
@@ -42,16 +72,35 @@ var _ledge_wall_normal: Vector3 = Vector3.ZERO
 var _nearby_interactables: Array[Node3D] = []
 var _current_interactable: Node3D = null
 
+# Combat flag (informational; kept for tests/legacy callers — input routing
+# uses `in_battle`). True if an encounter owner emitted Events.combat_started,
+# OR Battle Mode is on, OR any enemy is currently engaged (not IDLE/DEAD).
+# Read-only query of the public enemy ai_state; never mutates enemy state.
+var _combat_signal_active: bool = false
+var is_in_combat: bool:
+	get:
+		return _combat_signal_active or in_battle or _any_enemy_engaged()
+
 # Traversal abilities
-var has_double_jump: bool = false
+# Unlocked by default for now; tie to progression later (item 481).
+var has_double_jump: bool = true
 var _double_jump_used: bool = false
+# Set by try_double_jump() so JumpState.enter() keeps the air-jump velocity
+# instead of re-applying the ground jump_force.
+var _air_jump_pending: bool = false
+
+# Free-locomotion states where an `interact` press may fire an interaction.
+# Any other state (TacticalIdle, Ability, Dodge, attacks, Carry, ThrowAim...)
+# owns its own input, so a shared button (B = interact + ui_cancel) can't leak.
+const INTERACT_STATES: Array[StringName] = [&"Idle", &"Run", &"LockOnIdle", &"LockOnStrafe"]
 
 var current_hp: float = 100.0
 var max_hp: float = 100.0
 var current_mp: float = 50.0
 var max_mp: float = 50.0
-var current_atb: float = 0.0
 var max_atb: float = 100.0
+# Start with a full ATB gauge (user request 2026-11-12). It drains and refills as normal.
+var current_atb: float = max_atb
 var atb_fill_rate: float = 5.0
 
 # MP regen
@@ -62,6 +111,7 @@ var _mp_regen_timer: float = 0.0
 
 func _ready() -> void:
 	add_to_group(&"player")
+	_apply_member_visual(get_member_data())
 	_setup_model()
 	state_machine.initialize(self)
 	ability_system.initialize(self)
@@ -69,22 +119,22 @@ func _ready() -> void:
 	Events.lock_on_target_acquired.connect(_on_lock_on_acquired)
 	Events.lock_on_target_switched.connect(_on_lock_on_switched)
 	Events.lock_on_target_lost.connect(_on_lock_on_lost)
+	Events.combat_started.connect(_on_combat_started)
+	Events.combat_ended.connect(_on_combat_ended)
+	if battle_mode:
+		battle_mode.changed.connect(_on_battle_mode_changed)
 	Events.player_spawned.emit(self)
+	# Push the starting (full) ATB to the HUD once it exists; the regen loop
+	# only emits while below max, so the HUD would otherwise show 0.
+	Events.player_atb_changed.emit.call_deferred(current_atb, max_atb)
 
 	# Interaction detection
 	interaction_anchor.area_entered.connect(_on_interactable_entered)
 	interaction_anchor.area_exited.connect(_on_interactable_exited)
 
-	# Equip default abilities
-	var fire_bolt := load("res://resources/abilities/fire_bolt.tres") as AbilityData
-	if fire_bolt:
-		ability_system.equip_ability(fire_bolt, 0)
-	var ice_freeze := load("res://resources/abilities/ice_freeze.tres") as AbilityData
-	if ice_freeze:
-		ability_system.equip_ability(ice_freeze, 1)
-	var heal := load("res://resources/abilities/heal.tres") as AbilityData
-	if heal:
-		ability_system.equip_ability(heal, 2)
+	# Equip the starting member's command list (hero.tres default_abilities, or
+	# the legacy Fire Bolt / Ice Freeze / Heal set while that list is empty).
+	_equip_ability_list(_starting_abilities(get_member_data()))
 
 	# Illegal transitions per design contract
 	state_machine.add_illegal_transition(&"Ability", &"Dodge")
@@ -92,18 +142,20 @@ func _ready() -> void:
 	state_machine.add_illegal_transition(&"Flinch", &"Attack1")
 	state_machine.add_illegal_transition(&"LedgeGrab", &"Attack1")
 	state_machine.add_illegal_transition(&"ClimbUp", &"Attack1")
+	# v3 MeleeStrike mirrors Attack1's rules
+	state_machine.add_illegal_transition(&"Flinch", &"MeleeStrike")
+	state_machine.add_illegal_transition(&"LedgeGrab", &"MeleeStrike")
+	state_machine.add_illegal_transition(&"ClimbUp", &"MeleeStrike")
 
 	# Block tactical mode from forced/locked states (items 167-170)
-	for blocked_state in [&"Dodge", &"Ability", &"LedgeGrab", &"ClimbUp",
-			&"JumpAttack", &"Attack1", &"Attack2", &"Attack3", &"Land"]:
+	for blocked_state in [&"Dodge", &"AirDodge", &"Ability", &"LedgeGrab", &"ClimbUp",
+			&"JumpAttack", &"Attack1", &"Attack2", &"Attack3", &"MeleeStrike", &"Land"]:
 		state_machine.add_illegal_transition(blocked_state, &"TacticalIdle")
 
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-	else:
-		_double_jump_used = false
 
 	# Jump buffer countdown
 	if _jump_buffer_timer > 0.0:
@@ -135,6 +187,13 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	# Reset the air jump only on a real landing: checked AFTER move_and_slide()
+	# (so is_on_floor() is this frame's result, not last frame's stale value on
+	# the takeoff frame) and only when not moving upward.
+	if is_on_floor() and velocity.y <= 0.0:
+		_double_jump_used = false
+		_air_jump_pending = false
+
 
 func take_damage(amount: float, source: Node3D = null) -> void:
 	current_hp = maxf(current_hp - amount, 0.0)
@@ -145,6 +204,7 @@ func take_damage(amount: float, source: Node3D = null) -> void:
 	GameManager.hit_stop(65.0)
 	Events.camera_shake_requested.emit(0.15, 0.2)
 
+	_rigless_cue(&"hit")
 	if current_hp <= 0.0:
 		Events.player_died.emit()
 
@@ -189,6 +249,40 @@ func has_buffered_jump() -> bool:
 
 func consume_jump_buffer() -> void:
 	_jump_buffer_timer = 0.0
+
+
+## True if an air jump is available right now.
+func can_double_jump() -> bool:
+	return has_double_jump and not _double_jump_used and not is_on_floor()
+
+
+## Perform the air jump if available. Returns true if it fired. Callers in the
+## air (Jump/Fall/Carry) should transition to/stay in Jump on true.
+func try_double_jump() -> bool:
+	if not can_double_jump():
+		return false
+	_double_jump_used = true
+	_air_jump_pending = true
+	velocity.y = double_jump_force
+	return true
+
+
+## Consumed by JumpState.enter(): true if the entry was an air jump (velocity
+## already set by try_double_jump), false for a ground jump.
+func consume_air_jump_pending() -> bool:
+	var pending := _air_jump_pending
+	_air_jump_pending = false
+	return pending
+
+
+## Sprint input query (action-based; works for any binding of `sprint`).
+func wants_sprint() -> bool:
+	return InputMap.has_action(&"sprint") and Input.is_action_pressed(&"sprint")
+
+
+## Set by locomotion states that apply sprint speed (Run; later Carry).
+func set_sprinting(value: bool) -> void:
+	_sprinting = value
 
 
 func can_grab_ledge() -> bool:
@@ -318,15 +412,325 @@ func _update_nearest_interactable() -> void:
 		Events.interaction_available.emit(best)
 
 
+func _on_combat_started() -> void:
+	_combat_signal_active = true
+
+
+func _any_enemy_engaged() -> bool:
+	if not is_inside_tree():
+		return false
+	for enemy in get_tree().get_nodes_in_group(&"enemies"):
+		var e := enemy as EnemyBase
+		if e == null or not is_instance_valid(e):
+			continue
+		if e.ai_state != EnemyBase.AIState.IDLE and e.ai_state != EnemyBase.AIState.DEAD:
+			return true
+	return false
+
+
+func _on_combat_ended() -> void:
+	_combat_signal_active = false
+
+
+## True when a valid, active interactable is currently targeted.
+func has_interactable() -> bool:
+	if _current_interactable == null or not is_instance_valid(_current_interactable):
+		return false
+	if _current_interactable.has_method("is_active") and not _current_interactable.is_active():
+		return false
+	return _current_interactable.has_method("interact")
+
+
+## Interact with the current interactable. Returns true if an interaction fired.
+func try_interact() -> bool:
+	if not has_interactable():
+		return false
+	_current_interactable.interact(self)
+	return true
+
+
+## True while a dialogue box is open (public DialogueUI API, looked up by group).
+func is_dialogue_active() -> bool:
+	if not is_inside_tree():
+		return false
+	for ui in get_tree().get_nodes_in_group(&"dialogue_ui"):
+		if ui.has_method("is_dialogue_active") and ui.is_dialogue_active():
+			return true
+	return false
+
+
+# --- Battle v3 input routing (Package Q) ---
+# InputMap actions are PHYSICAL-ROLE actions (jump = A/Space, interact = Y/E,
+# tactical_mode = Q only, unique_ability = R only). These helpers translate a
+# press into its meaning for the current mode. Every state must use them; no
+# state may hardcode the mode logic. All return false for echo events and while
+# a dialogue box is open (the dialogue owns the press; this preserves the v2
+# handle_contextual_command gate).
+
+## Command Menu: `tactical_mode` (Q) in either mode, OR `jump` (A) in battle,
+## OR `interact` (Y/E) in free roam when no interactable is targeted.
+func is_command_press(event: InputEvent) -> bool:
+	if is_dialogue_active():
+		return false
+	if event.is_action_pressed(&"tactical_mode"):
+		return true
+	if in_battle:
+		return event.is_action_pressed(&"jump")
+	return event.is_action_pressed(&"interact") and not has_interactable()
+
+
+## Jump: `jump` (A/Space) in free roam only. Does nothing in battle.
+func is_jump_press(event: InputEvent) -> bool:
+	if in_battle or is_dialogue_active():
+		return false
+	return event.is_action_pressed(&"jump")
+
+
+## Interact: `interact` (Y/E) in free roam when an interactable is targeted.
+## (Whether the current state allows it is can_interact_now()'s job.)
+func is_interact_press(event: InputEvent) -> bool:
+	if in_battle or is_dialogue_active():
+		return false
+	return event.is_action_pressed(&"interact") and has_interactable()
+
+
+## Unique ability: `unique_ability` (R) in battle, OR `interact` (Y/E) in battle.
+func is_unique_press(event: InputEvent) -> bool:
+	if not in_battle or is_dialogue_active():
+		return false
+	return event.is_action_pressed(&"unique_ability") or event.is_action_pressed(&"interact")
+
+
+## Battle toggle (v4): `battle_toggle` (View/Back on pad, F on keyboard) in
+## either mode. Gating lives in can_toggle_battle().
+func is_battle_toggle_press(event: InputEvent) -> bool:
+	if is_dialogue_active():
+		return false
+	return event.is_action_pressed(&"battle_toggle")
+
+
+## True when a manual Battle/Free Roam toggle may fire: gameplay running (no
+## pause/menu, tactical menu, cutscene or game over), no dialogue, alive, and not
+## carrying or aiming a throw.
+func can_toggle_battle() -> bool:
+	if battle_mode == null:
+		return false
+	if GameManager.current_state != GameManager.GameState.PLAYING:
+		return false
+	if is_dialogue_active() or current_hp <= 0.0:
+		return false
+	var carry := get_node_or_null(^"CarryComponent")
+	if carry and bool(carry.get(&"is_carrying")):
+		return false
+	var cur: Node = state_machine.current_state if state_machine else null
+	if cur != null and StringName(cur.name) in [&"Carry", &"ThrowAim"]:
+		return false
+	return true
+
+
+## DEPRECATED (v2 shim): kept only so the pre-T states keep compiling. Returns
+## true while a dialogue is open. T replaces its callers with is_command_press().
+func handle_contextual_command(_event: InputEvent) -> bool:
+	return is_dialogue_active()
+
+
+## Transition the state machine to `target`, honouring illegal transitions.
+## Returns true if the transition happened. For time-driven entries that don't
+## come from a state's return value (ComboComponent heavy-at-threshold, stance).
+func request_transition(target: StringName, msg: Dictionary = {}) -> bool:
+	if state_machine == null or not state_machine.states.has(target):
+		return false
+	var cur: Node = state_machine.current_state
+	if cur and state_machine._is_illegal_transition(cur.name, target):
+		return false
+	state_machine._transition(target, msg)
+	return true
+
+
+## PartyMemberData of this character: the PartySystem entry whose node is this
+## player, else hero.tres. Never null unless hero.tres is missing.
+func get_member_data() -> Resource:
+	if party_system and "members" in party_system:
+		for m in party_system.members:
+			if m is Dictionary and m.get("node") == self and m.get("data") != null:
+				return m["data"]
+	if _default_member_data == null:
+		_default_member_data = load(DEFAULT_MEMBER_DATA_PATH)
+	return _default_member_data
+
+
+# --- v5 party switch: identity swap (Package CC) ---
+# PartySystem swaps IDENTITIES, not bodies: this Player node stays the input
+# body the camera follows; switching exchanges member data, HP/MP/ATB, command
+# list and visual model with the CompanionAI body (and their positions/facing).
+# Camera, lock-on, battle mode and state ownership never move.
+
+## States from which a party switch may fire (everything else is blocked:
+## dodge, casts, attacks, flinch, ledge, carry/throw, tactical menu...).
+const SWITCH_STATES: Array[StringName] = [&"Idle", &"Run", &"Jump", &"Fall",
+	&"Land", &"LockOnIdle", &"LockOnStrafe"]
+
+
+## True when the controlled member may hand over control right now.
+func can_party_switch() -> bool:
+	if current_hp <= 0.0 or is_dialogue_active():
+		return false
+	var carry := get_node_or_null(^"CarryComponent")
+	if carry and bool(carry.get(&"is_carrying")):
+		return false
+	var cur: Node = state_machine.current_state if state_machine else null
+	return cur != null and StringName(cur.name) in SWITCH_STATES
+
+
+## Snapshot of the controlled member's live state (handed to the other body).
+func export_member_state() -> Dictionary:
+	return {
+		"hp": current_hp, "max_hp": max_hp,
+		"mp": current_mp, "max_mp": max_mp,
+		"atb": current_atb, "max_atb": max_atb,
+		"atb_fill_rate": atb_fill_rate, "mp_regen_rate": mp_regen_rate,
+		"abilities": ability_system.equipped_abilities.duplicate() if ability_system else [],
+		"downed": false,
+	}
+
+
+## Become member `data` with `state` (from CompanionAI.export_member_state()).
+## Stance exits, the combo resets, the unique ability is re-resolved and the
+## state machine drops to a neutral state. Lock-on and battle mode are kept.
+func import_member_state(data: Resource, state: Dictionary) -> void:
+	if stance and stance.is_active():
+		stance.exit_stance(&"party_switch")
+	if combo:
+		combo.reset(&"party_switch")
+	disable_hitbox()
+	max_hp = state.get("max_hp", max_hp)
+	max_mp = state.get("max_mp", max_mp)
+	max_atb = state.get("max_atb", max_atb)
+	atb_fill_rate = state.get("atb_fill_rate", atb_fill_rate)
+	mp_regen_rate = state.get("mp_regen_rate", mp_regen_rate)
+	current_hp = clampf(state.get("hp", max_hp), 0.0, max_hp)
+	current_mp = clampf(state.get("mp", max_mp), 0.0, max_mp)
+	current_atb = clampf(state.get("atb", 0.0), 0.0, max_atb)
+	_mp_regen_timer = 0.0
+	var list: Array = state.get("abilities", [])
+	if list.is_empty():
+		list = _starting_abilities(data)
+	_equip_ability_list(list)
+	if stance:
+		stance.refresh_ability()
+	velocity = Vector3.ZERO
+	consume_jump_buffer()
+	if state_machine and state_machine.current_state:
+		state_machine.force_transition(&"LockOnIdle" if is_locked_on else &"Idle")
+	Events.player_hp_changed.emit(current_hp, max_hp)
+	Events.player_mp_changed.emit(current_mp, max_mp)
+	Events.player_atb_changed.emit(current_atb, max_atb)
+
+
+## v5 EE: a rigless member replaces the authored model with a RiglessVisual
+## (dormant until a .tres sets rigless + model_scene).
+func _apply_member_visual(data: Resource) -> void:
+	if data == null or not data.has_method("make_rigless_visual"):
+		return
+	var rv: Node3D = data.make_rigless_visual()
+	if rv == null:
+		return
+	for c in visual_root.get_children():
+		visual_root.remove_child(c)
+		c.queue_free()
+	visual_root.add_child(rv)
+	model = rv
+
+
+## Cosmetic RiglessVisual cue (&"attack", &"dodge", &"hit"...). No-op otherwise.
+func _rigless_cue(cue: StringName) -> void:
+	var rv: Node = visual_root.get_node_or_null(^"RiglessVisual") if visual_root else null
+	if rv and rv.has_method(&"play_cue"):
+		rv.play_cue(cue)
+
+
+## Re-resolve `model` / `anim_player` after PartySystem exchanged the child of
+## $VisualRoot (the member's model travels with the identity).
+func refresh_visual() -> void:
+	model = visual_root.get_child(0) if visual_root.get_child_count() > 0 else null
+	anim_player = _find_child_of_type(model, "AnimationPlayer") as AnimationPlayer if model else null
+
+
+## Vertical launch into Jump (Super Jump etc.): sets velocity.y = `vy`, adds
+## `forward_carry` m/s along facing and enters Jump without re-applying
+## jump_force. Returns false if Jump is illegal from the current state.
+func launch_jump(vy: float, forward_carry: float = 0.0) -> bool:
+	var cur: Node = state_machine.current_state if state_machine else null
+	if cur and state_machine._is_illegal_transition(cur.name, &"Jump"):
+		return false
+	var fwd: Vector3 = -global_basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized() if fwd.length() > 0.01 else Vector3.FORWARD
+	velocity.x += fwd.x * forward_carry
+	velocity.z += fwd.z * forward_carry
+	velocity.y = vy
+	_air_jump_pending = true  # JumpState.enter() keeps our velocity.y
+	if not request_transition(&"Jump"):
+		_air_jump_pending = false
+		return false
+	return true
+
+
+func _starting_abilities(data: Resource) -> Array:
+	if data and data.has_method("get_starting_abilities"):
+		return data.get_starting_abilities()
+	return []
+
+
+func _equip_ability_list(list: Array) -> void:
+	if ability_system == null:
+		return
+	ability_system.equipped_abilities.clear()
+	for i in list.size():
+		var a := list[i] as AbilityData
+		if a:
+			ability_system.equip_ability(a, i)
+
+
+func _on_battle_mode_changed(value: bool) -> void:
+	# Entering battle drops a carried crate (pick-up is free-roam only).
+	if value:
+		var carry := get_node_or_null(^"CarryComponent")
+		if carry and carry.has_method("drop") and carry.is_carrying:
+			carry.drop(&"forced")
+
+
+## True when an `interact` press may fire: gameplay running (not tactical,
+## paused, cutscene...), no dialogue open, and in a free-locomotion state.
+func can_interact_now() -> bool:
+	if GameManager.current_state != GameManager.GameState.PLAYING:
+		return false
+	if is_dialogue_active():
+		return false
+	var cur: Node = state_machine.current_state if state_machine else null
+	return cur != null and StringName(cur.name) in INTERACT_STATES
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"interact") and _current_interactable != null:
-		if _current_interactable.has_method("interact"):
-			_current_interactable.interact(self)
+	# The StateMachine (child) sees events first; states that consume a shared
+	# button mark it handled. v3: Y/E interacts only in free roam with a prompt
+	# (in battle it is the unique ability; with no prompt it is the Command Menu).
+	if is_interact_press(event) and can_interact_now():
+		if try_interact():
+			get_viewport().set_input_as_handled()
+			return
+	# v4: View/Back (F) flips Battle / Free Roam on the fly.
+	if is_battle_toggle_press(event):
+		if can_toggle_battle():
+			battle_mode.toggle_manual()
+		get_viewport().set_input_as_handled()
 
 
 # --- Model & Animation Setup ---
 
 func _setup_model() -> void:
+	if model == null:
+		return
 	# Find AnimationPlayer in the imported model
 	anim_player = _find_child_of_type(model, "AnimationPlayer") as AnimationPlayer
 	if anim_player == null:
@@ -407,6 +811,10 @@ func load_save_data(data: Dictionary) -> void:
 		global_position = Vector3(pos["x"], pos["y"], pos["z"])
 	if data.has("rotation_y"):
 		global_rotation.y = data["rotation_y"]
+	# v5: party first; it may swap the active identity onto this body (which
+	# sets the member's max values), then the body's saved HP/MP/ATB apply.
+	if data.has("party") and party_system and party_system.has_method("load_save_data"):
+		party_system.load_save_data(data["party"])
 	current_hp = data.get("hp", max_hp)
 	current_mp = data.get("mp", max_mp)
 	current_atb = data.get("atb", 0.0)
@@ -419,5 +827,3 @@ func load_save_data(data: Dictionary) -> void:
 		equipment_system.load_save_data(data["equipment"])
 	if data.has("quests"):
 		quest_system.load_save_data(data["quests"])
-	if data.has("party") and party_system and party_system.has_method("load_save_data"):
-		party_system.load_save_data(data["party"])

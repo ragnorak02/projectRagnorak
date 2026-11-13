@@ -1,5 +1,6 @@
 ## Save/Load slot selection menu overlay.
 ## Builds UI programmatically — shows slot metadata, supports save and load modes.
+## Visuals: "Lumina Frost" menu shell (header tab, glass slot cards, footer glyphs).
 extends CanvasLayer
 
 # --- Colors ---
@@ -19,6 +20,8 @@ var _mode: Mode = Mode.SAVE
 var _is_open: bool = false
 var _selected_index: int = 0
 var _confirming_overwrite: bool = false
+## Stick/D-pad/key navigation (v5 AA): one push = one step, hold = steady repeat.
+var _nav := MenuNav.new([&"move_up", &"ui_up"], [&"move_down", &"ui_down"], [], [])
 
 # Slot order: manual 1, 2, 3 (no autosave/quicksave in manual UI)
 var _slot_ids: Array[int] = [1, 2, 3]
@@ -34,6 +37,8 @@ var _hint_label: Label
 var _confirm_panel: PanelContainer
 var _confirm_label: Label
 var _feedback_label: Label
+var _header: HeaderTab
+var _accept_hint: GlyphHint
 
 signal menu_closed
 
@@ -50,12 +55,14 @@ func open_menu(mode: Mode) -> void:
 	_is_open = true
 	_selected_index = 0
 	_confirming_overwrite = false
+	_nav.reset()
 	_refresh_slots()
 	_update_title()
 	_update_selection()
 	_confirm_panel.visible = false
 	_feedback_label.visible = false
 	_root.visible = true
+	_play_open_transition()
 
 
 func close_menu() -> void:
@@ -65,6 +72,21 @@ func close_menu() -> void:
 	menu_closed.emit()
 
 
+func _play_open_transition() -> void:
+	_overlay.modulate.a = 0.0
+	var tw := UIStyle.ui_tween(_overlay)
+	if tw:
+		tw.tween_property(_overlay, "modulate:a", 1.0, UIStyle.ANIM_TIME)
+	else:
+		_overlay.modulate.a = 1.0
+	_panel.modulate.a = 0.0
+	var tp := UIStyle.ui_tween(_panel)
+	if tp:
+		tp.tween_property(_panel, "modulate:a", 1.0, 0.16)
+	else:
+		_panel.modulate.a = 1.0
+
+
 # --- Input ---
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -72,34 +94,46 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if _confirming_overwrite:
-		if event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
+		if event.is_action_pressed(&"ui_accept"):
 			_execute_save(_slot_ids[_selected_index])
 			_confirming_overwrite = false
 			_confirm_panel.visible = false
 			get_viewport().set_input_as_handled()
 			return
-		if event.is_action_pressed(&"dodge") or event.is_action_pressed(&"ui_cancel"):
+		if event.is_action_pressed(&"ui_cancel"):
 			_confirming_overwrite = false
 			_confirm_panel.visible = false
 			get_viewport().set_input_as_handled()
 			return
-		# Block all other input during confirm
+		# Block all other input during confirm (stick still tracked, never steps)
+		_nav.consume_event(event)
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.is_action_pressed(&"move_up") or event.is_action_pressed(&"ui_up"):
-		_move_selection(-1)
+	# Raw stick motion -> MenuNav (stepped in _process); D-pad / keys step here.
+	if _nav.consume_event(event):
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"move_down") or event.is_action_pressed(&"ui_down"):
-		_move_selection(1)
+		return
+	var step := _nav.event_step(event)
+	if step.y != 0:
+		_move_selection(step.y)
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"jump") or event.is_action_pressed(&"ui_accept"):
+	elif event.is_action_pressed(&"ui_accept"):
 		_confirm_slot()
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"dodge") or event.is_action_pressed(&"ui_cancel") \
-			or event.is_action_pressed(&"pause"):
+	elif event.is_action_pressed(&"ui_cancel") or event.is_action_pressed(&"pause"):
 		close_menu()
 		get_viewport().set_input_as_handled()
+
+
+func _process(_delta: float) -> void:
+	if not _is_open:
+		return
+	var nav_step := _nav.poll()
+	if _confirming_overwrite:
+		return   # the overwrite prompt blocks navigation
+	if nav_step.y != 0:
+		_move_selection(nav_step.y)
 
 
 # --- Selection ---
@@ -111,8 +145,13 @@ func _move_selection(direction: int) -> void:
 
 func _update_selection() -> void:
 	for i in _slot_rows.size():
-		var style := _slot_rows[i].get_theme_stylebox("panel") as StyleBoxFlat
-		style.bg_color = HIGHLIGHT_BG if i == _selected_index else Color(0, 0, 0, 0)
+		var row: SlantPanel = _slot_rows[i]
+		var is_sel := i == _selected_index
+		row.selected = is_sel
+		var accent: ColorRect = row.get_meta("accent")
+		accent.color = UIStyle.CYAN if is_sel else Color(0, 0, 0, 0)
+		var idx_label: Label = row.get_meta("index_label")
+		idx_label.add_theme_color_override("font_color", UIStyle.GOLD if is_sel else UIStyle.GOLD_DIM)
 
 
 func _confirm_slot() -> void:
@@ -122,7 +161,7 @@ func _confirm_slot() -> void:
 			# Ask overwrite confirmation
 			_confirming_overwrite = true
 			_confirm_panel.visible = true
-			_confirm_label.text = "Overwrite Slot %d? [A/Enter] Yes  [B/Esc] No" % slot_id
+			_confirm_label.text = "Overwrite Slot %d?" % slot_id
 		else:
 			_execute_save(slot_id)
 	else:
@@ -161,23 +200,33 @@ func _refresh_slots() -> void:
 
 	# Update row labels
 	for i in _slot_rows.size():
-		var label: Label = _slot_rows[i].get_child(0)
+		var row: Control = _slot_rows[i]
+		var label: Label = row.get_meta("zone_label")
+		var sub: Label = row.get_meta("time_label")
 		var meta: Dictionary = _slot_metadata[i]
 		if meta.get("empty", true):
-			label.text = "Slot %d  —  Empty" % _slot_ids[i]
-			label.add_theme_color_override("font_color", EMPTY_COLOR)
+			label.text = "Empty Slot"
+			label.add_theme_color_override("font_color", UIStyle.TEXT_DIM)
+			sub.text = "No data"
+			sub.add_theme_color_override("font_color", UIStyle.TEXT_DISABLED)
 		else:
 			var ts: String = meta.get("timestamp", "Unknown")
 			# Format timestamp for display
 			if ts.length() > 16:
 				ts = ts.substr(0, 16).replace("T", "  ")
 			var zone: String = meta.get("zone_id", "?").replace("_", " ").capitalize()
-			label.text = "Slot %d  |  %s  |  %s" % [_slot_ids[i], zone, ts]
-			label.add_theme_color_override("font_color", TEXT_COLOR)
+			label.text = zone
+			label.add_theme_color_override("font_color", UIStyle.TEXT)
+			sub.text = ts
+			sub.add_theme_color_override("font_color", UIStyle.TEXT_DIM)
 
 
 func _update_title() -> void:
-	_title_label.text = "SAVE GAME" if _mode == Mode.SAVE else "LOAD GAME"
+	_header.title = "Save Game" if _mode == Mode.SAVE else "Load Game"
+	_header.subtitle = "Choose a slot"
+	_title_label.text = _header.get_title_label().text
+	if _accept_hint:
+		_accept_hint.text = "Save" if _mode == Mode.SAVE else "Load"
 
 
 # --- Feedback ---
@@ -186,14 +235,22 @@ func _show_feedback(msg: String) -> void:
 	_feedback_label.text = msg
 	_feedback_label.visible = true
 	_feedback_label.modulate.a = 1.0
-	var tween := create_tween()
-	tween.set_process_mode(Tween.TWEEN_PROCESS_IDLE)
+	var bad := msg.contains("fail") or msg.contains("empty")
+	_feedback_label.add_theme_color_override("font_color", UIStyle.DANGER if bad else UIStyle.CYAN)
+	_feedback_label.add_theme_stylebox_override("normal",
+		UIStyle.pill(UIStyle.GLASS_DEEP, UIStyle.DANGER if bad else UIStyle.CYAN_DIM, 20, 6))
+	var tween := UIStyle.ui_tween(_feedback_label)
+	if tween == null:
+		return
 	tween.tween_interval(1.5)
 	tween.tween_property(_feedback_label, "modulate:a", 0.0, 0.4)
 	tween.tween_callback(func(): _feedback_label.visible = false)
 
 
 # --- Build UI ---
+
+const SHELL_WIDTH := 880.0
+
 
 func _build_ui() -> void:
 	_root = Control.new()
@@ -203,53 +260,42 @@ func _build_ui() -> void:
 
 	_overlay = ColorRect.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_overlay.color = OVERLAY_COLOR
+	_overlay.color = Color(UIStyle.DIM_SCREEN, 0.94)   # full screen: hide the menu beneath
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_overlay)
 
+	# Centered shell: header tab + glass content + footer glyph bar
 	_panel = PanelContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_panel.custom_minimum_size = Vector2(500, 0)
+	_panel.custom_minimum_size = Vector2(SHELL_WIDTH, 0)
 	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	var ps := StyleBoxFlat.new()
-	ps.bg_color = PANEL_BG
-	ps.border_color = PANEL_BORDER
-	ps.border_width_left = 2
-	ps.border_width_right = 2
-	ps.border_width_top = 2
-	ps.border_width_bottom = 2
-	ps.corner_radius_top_left = 6
-	ps.corner_radius_top_right = 6
-	ps.corner_radius_bottom_left = 6
-	ps.corner_radius_bottom_right = 6
-	ps.content_margin_left = 24
-	ps.content_margin_right = 24
-	ps.content_margin_top = 16
-	ps.content_margin_bottom = 16
-	_panel.add_theme_stylebox_override("panel", ps)
+	_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	_root.add_child(_panel)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 6)
-	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_panel.add_child(vbox)
+	var shell := VBoxContainer.new()
+	shell.add_theme_constant_override("separation", 0)
+	shell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.add_child(shell)
 
-	# Title
-	_title_label = Label.new()
+	_header = HeaderTab.new().setup("Save Game", "Choose a slot")
+	_header.title_size = UIStyle.SIZE_L
+	_header.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	shell.add_child(_header)
+	_title_label = Label.new()   # legacy handle; HeaderTab renders the title
 	_title_label.text = "SAVE GAME"
-	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.add_theme_font_size_override("font_size", 22)
-	_title_label.add_theme_color_override("font_color", TITLE_COLOR)
-	_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.add_child(_title_label)
+	_title_label.visible = false
+	shell.add_child(_title_label)
 
-	var sep := HSeparator.new()
-	sep.add_theme_constant_override("separation", 8)
-	sep.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.add_child(sep)
+	var content := SlantPanel.new()
+	content.padding = 20
+	shell.add_child(content)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 10)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(vbox)
 
 	# Slot rows
 	_slot_rows.clear()
@@ -257,93 +303,118 @@ func _build_ui() -> void:
 		var row := _create_slot_row(i)
 		vbox.add_child(row)
 
-	var sep2 := HSeparator.new()
-	sep2.add_theme_constant_override("separation", 8)
-	sep2.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.add_child(sep2)
-
-	# Hint
-	_hint_label = Label.new()
-	_hint_label.text = "[A/Enter] Select    [B/Esc] Back"
-	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint_label.add_theme_font_size_override("font_size", 11)
-	_hint_label.add_theme_color_override("font_color", DIMMED_COLOR)
-	_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.add_child(_hint_label)
+	# Footer glyph bar
+	var footer := PanelContainer.new()
+	footer.add_theme_stylebox_override("panel", UIStyle.glass_panel(10))
+	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	shell.add_child(footer)
+	var fbox := HBoxContainer.new()
+	fbox.add_theme_constant_override("separation", 28)
+	fbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	footer.add_child(fbox)
+	_hint_label = UIStyle.make_label("Manual slots", UIStyle.SIZE_S, UIStyle.TEXT_DIM)
+	_hint_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_hint_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	fbox.add_child(_hint_label)
+	fbox.add_child(GlyphHint.create(&"ui_up", "Select", UIStyle.SIZE_S))
+	_accept_hint = GlyphHint.create(&"ui_accept", "Save", UIStyle.SIZE_S)
+	fbox.add_child(_accept_hint)
+	fbox.add_child(GlyphHint.create(&"ui_cancel", "Back", UIStyle.SIZE_S))
 
 	# Overwrite confirm panel (hidden)
 	_confirm_panel = PanelContainer.new()
 	_confirm_panel.set_anchors_preset(Control.PRESET_CENTER)
 	_confirm_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_confirm_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	_confirm_panel.position.y = 80
+	_confirm_panel.custom_minimum_size = Vector2(560, 0)
 	_confirm_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_confirm_panel.visible = false
 
-	var cs := StyleBoxFlat.new()
-	cs.bg_color = Color(0.15, 0.08, 0.05, 0.95)
+	var cs := UIStyle.glass_panel_selected(22)
+	cs.bg_color = Color(UIStyle.GLASS_DEEP, 0.97)
 	cs.border_color = OVERWRITE_COLOR
-	cs.border_width_left = 2
-	cs.border_width_right = 2
-	cs.border_width_top = 2
-	cs.border_width_bottom = 2
-	cs.corner_radius_top_left = 4
-	cs.corner_radius_top_right = 4
-	cs.corner_radius_bottom_left = 4
-	cs.corner_radius_bottom_right = 4
-	cs.content_margin_left = 16
-	cs.content_margin_right = 16
-	cs.content_margin_top = 10
-	cs.content_margin_bottom = 10
+	cs.shadow_color = Color(0, 0, 0, 0.6)
+	cs.shadow_size = 24
 	_confirm_panel.add_theme_stylebox_override("panel", cs)
 
-	_confirm_label = Label.new()
-	_confirm_label.text = "Overwrite?"
+	var cbox := VBoxContainer.new()
+	cbox.add_theme_constant_override("separation", 16)
+	cbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_confirm_panel.add_child(cbox)
+	_confirm_label = UIStyle.make_label("Overwrite?", UIStyle.SIZE_L, OVERWRITE_COLOR, true)
 	_confirm_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_confirm_label.add_theme_font_size_override("font_size", 14)
-	_confirm_label.add_theme_color_override("font_color", OVERWRITE_COLOR)
-	_confirm_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_confirm_panel.add_child(_confirm_label)
+	cbox.add_child(_confirm_label)
+	var csub := UIStyle.make_label("The existing save in this slot will be replaced.", UIStyle.SIZE_S, UIStyle.TEXT_DIM)
+	csub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cbox.add_child(csub)
+	var chints := HBoxContainer.new()
+	chints.alignment = BoxContainer.ALIGNMENT_CENTER
+	chints.add_theme_constant_override("separation", 36)
+	chints.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chints.add_child(GlyphHint.create(&"ui_accept", "Yes", UIStyle.SIZE_M))
+	chints.add_child(GlyphHint.create(&"ui_cancel", "No", UIStyle.SIZE_M))
+	cbox.add_child(chints)
 	_root.add_child(_confirm_panel)
 
-	# Feedback label
-	_feedback_label = Label.new()
+	# Feedback toast
+	_feedback_label = UIStyle.make_label("", UIStyle.SIZE_M, UIStyle.CYAN, true)
 	_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_feedback_label.set_anchors_preset(Control.PRESET_CENTER)
-	_feedback_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_feedback_label.grow_vertical = Control.GROW_DIRECTION_BOTH
-	_feedback_label.position.y = 120
-	_feedback_label.add_theme_font_size_override("font_size", 16)
-	_feedback_label.add_theme_color_override("font_color", Color(0.3, 0.9, 0.4))
+	_feedback_label.anchor_left = 0.5
+	_feedback_label.anchor_right = 0.5
+	_feedback_label.anchor_top = 1.0
+	_feedback_label.anchor_bottom = 1.0
+	_feedback_label.offset_left = -240
+	_feedback_label.offset_right = 240
+	_feedback_label.offset_top = -200
+	_feedback_label.offset_bottom = -160
 	_feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_feedback_label.visible = false
 	_root.add_child(_feedback_label)
 
 
 func _create_slot_row(index: int) -> PanelContainer:
-	var row := PanelContainer.new()
-	row.custom_minimum_size = Vector2(450, 40)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var row := SlantPanel.new()
+	row.custom_minimum_size = Vector2(SHELL_WIDTH - 60, 92)
+	row.padding = 14
+	row.show_top_line = false
+	row.fill_color = Color(UIStyle.GLASS.r, UIStyle.GLASS.g, UIStyle.GLASS.b, 0.55)
 
-	var rs := StyleBoxFlat.new()
-	rs.bg_color = Color(0, 0, 0, 0)
-	rs.corner_radius_top_left = 4
-	rs.corner_radius_top_right = 4
-	rs.corner_radius_bottom_left = 4
-	rs.corner_radius_bottom_right = 4
-	rs.content_margin_left = 12
-	rs.content_margin_right = 12
-	rs.content_margin_top = 6
-	rs.content_margin_bottom = 6
-	row.add_theme_stylebox_override("panel", rs)
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 22)
+	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(hbox)
 
-	var label := Label.new()
-	label.text = "Slot %d  —  Empty" % _slot_ids[index]
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 16)
-	label.add_theme_color_override("font_color", EMPTY_COLOR)
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(label)
+	var accent := ColorRect.new()
+	accent.custom_minimum_size = Vector2(4, 0)
+	accent.color = Color(0, 0, 0, 0)
+	accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hbox.add_child(accent)
+
+	var idx_label := UIStyle.make_label("%02d" % _slot_ids[index], UIStyle.SIZE_XL, UIStyle.GOLD_DIM, true)
+	idx_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	idx_label.custom_minimum_size.x = 70
+	hbox.add_child(idx_label)
+
+	var info := VBoxContainer.new()
+	info.add_theme_constant_override("separation", 2)
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hbox.add_child(info)
+
+	var label := UIStyle.make_label("Slot %d  —  Empty" % _slot_ids[index], UIStyle.SIZE_L, EMPTY_COLOR, true)
+	info.add_child(label)
+	var sub := UIStyle.make_label("", UIStyle.SIZE_S, UIStyle.TEXT_DIM)
+	info.add_child(sub)
+
+	var slot_tag := UIStyle.make_label("SLOT %d" % _slot_ids[index], UIStyle.SIZE_S, UIStyle.TEXT_DIM, true)
+	slot_tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hbox.add_child(slot_tag)
+
+	row.set_meta("accent", accent)
+	row.set_meta("index_label", idx_label)
+	row.set_meta("zone_label", label)
+	row.set_meta("time_label", sub)
 
 	_slot_rows.append(row)
 	return row

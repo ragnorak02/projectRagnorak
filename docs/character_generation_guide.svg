@@ -1,0 +1,808 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 3800" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#111827"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow-gold">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#f59e0b" flood-opacity="0.3" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+      <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="3800" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="960" y="50" text-anchor="middle" fill="#f59e0b" font-size="34" font-weight="bold" letter-spacing="6">RAGNORAK — CHARACTER GENERATION GUIDE</text>
+  <text x="960" y="78" text-anchor="middle" fill="#9ca3af" font-size="15" letter-spacing="2">6 PARTY · 22 NPCs · 12 MILITARY · 8 CORRUPTED · 7 BOSSES — ORGANIZED BY GENERATION PRIORITY</text>
+  <line x1="200" y1="92" x2="1720" y2="92" stroke="#f59e0b" stroke-width="1" opacity="0.3"/>
+
+  <!-- ============================================================ -->
+  <!-- BATCH 1: PLAYABLE PARTY — HERO + FIRST COMPANION             -->
+  <!-- ============================================================ -->
+  <g transform="translate(0, 110)">
+    <!-- Batch header -->
+    <rect x="50" y="0" width="1820" height="44" rx="6" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
+    <rect x="50" y="0" width="8" height="44" rx="4" fill="#ef4444"/>
+    <text x="80" y="17" fill="#ef4444" font-size="11" font-weight="bold" letter-spacing="2">BATCH 1</text>
+    <text x="80" y="35" fill="#fca5a5" font-size="18" font-weight="bold">PROTAGONIST + FIRST COMPANION</text>
+    <text x="960" y="28" text-anchor="middle" fill="#f87171" font-size="13">Generate these FIRST — needed for all gameplay footage, screenshots, and vertical slice</text>
+    <rect x="1620" y="8" width="230" height="28" rx="14" fill="rgba(239,68,68,0.2)" stroke="#ef4444" stroke-width="1"/>
+    <text x="1735" y="27" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="bold">PRIORITY: CRITICAL</text>
+
+    <!-- Amaro -->
+    <rect x="80" y="60" width="860" height="260" rx="10" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="80" y="60" width="860" height="5" rx="3" fill="#f59e0b"/>
+
+    <!-- Amaro silhouette placeholder -->
+    <rect x="100" y="80" width="160" height="220" rx="8" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="180" y="175" text-anchor="middle" fill="#f59e0b" font-size="40" opacity="0.3">⚔</text>
+    <text x="180" y="210" text-anchor="middle" fill="#f59e0b" font-size="10" opacity="0.4">3D MODEL</text>
+    <text x="180" y="225" text-anchor="middle" fill="#f59e0b" font-size="10" opacity="0.4">REFERENCE</text>
+    <text x="180" y="285" text-anchor="middle" fill="#6b7280" font-size="9">Existing: Red Knight placeholder</text>
+
+    <!-- Amaro details -->
+    <text x="280" y="95" fill="#fbbf24" font-size="22" font-weight="bold">AMARO</text>
+    <text x="445" y="95" fill="#9ca3af" font-size="14">— Protagonist · Magic Knight</text>
+
+    <text x="280" y="120" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">APPEARANCE</text>
+    <text x="280" y="138" fill="#d1d5db" font-size="12">Male, young adult village soldier. Athletic build, not bulky.</text>
+    <text x="280" y="155" fill="#d1d5db" font-size="12">Practical military clothing with subtle magical accents (glowing trim, Lumina crystal details).</text>
+    <text x="280" y="172" fill="#d1d5db" font-size="12">Hair: short-medium, practical for combat. No helmet (face always visible).</text>
+
+    <text x="280" y="198" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">EQUIPMENT TO MODEL</text>
+    <text x="280" y="216" fill="#60a5fa" font-size="12">• Sword — one-handed, medium length, Lumina-infused glow along edge</text>
+    <text x="280" y="233" fill="#60a5fa" font-size="12">• Light armor — leather + metal hybrid, militia-grade, upgradeable visual</text>
+    <text x="280" y="250" fill="#60a5fa" font-size="12">• Lumina crystal — small, embedded in gauntlet or belt (magic channel)</text>
+
+    <text x="280" y="275" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">ANIMATIONS NEEDED</text>
+    <rect x="280" y="282" width="640" height="20" rx="3" fill="rgba(59,130,246,0.08)"/>
+    <text x="290" y="296" fill="#6b7280" font-size="10">Idle · Run · Strafe · Jump · Fall · Land · Dodge · Attack1-3 · JumpAttack · SpellCast · Flinch · Stagger · Death · Interact</text>
+
+    <!-- Taighe -->
+    <rect x="980" y="60" width="860" height="260" rx="10" fill="rgba(59,130,246,0.06)" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="980" y="60" width="860" height="5" rx="3" fill="#3b82f6"/>
+
+    <!-- Taighe silhouette -->
+    <rect x="1000" y="80" width="160" height="220" rx="8" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="1080" y="175" text-anchor="middle" fill="#3b82f6" font-size="40" opacity="0.3">✦</text>
+    <text x="1080" y="210" text-anchor="middle" fill="#3b82f6" font-size="10" opacity="0.4">3D MODEL</text>
+    <text x="1080" y="225" text-anchor="middle" fill="#3b82f6" font-size="10" opacity="0.4">REFERENCE</text>
+    <text x="1080" y="285" text-anchor="middle" fill="#6b7280" font-size="9">Existing: "Yuna" companion (rename)</text>
+
+    <!-- Taighe details -->
+    <text x="1180" y="95" fill="#60a5fa" font-size="22" font-weight="bold">TAIGHE</text>
+    <text x="1335" y="95" fill="#9ca3af" font-size="14">— First Companion · Elemental Mage</text>
+
+    <text x="1180" y="120" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">APPEARANCE</text>
+    <text x="1180" y="138" fill="#d1d5db" font-size="12">Female, young adult. Long blue hair (signature trait — locked per CLAUDE.md).</text>
+    <text x="1180" y="155" fill="#d1d5db" font-size="12">Mage robes/attire — flowing but practical. Blues and silvers.</text>
+    <text x="1180" y="172" fill="#d1d5db" font-size="12">Elegant but not fragile. Researcher vibe — she studies Lumina.</text>
+
+    <text x="1180" y="198" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">EQUIPMENT TO MODEL</text>
+    <text x="1180" y="216" fill="#60a5fa" font-size="12">• Staff — ornate, Lumina crystal at tip, channels elemental magic</text>
+    <text x="1180" y="233" fill="#60a5fa" font-size="12">• Mage attire — robes or coat, layered, wind-reactive cloth</text>
+    <text x="1180" y="250" fill="#60a5fa" font-size="12">• Elemental focus stones — small crystals on staff or belt</text>
+
+    <text x="1180" y="275" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">ANIMATIONS NEEDED</text>
+    <rect x="1180" y="282" width="640" height="20" rx="3" fill="rgba(59,130,246,0.08)"/>
+    <text x="1190" y="296" fill="#6b7280" font-size="10">Idle · Run · Strafe · Jump · Dodge · SpellCast (Fire/Ice/Wind/Earth) · Flinch · Stagger · Death · CompanionIdle</text>
+
+    <!-- Generation notes for Batch 1 -->
+    <rect x="80" y="335" width="1760" height="50" rx="6" fill="rgba(239,68,68,0.06)" stroke="#ef4444" stroke-width="1" stroke-dasharray="6,3"/>
+    <text x="100" y="358" fill="#fca5a5" font-size="12" font-weight="bold">GENERATION NOTES:</text>
+    <text x="280" y="358" fill="#d1d5db" font-size="12">Start with T-pose base mesh → rig with Mixamo → animate core set (idle/run/attack). These two appear in every screenshot and trailer.</text>
+    <text x="100" y="375" fill="#d1d5db" font-size="12">Current placeholder: Red Knight (Amaro) + generic companion (Taighe/"Yuna"). Replace both. Generate together so art style is consistent.</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- BATCH 2: CORE ENEMIES — STATE 1 COMBAT                      -->
+  <!-- ============================================================ -->
+  <g transform="translate(0, 520)">
+    <rect x="50" y="0" width="1820" height="44" rx="6" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="1.5"/>
+    <rect x="50" y="0" width="8" height="44" rx="4" fill="#f59e0b"/>
+    <text x="80" y="17" fill="#f59e0b" font-size="11" font-weight="bold" letter-spacing="2">BATCH 2</text>
+    <text x="80" y="35" fill="#fcd34d" font-size="18" font-weight="bold">CORE MILITARY ENEMIES — STATE 1 COMBAT LOOP</text>
+    <text x="960" y="28" text-anchor="middle" fill="#fbbf24" font-size="13">Needed immediately after party — these populate Greenhollow, Shrine, and Tidewatch</text>
+    <rect x="1620" y="8" width="230" height="28" rx="14" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="1"/>
+    <text x="1735" y="27" text-anchor="middle" fill="#fcd34d" font-size="12" font-weight="bold">PRIORITY: HIGH</text>
+
+    <!-- Enemy cards row 1 -->
+    <!-- Garrison Soldier -->
+    <rect x="80" y="60" width="410" height="150" rx="8" fill="rgba(255,255,255,0.03)" stroke="#6b7280" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="100" y="75" width="80" height="110" rx="6" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="140" y="125" text-anchor="middle" fill="#6b7280" font-size="28" opacity="0.4">⚔</text>
+    <text x="140" y="170" text-anchor="middle" fill="#4ade80" font-size="8">EXISTS</text>
+
+    <text x="195" y="88" fill="#d1d5db" font-size="15" font-weight="bold">Garrison Soldier</text>
+    <text x="195" y="105" fill="#4ade80" font-size="10">✓ Already implemented as EnemyBase</text>
+    <text x="195" y="125" fill="#9ca3af" font-size="11">Melee chaser · Sword + light armor</text>
+    <text x="195" y="142" fill="#6b7280" font-size="10">Generic military foot soldier, helmet, uniform</text>
+    <text x="195" y="159" fill="#6b7280" font-size="10">Animations: Idle, Patrol, Chase, Attack(2-hit), Flinch, Death</text>
+    <text x="195" y="178" fill="#fbbf24" font-size="10">→ Upgrade existing placeholder mesh</text>
+    <rect x="390" y="70" width="80" height="18" rx="9" fill="rgba(74,222,128,0.15)" stroke="#4ade80" stroke-width="1"/>
+    <text x="430" y="83" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="bold">HP: 50</text>
+
+    <!-- Shield Guard -->
+    <rect x="510" y="60" width="410" height="150" rx="8" fill="rgba(255,255,255,0.03)" stroke="#6b7280" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="530" y="75" width="80" height="110" rx="6" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="570" y="125" text-anchor="middle" fill="#6b7280" font-size="28" opacity="0.4">🛡</text>
+    <text x="570" y="170" text-anchor="middle" fill="#ef4444" font-size="8">NEEDED</text>
+
+    <text x="625" y="88" fill="#d1d5db" font-size="15" font-weight="bold">Shield Guard</text>
+    <text x="625" y="105" fill="#ef4444" font-size="10">NEW — Teaches flanking</text>
+    <text x="625" y="125" fill="#9ca3af" font-size="11">Defensive guard · Large shield + spear</text>
+    <text x="625" y="142" fill="#6b7280" font-size="10">Heavier armor, tower shield, slower build</text>
+    <text x="625" y="159" fill="#6b7280" font-size="10">Anims: Guard, ShieldBash, SpearThrust, BlockHit, Turn</text>
+    <text x="625" y="178" fill="#60a5fa" font-size="10">Weak: Wind · Blocks frontal attacks</text>
+    <rect x="820" y="70" width="80" height="18" rx="9" fill="rgba(74,222,128,0.15)" stroke="#4ade80" stroke-width="1"/>
+    <text x="860" y="83" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="bold">HP: 80</text>
+
+    <!-- Military Rifleman -->
+    <rect x="940" y="60" width="410" height="150" rx="8" fill="rgba(255,255,255,0.03)" stroke="#6b7280" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="960" y="75" width="80" height="110" rx="6" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1000" y="130" text-anchor="middle" fill="#6b7280" font-size="24" opacity="0.4">🎯</text>
+    <text x="1000" y="170" text-anchor="middle" fill="#ef4444" font-size="8">NEEDED</text>
+
+    <text x="1055" y="88" fill="#d1d5db" font-size="15" font-weight="bold">Military Rifleman</text>
+    <text x="1055" y="105" fill="#ef4444" font-size="10">NEW — Teaches gap closing</text>
+    <text x="1055" y="125" fill="#9ca3af" font-size="11">Ranged pressure · Rifle + light armor</text>
+    <text x="1055" y="142" fill="#6b7280" font-size="10">Lighter gear, marksman look, mobile</text>
+    <text x="1055" y="159" fill="#6b7280" font-size="10">Anims: Aim, Fire(2-burst), DodgeRoll, Reposition</text>
+    <text x="1055" y="178" fill="#60a5fa" font-size="10">Weak: Earth · Retreats at 8ft</text>
+    <rect x="1250" y="70" width="80" height="18" rx="9" fill="rgba(74,222,128,0.15)" stroke="#4ade80" stroke-width="1"/>
+    <text x="1290" y="83" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="bold">HP: 35</text>
+
+    <!-- Security Automaton -->
+    <rect x="1370" y="60" width="410" height="150" rx="8" fill="rgba(255,255,255,0.03)" stroke="#6b7280" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="1390" y="75" width="80" height="110" rx="6" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1430" y="130" text-anchor="middle" fill="#6b7280" font-size="24" opacity="0.4">⚙</text>
+    <text x="1430" y="170" text-anchor="middle" fill="#ef4444" font-size="8">NEEDED</text>
+
+    <text x="1485" y="88" fill="#d1d5db" font-size="15" font-weight="bold">Security Automaton</text>
+    <text x="1485" y="105" fill="#ef4444" font-size="10">NEW — First machine enemy</text>
+    <text x="1485" y="125" fill="#9ca3af" font-size="11">Hybrid · Arm blades + energy burst</text>
+    <text x="1485" y="142" fill="#6b7280" font-size="10">Robotic, angular, Lumina-powered, glowing core</text>
+    <text x="1485" y="159" fill="#6b7280" font-size="10">Anims: MeleeCombo(3), EnergyCharge, Burst, ModeSwitch</text>
+    <text x="1485" y="178" fill="#60a5fa" font-size="10">Weak: Fire · Switches melee/ranged modes</text>
+    <rect x="1680" y="70" width="80" height="18" rx="9" fill="rgba(74,222,128,0.15)" stroke="#4ade80" stroke-width="1"/>
+    <text x="1720" y="83" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="bold">HP: 70</text>
+
+    <!-- Generation notes -->
+    <rect x="80" y="225" width="1760" height="36" rx="6" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="6,3"/>
+    <text x="100" y="248" fill="#fcd34d" font-size="12" font-weight="bold">GENERATION NOTES:</text>
+    <text x="280" y="248" fill="#d1d5db" font-size="12">All share a "military faction" visual language — matching uniforms, insignia, color palette (grey/green/bronze). Generate as a cohesive set. Automaton is the outlier (machine).</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- BATCH 3: STATE 2 ENEMIES + DRONES                            -->
+  <!-- ============================================================ -->
+  <g transform="translate(0, 800)">
+    <rect x="50" y="0" width="1820" height="44" rx="6" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect x="50" y="0" width="8" height="44" rx="4" fill="#3b82f6"/>
+    <text x="80" y="17" fill="#3b82f6" font-size="11" font-weight="bold" letter-spacing="2">BATCH 3</text>
+    <text x="80" y="35" fill="#93c5fd" font-size="18" font-weight="bold">EXPANDED MILITARY + MACHINES — STATE 2 ESCALATION</text>
+    <text x="960" y="28" text-anchor="middle" fill="#60a5fa" font-size="13">Needed for Ironhaven onwards — tougher enemies, new archetypes, elite variants</text>
+    <rect x="1620" y="8" width="230" height="28" rx="14" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="1"/>
+    <text x="1735" y="27" text-anchor="middle" fill="#93c5fd" font-size="12" font-weight="bold">PRIORITY: MEDIUM-HIGH</text>
+
+    <!-- Row 1 -->
+    <rect x="80" y="60" width="350" height="130" rx="8" fill="rgba(255,255,255,0.03)" stroke="#6b7280" stroke-width="1"/>
+    <rect x="100" y="75" width="65" height="95" rx="6" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="132" y="120" text-anchor="middle" fill="#6b7280" font-size="22" opacity="0.4">🤖</text>
+    <text x="180" y="90" fill="#d1d5db" font-size="14" font-weight="bold">Patrol Drone</text>
+    <text x="180" y="107" fill="#9ca3af" font-size="10">Aerial · Flies 8-10ft · Dive-bombs</text>
+    <text x="180" y="122" fill="#6b7280" font-size="10">Small flying machine, rotors, sensor eye</text>
+    <text x="180" y="137" fill="#6b7280" font-size="10">Anims: Hover, Circle, DiveCharge, DiveHit, Recover</text>
+    <text x="180" y="155" fill="#60a5fa" font-size="10">Weak: Earth/Ice · HP: 30</text>
+    <text x="180" y="172" fill="#fbbf24" font-size="9">Variant needed: Sniper Drone (elite, higher altitude)</text>
+
+    <rect x="450" y="60" width="350" height="130" rx="8" fill="rgba(255,255,255,0.03)" stroke="#6b7280" stroke-width="1"/>
+    <rect x="470" y="75" width="65" height="95" rx="6" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="502" y="120" text-anchor="middle" fill="#6b7280" font-size="22" opacity="0.4">💪</text>
+    <text x="550" y="90" fill="#d1d5db" font-size="14" font-weight="bold">Heavy Trooper</text>
+    <text x="550" y="107" fill="#9ca3af" font-size="10">Stagger brute · Super-armor · Slow</text>
+    <text x="550" y="122" fill="#6b7280" font-size="10">Massive armor, heavy weapon, intimidating</text>
+    <text x="550" y="137" fill="#6b7280" font-size="10">Anims: HeavySwing, GroundPound, Charge, SuperArmor</text>
+    <text x="550" y="155" fill="#60a5fa" font-size="10">Weak: Ice · HP: 120 · Telegraphed attacks</text>
+    <text x="550" y="172" fill="#fbbf24" font-size="9">Largest human enemy — needs imposing silhouette</text>
+
+    <rect x="820" y="60" width="350" height="130" rx="8" fill="rgba(255,255,255,0.03)" stroke="#6b7280" stroke-width="1"/>
+    <rect x="840" y="75" width="65" height="95" rx="6" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="872" y="120" text-anchor="middle" fill="#6b7280" font-size="22" opacity="0.4">✚</text>
+    <text x="920" y="90" fill="#d1d5db" font-size="14" font-weight="bold">Combat Medic</text>
+    <text x="920" y="107" fill="#9ca3af" font-size="10">Support · Heals allies every 8s</text>
+    <text x="920" y="122" fill="#6b7280" font-size="10">Lighter armor, medical pack, runs from player</text>
+    <text x="920" y="137" fill="#6b7280" font-size="10">Anims: Heal(cast), Flee, WeakShot</text>
+    <text x="920" y="155" fill="#60a5fa" font-size="10">Weak: Fire/Wind · HP: 40 · Priority target</text>
+    <text x="920" y="172" fill="#fbbf24" font-size="9">Visually distinct — medic cross / green accents</text>
+
+    <rect x="1190" y="60" width="350" height="130" rx="8" fill="rgba(255,255,255,0.03)" stroke="#6b7280" stroke-width="1"/>
+    <rect x="1210" y="75" width="65" height="95" rx="6" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1242" y="120" text-anchor="middle" fill="#6b7280" font-size="22" opacity="0.4">📣</text>
+    <text x="1290" y="90" fill="#d1d5db" font-size="14" font-weight="bold">Tactical Officer</text>
+    <text x="1290" y="107" fill="#9ca3af" font-size="10">Commander · Buffs allies +25% speed</text>
+    <text x="1290" y="122" fill="#6b7280" font-size="10">Officer uniform, baton, command presence</text>
+    <text x="1290" y="137" fill="#6b7280" font-size="10">Anims: Command(buff aura), SwordCombo, Reinforce</text>
+    <text x="1290" y="155" fill="#60a5fa" font-size="10">Weak: Wind · HP: 60 · Spawns 2 soldiers at 50%</text>
+    <text x="1290" y="172" fill="#fbbf24" font-size="9">Distinct rank insignia — clearly the "boss" of a group</text>
+
+    <!-- Elite variants note -->
+    <rect x="1560" y="60" width="220" height="130" rx="8" fill="rgba(180,83,9,0.08)" stroke="#b45309" stroke-width="1.5"/>
+    <text x="1670" y="82" text-anchor="middle" fill="#fcd34d" font-size="12" font-weight="bold">ELITE VARIANTS</text>
+    <text x="1670" y="100" text-anchor="middle" fill="#b45309" font-size="10">(recolor + enhance)</text>
+    <text x="1580" y="120" fill="#9ca3af" font-size="10">• Ironclad Sergeant</text>
+    <text x="1580" y="137" fill="#9ca3af" font-size="10">• Sniper Drone</text>
+    <text x="1580" y="154" fill="#9ca3af" font-size="10">• Reactor Sentinel</text>
+    <text x="1580" y="171" fill="#9ca3af" font-size="10">• Frost Trooper</text>
+    <text x="1580" y="185" fill="#6b7280" font-size="9">Generate as palette swaps</text>
+
+    <rect x="80" y="200" width="1760" height="28" rx="6" fill="rgba(59,130,246,0.06)" stroke="#3b82f6" stroke-width="1" stroke-dasharray="6,3"/>
+    <text x="100" y="219" fill="#93c5fd" font-size="12" font-weight="bold">GENERATION NOTES:</text>
+    <text x="280" y="219" fill="#d1d5db" font-size="12">Same military faction as Batch 2 but escalated. Heavier armor, bigger weapons, more tech. Drone is the first non-humanoid. Elites are recolors/upscales — generate last in batch.</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- BATCH 4: REMAINING PARTY MEMBERS                             -->
+  <!-- ============================================================ -->
+  <g transform="translate(0, 1060)">
+    <rect x="50" y="0" width="1820" height="44" rx="6" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-width="1.5"/>
+    <rect x="50" y="0" width="8" height="44" rx="4" fill="#22c55e"/>
+    <text x="80" y="17" fill="#22c55e" font-size="11" font-weight="bold" letter-spacing="2">BATCH 4</text>
+    <text x="80" y="35" fill="#86efac" font-size="18" font-weight="bold">REMAINING PARTY MEMBERS — 4 CHARACTERS</text>
+    <text x="960" y="28" text-anchor="middle" fill="#4ade80" font-size="13">Generate together for art style consistency. Each joins at different story points.</text>
+    <rect x="1620" y="8" width="230" height="28" rx="14" fill="rgba(34,197,94,0.2)" stroke="#22c55e" stroke-width="1"/>
+    <text x="1735" y="27" text-anchor="middle" fill="#86efac" font-size="12" font-weight="bold">PRIORITY: MEDIUM</text>
+
+    <!-- Kael -->
+    <rect x="80" y="60" width="420" height="220" rx="8" fill="rgba(234,179,8,0.06)" stroke="#eab308" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="100" y="75" width="100" height="180" rx="6" fill="rgba(234,179,8,0.06)" stroke="#eab308" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="150" y="155" text-anchor="middle" fill="#eab308" font-size="32" opacity="0.3">🛡</text>
+    <text x="150" y="240" text-anchor="middle" fill="#eab308" font-size="9">Joins: Frostmere (S2)</text>
+
+    <text x="215" y="88" fill="#facc15" font-size="18" font-weight="bold">KAEL</text>
+    <text x="305" y="88" fill="#9ca3af" font-size="12">Shield Guardian · Tank</text>
+    <text x="215" y="108" fill="#9ca3af" font-size="11" font-weight="bold">APPEARANCE</text>
+    <text x="215" y="124" fill="#d1d5db" font-size="11">Male, older than Amaro. Broad, strong build.</text>
+    <text x="215" y="139" fill="#d1d5db" font-size="11">Garrison sergeant — worn veteran look. Scars.</text>
+    <text x="215" y="154" fill="#d1d5db" font-size="11">Heavy plate armor, practical not ornate.</text>
+    <text x="215" y="174" fill="#9ca3af" font-size="11" font-weight="bold">EQUIPMENT</text>
+    <text x="215" y="190" fill="#60a5fa" font-size="11">• Tower shield (large, battle-damaged)</text>
+    <text x="215" y="205" fill="#60a5fa" font-size="11">• One-handed mace</text>
+    <text x="215" y="220" fill="#60a5fa" font-size="11">• Heavy plate armor (Earth/Ice tones)</text>
+    <text x="215" y="240" fill="#a78bfa" font-size="10">Traversal: Double Jump (heavy but magically enhanced)</text>
+    <text x="215" y="260" fill="#ef4444" font-size="10">Elements: Earth · Ice</text>
+
+    <!-- Sera -->
+    <rect x="520" y="60" width="420" height="220" rx="8" fill="rgba(34,197,94,0.06)" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="540" y="75" width="100" height="180" rx="6" fill="rgba(34,197,94,0.06)" stroke="#22c55e" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="590" y="155" text-anchor="middle" fill="#22c55e" font-size="32" opacity="0.3">💨</text>
+    <text x="590" y="240" text-anchor="middle" fill="#22c55e" font-size="9">Joins: Ashveil Aerie (S2-3)</text>
+
+    <text x="655" y="88" fill="#4ade80" font-size="18" font-weight="bold">SERA</text>
+    <text x="725" y="88" fill="#9ca3af" font-size="12">Wind Dancer · Speed DPS</text>
+    <text x="655" y="108" fill="#9ca3af" font-size="11" font-weight="bold">APPEARANCE</text>
+    <text x="655" y="124" fill="#d1d5db" font-size="11">Female, young. Light, agile build. Athletic.</text>
+    <text x="655" y="139" fill="#d1d5db" font-size="11">Former military deserter — practical but free-spirited.</text>
+    <text x="655" y="154" fill="#d1d5db" font-size="11">Wind-themed — flowing scarves, light fabric.</text>
+    <text x="655" y="174" fill="#9ca3af" font-size="11" font-weight="bold">EQUIPMENT</text>
+    <text x="655" y="190" fill="#60a5fa" font-size="11">• Dual daggers (curved, wind-etched)</text>
+    <text x="655" y="205" fill="#60a5fa" font-size="11">• Light leather/cloth armor</text>
+    <text x="655" y="220" fill="#60a5fa" font-size="11">• Wind scarves (animated cloth physics)</text>
+    <text x="655" y="240" fill="#a78bfa" font-size="10">Traversal: Glide (wind-assisted)</text>
+    <text x="655" y="260" fill="#ef4444" font-size="10">Element: Wind</text>
+
+    <!-- Varn -->
+    <rect x="960" y="60" width="420" height="220" rx="8" fill="rgba(168,85,247,0.06)" stroke="#a855f7" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="980" y="75" width="100" height="180" rx="6" fill="rgba(168,85,247,0.06)" stroke="#a855f7" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1030" y="155" text-anchor="middle" fill="#a855f7" font-size="32" opacity="0.3">🔧</text>
+    <text x="1030" y="240" text-anchor="middle" fill="#a855f7" font-size="9">Joins: Veilwatch (S3)</text>
+
+    <text x="1095" y="88" fill="#c084fc" font-size="18" font-weight="bold">VARN</text>
+    <text x="1155" y="88" fill="#9ca3af" font-size="12">Lumina Engineer · Support</text>
+    <text x="1095" y="108" fill="#9ca3af" font-size="11" font-weight="bold">APPEARANCE</text>
+    <text x="1095" y="124" fill="#d1d5db" font-size="11">Male, middle-aged. Stocky, practical build.</text>
+    <text x="1095" y="139" fill="#d1d5db" font-size="11">Engineer — goggles, tool belt, stained work coat.</text>
+    <text x="1095" y="154" fill="#d1d5db" font-size="11">Lumina tech integrated into gear (glowing conduits).</text>
+    <text x="1095" y="174" fill="#9ca3af" font-size="11" font-weight="bold">EQUIPMENT</text>
+    <text x="1095" y="190" fill="#60a5fa" font-size="11">• Magitech gauntlet (weapon + tool)</text>
+    <text x="1095" y="205" fill="#60a5fa" font-size="11">• Engineer's coat + tool belt</text>
+    <text x="1095" y="220" fill="#60a5fa" font-size="11">• Deployable turret (ability prop)</text>
+    <text x="1095" y="240" fill="#a78bfa" font-size="10">Traversal: Wall Run (mag-boots)</text>
+    <text x="1095" y="260" fill="#ef4444" font-size="10">Elements: Fire · Earth</text>
+
+    <!-- Lyra -->
+    <rect x="1400" y="60" width="420" height="220" rx="8" fill="rgba(236,72,153,0.06)" stroke="#ec4899" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="1420" y="75" width="100" height="180" rx="6" fill="rgba(236,72,153,0.06)" stroke="#ec4899" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1470" y="155" text-anchor="middle" fill="#ec4899" font-size="32" opacity="0.3">✨</text>
+    <text x="1470" y="240" text-anchor="middle" fill="#ec4899" font-size="9">Joins: Luminous Hollow (S3)</text>
+
+    <text x="1535" y="88" fill="#f472b6" font-size="18" font-weight="bold">LYRA</text>
+    <text x="1600" y="88" fill="#9ca3af" font-size="12">Spirit Channeler · Healer/Hybrid</text>
+    <text x="1535" y="108" fill="#9ca3af" font-size="11" font-weight="bold">APPEARANCE</text>
+    <text x="1535" y="124" fill="#d1d5db" font-size="11">Female, ethereal presence. Slender, graceful.</text>
+    <text x="1535" y="139" fill="#d1d5db" font-size="11">Crystal-touched — skin faintly luminous, crystal</text>
+    <text x="1535" y="154" fill="#d1d5db" font-size="11">growths on arms/shoulders. Otherworldly beauty.</text>
+    <text x="1535" y="174" fill="#9ca3af" font-size="11" font-weight="bold">EQUIPMENT</text>
+    <text x="1535" y="190" fill="#60a5fa" font-size="11">• Crystal focus (floating crystal weapon)</text>
+    <text x="1535" y="205" fill="#60a5fa" font-size="11">• Spirit robes (translucent layers)</text>
+    <text x="1535" y="220" fill="#60a5fa" font-size="11">• Crystal growths (character feature)</text>
+    <text x="1535" y="240" fill="#a78bfa" font-size="10">Traversal: Light/Dark element mastery</text>
+    <text x="1535" y="260" fill="#ef4444" font-size="10">Elements: Light · Dark</text>
+
+    <rect x="80" y="295" width="1760" height="28" rx="6" fill="rgba(34,197,94,0.06)" stroke="#22c55e" stroke-width="1" stroke-dasharray="6,3"/>
+    <text x="100" y="314" fill="#86efac" font-size="12" font-weight="bold">GENERATION NOTES:</text>
+    <text x="280" y="314" fill="#d1d5db" font-size="12">Generate all 4 in one session for style consistency with Batch 1 (Amaro/Taighe). Each needs unique silhouette. Kael=massive, Sera=slim/fast, Varn=stocky/practical, Lyra=ethereal.</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- BATCH 5: BOSSES                                              -->
+  <!-- ============================================================ -->
+  <g transform="translate(0, 1405)">
+    <rect x="50" y="0" width="1820" height="44" rx="6" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
+    <rect x="50" y="0" width="8" height="44" rx="4" fill="#ef4444"/>
+    <text x="80" y="17" fill="#ef4444" font-size="11" font-weight="bold" letter-spacing="2">BATCH 5</text>
+    <text x="80" y="35" fill="#fca5a5" font-size="18" font-weight="bold">BOSS ENCOUNTERS — 7 UNIQUE MODELS</text>
+    <text x="960" y="28" text-anchor="middle" fill="#f87171" font-size="13">Each boss is unique — no recolors. Generate in story order. Complex rigs with breakable parts and phase changes.</text>
+    <rect x="1620" y="8" width="230" height="28" rx="14" fill="rgba(239,68,68,0.2)" stroke="#ef4444" stroke-width="1"/>
+    <text x="1735" y="27" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="bold">PRIORITY: MEDIUM</text>
+
+    <!-- Boss 1: Grendl -->
+    <rect x="80" y="60" width="500" height="155" rx="8" fill="rgba(255,255,255,0.03)" stroke="#ef4444" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="80" y="60" width="500" height="4" rx="2" fill="#ef4444"/>
+    <rect x="100" y="80" width="90" height="115" rx="6" fill="rgba(239,68,68,0.06)" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="145" y="130" text-anchor="middle" fill="#ef4444" font-size="28" opacity="0.3">★</text>
+    <text x="145" y="175" text-anchor="middle" fill="#fca5a5" font-size="9">BOSS 1 · S2</text>
+
+    <text x="205" y="85" fill="#fca5a5" font-size="16" font-weight="bold">Mine Overseer Grendl</text>
+    <text x="205" y="102" fill="#6b7280" font-size="10">Irondeep Mines · 500 HP · 2 Phases</text>
+    <text x="205" y="120" fill="#d1d5db" font-size="11">Human fused with mining equipment. Industrial horror.</text>
+    <text x="205" y="135" fill="#d1d5db" font-size="11">Drill arm (Phase 1) — BREAKABLE PART (separate mesh).</text>
+    <text x="205" y="150" fill="#d1d5db" font-size="11">Phase 2: Switches to mining hammer after drill breaks.</text>
+    <text x="205" y="168" fill="#fbbf24" font-size="10">SPECIAL: Needs 2 weapon states (drill + hammer)</text>
+    <text x="205" y="183" fill="#9ca3af" font-size="10">Size: ~1.5x player · Industrial/mine aesthetic</text>
+    <text x="205" y="200" fill="#6b7280" font-size="9">Anims: DrillThrust, DrillSpin, HammerSlam, ChargeThrow, SummonSoldiers, DrillBreak, Stagger, Death</text>
+
+    <!-- Boss 2: Aquos -->
+    <rect x="600" y="60" width="500" height="155" rx="8" fill="rgba(255,255,255,0.03)" stroke="#06b6d4" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="600" y="60" width="500" height="4" rx="2" fill="#06b6d4"/>
+    <rect x="620" y="80" width="90" height="115" rx="6" fill="rgba(6,182,212,0.06)" stroke="#06b6d4" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="665" y="130" text-anchor="middle" fill="#06b6d4" font-size="28" opacity="0.3">★</text>
+    <text x="665" y="175" text-anchor="middle" fill="#67e8f9" font-size="9">BOSS 2 · S2</text>
+
+    <text x="725" y="85" fill="#67e8f9" font-size="16" font-weight="bold">Reactor Warden Aquos</text>
+    <text x="725" y="102" fill="#6b7280" font-size="10">Seaward Reactor · 700 HP · 2 Phases</text>
+    <text x="725" y="120" fill="#d1d5db" font-size="11">Lumina-powered aquatic defense construct.</text>
+    <text x="725" y="135" fill="#d1d5db" font-size="11">Water-themed — fluid body, pressure mechanics.</text>
+    <text x="725" y="150" fill="#d1d5db" font-size="11">Barrier shell (transparent water shield effect).</text>
+    <text x="725" y="168" fill="#fbbf24" font-size="10">SPECIAL: Water VFX heavy — jets, floods, prison sphere</text>
+    <text x="725" y="183" fill="#9ca3af" font-size="10">Size: ~2x player · Aquatic/reactor aesthetic</text>
+    <text x="725" y="200" fill="#6b7280" font-size="9">Anims: WaterLance(sweep), HydroBomb, WaterDash, WaterPrison, BarrierUp/Break, Stagger, Death</text>
+
+    <!-- Boss 3: Colossus -->
+    <rect x="1120" y="60" width="340" height="155" rx="8" fill="rgba(255,255,255,0.03)" stroke="#60a5fa" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="1120" y="60" width="340" height="4" rx="2" fill="#60a5fa"/>
+    <rect x="1140" y="80" width="70" height="115" rx="6" fill="rgba(59,130,246,0.06)" stroke="#60a5fa" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1175" y="130" text-anchor="middle" fill="#60a5fa" font-size="22" opacity="0.3">★</text>
+    <text x="1175" y="170" text-anchor="middle" fill="#93c5fd" font-size="8">OPTIONAL · S2</text>
+
+    <text x="1225" y="85" fill="#93c5fd" font-size="14" font-weight="bold">Frostmere Colossus</text>
+    <text x="1225" y="102" fill="#6b7280" font-size="10">Glacier Shelf · 600 HP · 2P</text>
+    <text x="1225" y="120" fill="#d1d5db" font-size="11">Ancient frozen Lumina construct.</text>
+    <text x="1225" y="135" fill="#d1d5db" font-size="11">Ice golem — crystalline, massive.</text>
+    <text x="1225" y="150" fill="#d1d5db" font-size="11">Enrages at 40% HP.</text>
+    <text x="1225" y="168" fill="#fbbf24" font-size="10">Size: ~3x player</text>
+    <text x="1225" y="183" fill="#9ca3af" font-size="10">Ice slam, frost breath, spike eruption</text>
+
+    <!-- Boss 4: Corrupted Guardian -->
+    <rect x="1480" y="60" width="340" height="155" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="1480" y="60" width="340" height="4" rx="2" fill="#9333ea"/>
+    <rect x="1500" y="80" width="70" height="115" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1535" y="130" text-anchor="middle" fill="#9333ea" font-size="22" opacity="0.3">★</text>
+    <text x="1535" y="170" text-anchor="middle" fill="#c4b5fd" font-size="8">BOSS 4 · S3</text>
+
+    <text x="1585" y="85" fill="#c4b5fd" font-size="14" font-weight="bold">Corrupted Guardian</text>
+    <text x="1585" y="102" fill="#6b7280" font-size="10">Corruption Scar · 800 HP · 3P</text>
+    <text x="1585" y="120" fill="#d1d5db" font-size="11">Twisted Lumina construct.</text>
+    <text x="1585" y="135" fill="#d1d5db" font-size="11">Corruption beams, splits in P3.</text>
+    <text x="1585" y="150" fill="#d1d5db" font-size="11">First corrupted boss aesthetic.</text>
+    <text x="1585" y="168" fill="#fbbf24" font-size="10">SPECIAL: Splits into 2 meshes</text>
+    <text x="1585" y="183" fill="#9ca3af" font-size="10">Purple/violet corruption VFX</text>
+
+    <!-- Boss row 2 -->
+    <!-- Boss 5: Corrupted Commander -->
+    <rect x="80" y="230" width="450" height="130" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="80" y="230" width="450" height="4" rx="2" fill="#9333ea"/>
+    <rect x="100" y="248" width="70" height="95" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="135" y="290" text-anchor="middle" fill="#9333ea" font-size="22" opacity="0.3">★</text>
+    <text x="135" y="330" text-anchor="middle" fill="#c4b5fd" font-size="8">BOSS 5 · S3</text>
+
+    <text x="185" y="255" fill="#c4b5fd" font-size="15" font-weight="bold">Corrupted Commander</text>
+    <text x="185" y="272" fill="#6b7280" font-size="10">Fallen Ironhaven · 900 HP · 2 Phases</text>
+    <text x="185" y="290" fill="#d1d5db" font-size="11">P1: Recognizably human military officer (sword + tactics).</text>
+    <text x="185" y="305" fill="#d1d5db" font-size="11">P2: Corruption transforms — larger, monstrous, corruption blade.</text>
+    <text x="185" y="323" fill="#fbbf24" font-size="10">SPECIAL: Needs 2 models (human form + corrupted form) or morph</text>
+    <text x="185" y="340" fill="#9ca3af" font-size="10">Emotional fight — was an ally. Uniform visible under corruption.</text>
+
+    <!-- Boss 6: Hollow Guardian -->
+    <rect x="550" y="230" width="400" height="130" rx="8" fill="rgba(255,255,255,0.03)" stroke="#ec4899" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="550" y="230" width="400" height="4" rx="2" fill="#ec4899"/>
+    <rect x="570" y="248" width="70" height="95" rx="6" fill="rgba(236,72,153,0.06)" stroke="#ec4899" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="605" y="290" text-anchor="middle" fill="#ec4899" font-size="22" opacity="0.3">★</text>
+    <text x="605" y="330" text-anchor="middle" fill="#f9a8d4" font-size="8">OPTIONAL · S3</text>
+
+    <text x="655" y="255" fill="#f9a8d4" font-size="15" font-weight="bold">Hollow Guardian</text>
+    <text x="655" y="272" fill="#6b7280" font-size="10">Luminous Hollow · 750 HP · 2P</text>
+    <text x="655" y="290" fill="#d1d5db" font-size="11">Crystal entity. Beautiful but dangerous.</text>
+    <text x="655" y="305" fill="#d1d5db" font-size="11">P2: Splits into 3 smaller crystal entities.</text>
+    <text x="655" y="323" fill="#fbbf24" font-size="10">SPECIAL: 1 main mesh + 3 split meshes</text>
+    <text x="655" y="340" fill="#9ca3af" font-size="10">Translucent crystal material, inner glow</text>
+
+    <!-- Boss 7: Ragnorak Avatar (FINAL) -->
+    <rect x="970" y="230" width="850" height="130" rx="8" fill="rgba(239,68,68,0.08)" stroke="#ef4444" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="970" y="230" width="850" height="5" rx="3" fill="#ef4444"/>
+    <rect x="966" y="226" width="858" height="138" rx="10" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.3"/>
+    <rect x="990" y="248" width="90" height="95" rx="6" fill="rgba(239,68,68,0.06)" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1035" y="290" text-anchor="middle" fill="#ef4444" font-size="28" opacity="0.3">★</text>
+    <text x="1035" y="330" text-anchor="middle" fill="#fca5a5" font-size="8">FINAL BOSS</text>
+
+    <text x="1095" y="255" fill="#fca5a5" font-size="18" font-weight="bold">RAGNORAK AVATAR</text>
+    <text x="1095" y="275" fill="#6b7280" font-size="10">Reactor Core Descent · 2000 HP · 4 PHASES · End of Game</text>
+    <text x="1095" y="295" fill="#d1d5db" font-size="11">Manifestation of destabilized Lumina. Not a creature — a force of nature given form.</text>
+    <text x="1095" y="310" fill="#d1d5db" font-size="11">P1: Elemental rotation (shifts appearance). P2: Gravity warps. P3: Splits Light/Dark. P4: All at once.</text>
+    <text x="1095" y="328" fill="#fbbf24" font-size="10">SPECIAL: Most complex model — elemental VFX layers, Light half + Dark half meshes, aura effects</text>
+    <text x="1095" y="345" fill="#9ca3af" font-size="10">Size: ~4x player. Otherworldly, abstract geometry + organic corruption. Crown jewel of art pipeline.</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- BATCH 6: CORRUPTED ENEMIES                                   -->
+  <!-- ============================================================ -->
+  <g transform="translate(0, 1800)">
+    <rect x="50" y="0" width="1820" height="44" rx="6" fill="rgba(147,51,234,0.15)" stroke="#9333ea" stroke-width="1.5"/>
+    <rect x="50" y="0" width="8" height="44" rx="4" fill="#9333ea"/>
+    <text x="80" y="17" fill="#9333ea" font-size="11" font-weight="bold" letter-spacing="2">BATCH 6</text>
+    <text x="80" y="35" fill="#c4b5fd" font-size="18" font-weight="bold">POST-RAGNORAK CORRUPTED ENEMIES — 8 TYPES</text>
+    <text x="960" y="28" text-anchor="middle" fill="#a78bfa" font-size="13">New enemy faction — corruption aesthetic (purple, violet, crystalline). Completely distinct from military.</text>
+    <rect x="1620" y="8" width="230" height="28" rx="14" fill="rgba(147,51,234,0.2)" stroke="#9333ea" stroke-width="1"/>
+    <text x="1735" y="27" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="bold">PRIORITY: LOW-MEDIUM</text>
+
+    <!-- Row 1 -->
+    <rect x="80" y="60" width="420" height="120" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1"/>
+    <rect x="100" y="75" width="60" height="85" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="130" y="115" text-anchor="middle" fill="#9333ea" font-size="20" opacity="0.4">👤</text>
+    <text x="175" y="88" fill="#c4b5fd" font-size="14" font-weight="bold">Corrupted Soldier</text>
+    <text x="175" y="105" fill="#9ca3af" font-size="10">Twisted Garrison Soldier · Erratic movement</text>
+    <text x="175" y="120" fill="#6b7280" font-size="10">Military uniform torn/warped, purple veins, glowing eyes</text>
+    <text x="175" y="135" fill="#6b7280" font-size="10">HP: 65 · Weak: Light · Scream vulnerability window</text>
+    <text x="175" y="152" fill="#fbbf24" font-size="9">BASE: Garrison Soldier mesh + corruption overlay shader</text>
+    <text x="175" y="166" fill="#6b7280" font-size="9">Could potentially reuse Garrison Soldier with corruption material</text>
+
+    <rect x="520" y="60" width="420" height="120" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1"/>
+    <rect x="540" y="75" width="60" height="85" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="570" y="115" text-anchor="middle" fill="#9333ea" font-size="20" opacity="0.4">👻</text>
+    <text x="615" y="88" fill="#c4b5fd" font-size="14" font-weight="bold">Lumina Wraith</text>
+    <text x="615" y="105" fill="#9ca3af" font-size="10">Spectral · Phases visible/invisible</text>
+    <text x="615" y="120" fill="#6b7280" font-size="10">Translucent spirit, wispy form, claw hands</text>
+    <text x="615" y="135" fill="#6b7280" font-size="10">HP: 45 · Weak: Light (+75%) · Teleports</text>
+    <text x="615" y="152" fill="#fbbf24" font-size="9">SPECIAL: Needs transparency shader + phase animation</text>
+    <text x="615" y="166" fill="#6b7280" font-size="9">First truly non-humanoid non-machine enemy</text>
+
+    <rect x="960" y="60" width="420" height="120" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1"/>
+    <rect x="980" y="75" width="60" height="85" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1010" y="115" text-anchor="middle" fill="#9333ea" font-size="20" opacity="0.4">💎</text>
+    <text x="1055" y="88" fill="#c4b5fd" font-size="14" font-weight="bold">Crystal Stalker</text>
+    <text x="1055" y="105" fill="#9ca3af" font-size="10">Quadruped · Charge + reflect projectiles</text>
+    <text x="1055" y="120" fill="#6b7280" font-size="10">Crystalline beast, 4 legs, angular, sharp edges</text>
+    <text x="1055" y="135" fill="#6b7280" font-size="10">HP: 55 · Weak: Earth · Reflects magic during charge</text>
+    <text x="1055" y="152" fill="#fbbf24" font-size="9">NEW RIG: Quadruped skeleton (not humanoid)</text>
+    <text x="1055" y="166" fill="#6b7280" font-size="9">Anims: Prowl, Crouch, Charge, Slide, Swipe, Reflect</text>
+
+    <rect x="1400" y="60" width="420" height="120" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1"/>
+    <rect x="1420" y="75" width="60" height="85" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1450" y="115" text-anchor="middle" fill="#9333ea" font-size="20" opacity="0.4">☣</text>
+    <text x="1495" y="88" fill="#c4b5fd" font-size="14" font-weight="bold">Corruption Spewer</text>
+    <text x="1495" y="105" fill="#9ca3af" font-size="10">Stationary turret · AOE DOT pools</text>
+    <text x="1495" y="120" fill="#6b7280" font-size="10">Rooted growth, organic/crystal, pulsing sacs</text>
+    <text x="1495" y="135" fill="#6b7280" font-size="10">HP: 50 · Weak: Fire · Cannot move</text>
+    <text x="1495" y="152" fill="#fbbf24" font-size="9">SIMPLE RIG: No locomotion — rotate + lob only</text>
+    <text x="1495" y="166" fill="#6b7280" font-size="9">Anims: Idle(pulse), Lob, MeleeBurst, Death(dissolve)</text>
+
+    <!-- Row 2 -->
+    <rect x="80" y="195" width="420" height="120" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1"/>
+    <rect x="100" y="210" width="60" height="85" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="130" y="250" text-anchor="middle" fill="#9333ea" font-size="20" opacity="0.4">🐗</text>
+    <text x="175" y="223" fill="#c4b5fd" font-size="14" font-weight="bold">Hollow Beast</text>
+    <text x="175" y="240" fill="#9ca3af" font-size="10">Heavy brute · BREAKABLE PARTS · Enrages</text>
+    <text x="175" y="255" fill="#6b7280" font-size="10">Large corrupted animal/machine, crystal growths on shoulders</text>
+    <text x="175" y="270" fill="#6b7280" font-size="10">HP: 150 · Weak: Light · Crystal shoulders (40 HP each)</text>
+    <text x="175" y="287" fill="#fbbf24" font-size="9">COMPLEX: Breakable parts = separate sub-meshes that shatter</text>
+    <text x="175" y="301" fill="#6b7280" font-size="9">Anims: Charge, Slam, Roar(enrage), CrystalBreak(L/R), Stagger</text>
+
+    <rect x="520" y="195" width="420" height="120" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1"/>
+    <rect x="540" y="210" width="60" height="85" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="570" y="250" text-anchor="middle" fill="#9333ea" font-size="20" opacity="0.4">✚</text>
+    <text x="615" y="223" fill="#c4b5fd" font-size="14" font-weight="bold">Spirit Mender</text>
+    <text x="615" y="240" fill="#9ca3af" font-size="10">Corrupted support · Heals + shields + teleports</text>
+    <text x="615" y="255" fill="#6b7280" font-size="10">Small spectral entity, wispy, gentle look (deceptive)</text>
+    <text x="615" y="270" fill="#6b7280" font-size="10">HP: 35 · Weak: Light (+75%) · Priority target</text>
+    <text x="615" y="287" fill="#fbbf24" font-size="9">REUSE: Could share Wraith rig with smaller scale + recolor</text>
+    <text x="615" y="301" fill="#6b7280" font-size="9">Anims: Float, Heal(channel), Shield(cast), Teleport</text>
+
+    <rect x="960" y="195" width="420" height="120" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1"/>
+    <rect x="980" y="210" width="60" height="85" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1010" y="250" text-anchor="middle" fill="#9333ea" font-size="20" opacity="0.4">⚙</text>
+    <text x="1055" y="223" fill="#c4b5fd" font-size="14" font-weight="bold">Corrupted Automaton</text>
+    <text x="1055" y="240" fill="#9ca3af" font-size="10">Overloaded machine · DOT attacks · Self-stuns</text>
+    <text x="1055" y="255" fill="#6b7280" font-size="10">Security Automaton with corruption growths, sparking</text>
+    <text x="1055" y="270" fill="#6b7280" font-size="10">HP: 90 · Weak: Ice · Overloads every 20s → 3s stun</text>
+    <text x="1055" y="287" fill="#fbbf24" font-size="9">BASE: Security Automaton mesh + corruption overlay</text>
+    <text x="1055" y="301" fill="#6b7280" font-size="9">Anims: Same as Automaton + Overload(spark), Stun(collapse)</text>
+
+    <rect x="1400" y="195" width="420" height="120" rx="8" fill="rgba(255,255,255,0.03)" stroke="#9333ea" stroke-width="1"/>
+    <rect x="1420" y="210" width="60" height="85" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="1450" y="250" text-anchor="middle" fill="#9333ea" font-size="20" opacity="0.4">🕳</text>
+    <text x="1495" y="223" fill="#c4b5fd" font-size="14" font-weight="bold">Void Sentinel</text>
+    <text x="1495" y="240" fill="#9ca3af" font-size="10">Tank AOE · Darkness field · Plants anchors</text>
+    <text x="1495" y="255" fill="#6b7280" font-size="10">Massive dark construct, angular void geometry, oppressive</text>
+    <text x="1495" y="270" fill="#6b7280" font-size="10">HP: 130 · Weak: Light · IMMUNE: Dark (heals from it)</text>
+    <text x="1495" y="287" fill="#fbbf24" font-size="9">COMPLEX: Darkness field shader + Void Anchor spawnable</text>
+    <text x="1495" y="301" fill="#6b7280" font-size="9">Anims: HeavySwing, FieldPulse, PlantAnchor, Stagger, Death</text>
+
+    <rect x="80" y="330" width="1760" height="28" rx="6" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1" stroke-dasharray="6,3"/>
+    <text x="100" y="349" fill="#c4b5fd" font-size="12" font-weight="bold">GENERATION NOTES:</text>
+    <text x="280" y="349" fill="#d1d5db" font-size="12">Corrupted faction uses purple/violet palette with crystal growths and wispy effects. 2 can reuse base meshes (Corrupted Soldier, Corrupted Automaton). 3 need new rigs (Stalker=quadruped, Beast=large quadruped, Wraith=spectral).</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- BATCH 7: NPCS                                                -->
+  <!-- ============================================================ -->
+  <g transform="translate(0, 2175)">
+    <rect x="50" y="0" width="1820" height="44" rx="6" fill="rgba(107,114,128,0.15)" stroke="#6b7280" stroke-width="1.5"/>
+    <rect x="50" y="0" width="8" height="44" rx="4" fill="#6b7280"/>
+    <text x="80" y="17" fill="#6b7280" font-size="11" font-weight="bold" letter-spacing="2">BATCH 7</text>
+    <text x="80" y="35" fill="#d1d5db" font-size="18" font-weight="bold">TOWN NPCs — 22 CHARACTERS ACROSS 4 HUBS</text>
+    <text x="960" y="28" text-anchor="middle" fill="#9ca3af" font-size="13">Lowest priority for unique models — can use generic templates early. Group by town for visual consistency.</text>
+    <rect x="1620" y="8" width="230" height="28" rx="14" fill="rgba(107,114,128,0.2)" stroke="#6b7280" stroke-width="1"/>
+    <text x="1735" y="27" text-anchor="middle" fill="#d1d5db" font-size="12" font-weight="bold">PRIORITY: LOW</text>
+
+    <!-- Millhaven NPCs -->
+    <rect x="80" y="60" width="420" height="330" rx="8" fill="rgba(4,120,87,0.06)" stroke="#047857" stroke-width="1.5"/>
+    <rect x="80" y="60" width="420" height="4" rx="2" fill="#047857"/>
+    <text x="290" y="85" text-anchor="middle" fill="#6ee7b7" font-size="15" font-weight="bold">MILLHAVEN — 7 NPCs</text>
+    <text x="290" y="102" text-anchor="middle" fill="#047857" font-size="10">Pastoral village · Warm tones · Simple clothing</text>
+
+    <text x="100" y="125" fill="#d1d5db" font-size="12" font-weight="bold">Elder Maren</text>
+    <text x="270" y="125" fill="#6b7280" font-size="10">F, elderly, village leader, robes, wise presence</text>
+    <text x="100" y="148" fill="#d1d5db" font-size="12" font-weight="bold">Blacksmith Oren</text>
+    <text x="270" y="148" fill="#6b7280" font-size="10">M, middle-aged, burly, apron, soot-marked</text>
+    <text x="100" y="171" fill="#d1d5db" font-size="12" font-weight="bold">Herbalist Mira</text>
+    <text x="270" y="171" fill="#6b7280" font-size="10">F, young, herb-stained hands, green shawl</text>
+    <text x="100" y="194" fill="#d1d5db" font-size="12" font-weight="bold">Innkeeper Fenn</text>
+    <text x="270" y="194" fill="#6b7280" font-size="10">M, friendly, round, tavern apron</text>
+    <text x="100" y="217" fill="#d1d5db" font-size="12" font-weight="bold">Captain Dael</text>
+    <text x="270" y="217" fill="#6b7280" font-size="10">M, militia armor, stern, patrol-worn</text>
+    <text x="100" y="240" fill="#d1d5db" font-size="12" font-weight="bold">Merchant Syla</text>
+    <text x="270" y="240" fill="#6b7280" font-size="10">F, trader outfit, pack mule/cart aesthetic</text>
+    <text x="100" y="263" fill="#d1d5db" font-size="12" font-weight="bold">Technician Joss</text>
+    <text x="270" y="263" fill="#6b7280" font-size="10">M, relay worker, tools, Lumina-stained gloves</text>
+
+    <rect x="100" y="280" width="380" height="45" rx="4" fill="rgba(4,120,87,0.08)"/>
+    <text x="110" y="298" fill="#6ee7b7" font-size="10" font-weight="bold">GENERATION STRATEGY</text>
+    <text x="110" y="314" fill="#6b7280" font-size="10">Create 3-4 villager base meshes (M/F young, M/F old). Swap hair,</text>
+    <text x="110" y="326" fill="#6b7280" font-size="10">clothing, accessories. Only unique: Elder Maren, Captain Dael.</text>
+
+    <!-- Ironhaven NPCs -->
+    <rect x="520" y="60" width="420" height="330" rx="8" fill="rgba(180,83,9,0.06)" stroke="#b45309" stroke-width="1.5"/>
+    <rect x="520" y="60" width="420" height="4" rx="2" fill="#b45309"/>
+    <text x="730" y="85" text-anchor="middle" fill="#fcd34d" font-size="15" font-weight="bold">IRONHAVEN — 6 NPCs</text>
+    <text x="730" y="102" text-anchor="middle" fill="#b45309" font-size="10">Industrial port city · Military dress · Iron/bronze tones</text>
+
+    <text x="540" y="125" fill="#d1d5db" font-size="12" font-weight="bold">Commander Thane</text>
+    <text x="720" y="125" fill="#6b7280" font-size="10">M, military commander, decorated uniform, authority</text>
+    <text x="540" y="148" fill="#d1d5db" font-size="12" font-weight="bold">Forgemaster Kelda</text>
+    <text x="720" y="148" fill="#6b7280" font-size="10">F, muscular, forge apron, heat-resistant gear</text>
+    <text x="540" y="171" fill="#d1d5db" font-size="12" font-weight="bold">Dockmaster Bryn</text>
+    <text x="720" y="171" fill="#6b7280" font-size="10">M, weathered, naval coat, harbor clipboard</text>
+    <text x="540" y="194" fill="#d1d5db" font-size="12" font-weight="bold">Lieutenant Vassar</text>
+    <text x="720" y="194" fill="#6b7280" font-size="10">M, intelligence officer, sharp uniform, observant</text>
+    <text x="540" y="217" fill="#d1d5db" font-size="12" font-weight="bold">Engineer Petra</text>
+    <text x="720" y="217" fill="#6b7280" font-size="10">F, goggles, prototype tools, inventive energy</text>
+    <text x="540" y="240" fill="#d1d5db" font-size="12" font-weight="bold">Innkeeper Aldric</text>
+    <text x="720" y="240" fill="#6b7280" font-size="10">M, port-town innkeeper, hearty, well-connected</text>
+
+    <rect x="540" y="265" width="380" height="45" rx="4" fill="rgba(180,83,9,0.08)"/>
+    <text x="550" y="283" fill="#fcd34d" font-size="10" font-weight="bold">GENERATION STRATEGY</text>
+    <text x="550" y="299" fill="#6b7280" font-size="10">Military faction base meshes. Thane is key (returns in S3).</text>
+    <text x="550" y="311" fill="#6b7280" font-size="10">Kelda and Petra should look distinct from soldiers.</text>
+
+    <!-- Frostmere NPCs -->
+    <rect x="960" y="60" width="420" height="330" rx="8" fill="rgba(59,130,246,0.06)" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect x="960" y="60" width="420" height="4" rx="2" fill="#3b82f6"/>
+    <text x="1170" y="85" text-anchor="middle" fill="#93c5fd" font-size="15" font-weight="bold">FROSTMERE — 5 NPCs</text>
+    <text x="1170" y="102" text-anchor="middle" fill="#3b82f6" font-size="10">Frozen harbor · Cold weather gear · Blue/white tones</text>
+
+    <text x="980" y="125" fill="#d1d5db" font-size="12" font-weight="bold">Admiral Renne</text>
+    <text x="1160" y="125" fill="#6b7280" font-size="10">F, naval admiral, heavy cold-weather coat, stern</text>
+    <text x="980" y="148" fill="#d1d5db" font-size="12" font-weight="bold">Researcher Lumi</text>
+    <text x="1160" y="148" fill="#6b7280" font-size="10">F, scientist, thick glasses, research coat, curious</text>
+    <text x="980" y="171" fill="#d1d5db" font-size="12" font-weight="bold">Captain Voss</text>
+    <text x="1160" y="171" fill="#6b7280" font-size="10">M, search/rescue, rugged gear, rope/tools</text>
+    <text x="980" y="194" fill="#d1d5db" font-size="12" font-weight="bold">Healer Yrel</text>
+    <text x="1160" y="194" fill="#6b7280" font-size="10">F, healer robes, warm face, medical supplies</text>
+    <text x="980" y="217" fill="#d1d5db" font-size="12" font-weight="bold">Diver Ashwin</text>
+    <text x="1160" y="217" fill="#6b7280" font-size="10">M, diving suit (partial), salt-weathered, adventurous</text>
+
+    <rect x="980" y="245" width="380" height="45" rx="4" fill="rgba(59,130,246,0.08)"/>
+    <text x="990" y="263" fill="#93c5fd" font-size="10" font-weight="bold">GENERATION STRATEGY</text>
+    <text x="990" y="279" fill="#6b7280" font-size="10">Cold-weather variants of base meshes. Heavy coats, boots, fur.</text>
+    <text x="990" y="291" fill="#6b7280" font-size="10">Yrel returns in S3 — needs consistent look.</text>
+
+    <!-- Veilwatch NPCs -->
+    <rect x="1400" y="60" width="420" height="330" rx="8" fill="rgba(147,51,234,0.06)" stroke="#9333ea" stroke-width="1.5"/>
+    <rect x="1400" y="60" width="420" height="4" rx="2" fill="#9333ea"/>
+    <text x="1610" y="85" text-anchor="middle" fill="#c4b5fd" font-size="15" font-weight="bold">VEILWATCH — 4 NEW NPCs</text>
+    <text x="1610" y="102" text-anchor="middle" fill="#9333ea" font-size="10">Resistance camp · Makeshift gear · Worn/battle-worn</text>
+
+    <text x="1420" y="125" fill="#d1d5db" font-size="12" font-weight="bold">Scout Maren</text>
+    <text x="1590" y="125" fill="#6b7280" font-size="10">F, young, light recon gear, Elder Maren's relative</text>
+    <text x="1420" y="148" fill="#d1d5db" font-size="12" font-weight="bold">Archivist Seren</text>
+    <text x="1590" y="148" fill="#6b7280" font-size="10">M/F, scholar, books/scrolls, dust-covered</text>
+    <text x="1420" y="171" fill="#d1d5db" font-size="12" font-weight="bold">Refugee Aldric</text>
+    <text x="1590" y="171" fill="#6b7280" font-size="10">(Same as Ironhaven Innkeeper — now refugee leader)</text>
+
+    <rect x="1420" y="195" width="380" height="60" rx="4" fill="rgba(147,51,234,0.08)"/>
+    <text x="1430" y="213" fill="#c4b5fd" font-size="10" font-weight="bold">GENERATION STRATEGY</text>
+    <text x="1430" y="229" fill="#6b7280" font-size="10">Reuse existing NPC models with damage/wear. Thane returns</text>
+    <text x="1430" y="241" fill="#6b7280" font-size="10">(same model, battle damage). Yrel returns (same + tired).</text>
+    <text x="1430" y="253" fill="#6b7280" font-size="10">Only truly new: Scout Maren, Archivist Seren (2 models).</text>
+
+    <!-- Returning NPCs note -->
+    <rect x="1420" y="270" width="380" height="60" rx="4" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,2"/>
+    <text x="1430" y="288" fill="#fbbf24" font-size="10" font-weight="bold">RETURNING NPCs (S3)</text>
+    <text x="1430" y="305" fill="#6b7280" font-size="10">Cmdr Thane, Healer Yrel, Innkeeper Aldric — reuse models</text>
+    <text x="1430" y="320" fill="#6b7280" font-size="10">with wear/tear shader variant. Same rig, damaged textures.</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- GENERATION PIPELINE SUMMARY                                  -->
+  <!-- ============================================================ -->
+  <g transform="translate(50, 2570)">
+    <rect x="0" y="0" width="1820" height="200" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+    <text x="910" y="30" text-anchor="middle" fill="#f59e0b" font-size="18" font-weight="bold" letter-spacing="3">GENERATION PIPELINE SUMMARY</text>
+
+    <!-- Pipeline stages -->
+    <rect x="30" y="50" width="230" height="130" rx="8" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="145" y="75" text-anchor="middle" fill="#ef4444" font-size="13" font-weight="bold">BATCH 1 — CRITICAL</text>
+    <text x="145" y="95" text-anchor="middle" fill="#fca5a5" font-size="20" font-weight="bold">2</text>
+    <text x="145" y="110" text-anchor="middle" fill="#9ca3af" font-size="10">party characters</text>
+    <text x="145" y="130" text-anchor="middle" fill="#d1d5db" font-size="11">Amaro + Taighe</text>
+    <text x="145" y="148" text-anchor="middle" fill="#6b7280" font-size="10">Full rig + 14 animations each</text>
+    <text x="145" y="165" text-anchor="middle" fill="#fbbf24" font-size="10">Generate as pair for consistency</text>
+
+    <text x="272" y="115" fill="#6b7280" font-size="20">→</text>
+
+    <rect x="290" y="50" width="230" height="130" rx="8" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="405" y="75" text-anchor="middle" fill="#f59e0b" font-size="13" font-weight="bold">BATCH 2 — HIGH</text>
+    <text x="405" y="95" text-anchor="middle" fill="#fcd34d" font-size="20" font-weight="bold">4</text>
+    <text x="405" y="110" text-anchor="middle" fill="#9ca3af" font-size="10">enemy types</text>
+    <text x="405" y="130" text-anchor="middle" fill="#d1d5db" font-size="11">Core military faction</text>
+    <text x="405" y="148" text-anchor="middle" fill="#6b7280" font-size="10">3 humanoid + 1 machine</text>
+    <text x="405" y="165" text-anchor="middle" fill="#fbbf24" font-size="10">Matching military uniforms</text>
+
+    <text x="532" y="115" fill="#6b7280" font-size="20">→</text>
+
+    <rect x="550" y="50" width="230" height="130" rx="8" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="665" y="75" text-anchor="middle" fill="#3b82f6" font-size="13" font-weight="bold">BATCH 3 — MED-HIGH</text>
+    <text x="665" y="95" text-anchor="middle" fill="#93c5fd" font-size="20" font-weight="bold">4+4</text>
+    <text x="665" y="110" text-anchor="middle" fill="#9ca3af" font-size="10">enemies + elite variants</text>
+    <text x="665" y="130" text-anchor="middle" fill="#d1d5db" font-size="11">Expanded military + drones</text>
+    <text x="665" y="148" text-anchor="middle" fill="#6b7280" font-size="10">1 flying rig, 1 heavy, 2 support</text>
+    <text x="665" y="165" text-anchor="middle" fill="#fbbf24" font-size="10">Elites = palette swaps of base</text>
+
+    <text x="792" y="115" fill="#6b7280" font-size="20">→</text>
+
+    <rect x="810" y="50" width="230" height="130" rx="8" fill="rgba(34,197,94,0.1)" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="925" y="75" text-anchor="middle" fill="#22c55e" font-size="13" font-weight="bold">BATCH 4 — MEDIUM</text>
+    <text x="925" y="95" text-anchor="middle" fill="#86efac" font-size="20" font-weight="bold">4</text>
+    <text x="925" y="110" text-anchor="middle" fill="#9ca3af" font-size="10">party characters</text>
+    <text x="925" y="130" text-anchor="middle" fill="#d1d5db" font-size="11">Kael · Sera · Varn · Lyra</text>
+    <text x="925" y="148" text-anchor="middle" fill="#6b7280" font-size="10">Full rig + animations each</text>
+    <text x="925" y="165" text-anchor="middle" fill="#fbbf24" font-size="10">Each must have unique silhouette</text>
+
+    <text x="1052" y="115" fill="#6b7280" font-size="20">→</text>
+
+    <rect x="1070" y="50" width="230" height="130" rx="8" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="1"/>
+    <text x="1185" y="75" text-anchor="middle" fill="#ef4444" font-size="13" font-weight="bold">BATCH 5 — MEDIUM</text>
+    <text x="1185" y="95" text-anchor="middle" fill="#fca5a5" font-size="20" font-weight="bold">7</text>
+    <text x="1185" y="110" text-anchor="middle" fill="#9ca3af" font-size="10">boss models</text>
+    <text x="1185" y="130" text-anchor="middle" fill="#d1d5db" font-size="11">All unique, multi-phase</text>
+    <text x="1185" y="148" text-anchor="middle" fill="#6b7280" font-size="10">Some need 2+ forms/meshes</text>
+    <text x="1185" y="165" text-anchor="middle" fill="#fbbf24" font-size="10">Generate in story order</text>
+
+    <text x="1312" y="115" fill="#6b7280" font-size="20">→</text>
+
+    <rect x="1330" y="50" width="230" height="130" rx="8" fill="rgba(147,51,234,0.1)" stroke="#9333ea" stroke-width="1"/>
+    <text x="1445" y="75" text-anchor="middle" fill="#9333ea" font-size="13" font-weight="bold">BATCH 6 — LOW-MED</text>
+    <text x="1445" y="95" text-anchor="middle" fill="#c4b5fd" font-size="20" font-weight="bold">8</text>
+    <text x="1445" y="110" text-anchor="middle" fill="#9ca3af" font-size="10">corrupted enemies</text>
+    <text x="1445" y="130" text-anchor="middle" fill="#d1d5db" font-size="11">2 reuse base + 6 new</text>
+    <text x="1445" y="148" text-anchor="middle" fill="#6b7280" font-size="10">2 quadruped, 2 spectral rigs</text>
+    <text x="1445" y="165" text-anchor="middle" fill="#fbbf24" font-size="10">Purple/violet corruption palette</text>
+
+    <text x="1572" y="115" fill="#6b7280" font-size="20">→</text>
+
+    <rect x="1590" y="50" width="200" height="130" rx="8" fill="rgba(107,114,128,0.1)" stroke="#6b7280" stroke-width="1"/>
+    <text x="1690" y="75" text-anchor="middle" fill="#6b7280" font-size="13" font-weight="bold">BATCH 7 — LOW</text>
+    <text x="1690" y="95" text-anchor="middle" fill="#d1d5db" font-size="20" font-weight="bold">22</text>
+    <text x="1690" y="110" text-anchor="middle" fill="#9ca3af" font-size="10">town NPCs</text>
+    <text x="1690" y="130" text-anchor="middle" fill="#d1d5db" font-size="11">Template-based</text>
+    <text x="1690" y="148" text-anchor="middle" fill="#6b7280" font-size="10">~6 base meshes + variants</text>
+    <text x="1690" y="165" text-anchor="middle" fill="#fbbf24" font-size="10">Swap clothing/hair/props</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- TOTALS AND MESH REUSE MATRIX                                 -->
+  <!-- ============================================================ -->
+  <g transform="translate(50, 2800)">
+    <rect x="0" y="0" width="880" height="180" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="28" fill="#f59e0b" font-size="16" font-weight="bold" letter-spacing="2">TOTAL MODEL COUNT</text>
+
+    <text x="30" y="58" fill="#d1d5db" font-size="13">Party Characters (unique, full rig)</text>
+    <text x="500" y="58" fill="#fbbf24" font-size="13" font-weight="bold">6 models</text>
+    <text x="30" y="80" fill="#d1d5db" font-size="13">Military Enemies (base + elites)</text>
+    <text x="500" y="80" fill="#fbbf24" font-size="13" font-weight="bold">8 models + 4 recolors = 12</text>
+    <text x="30" y="102" fill="#d1d5db" font-size="13">Corrupted Enemies (new + overlays)</text>
+    <text x="500" y="102" fill="#fbbf24" font-size="13" font-weight="bold">6 new + 2 overlays = 8</text>
+    <text x="30" y="124" fill="#d1d5db" font-size="13">Boss Encounters (unique)</text>
+    <text x="500" y="124" fill="#fbbf24" font-size="13" font-weight="bold">7 models (some multi-mesh)</text>
+    <text x="30" y="146" fill="#d1d5db" font-size="13">Town NPCs (templates + variants)</text>
+    <text x="500" y="146" fill="#fbbf24" font-size="13" font-weight="bold">~8 base + 14 variants = 22</text>
+
+    <line x1="30" y1="155" x2="850" y2="155" stroke="#f59e0b" stroke-width="1" opacity="0.3"/>
+    <text x="30" y="175" fill="#f59e0b" font-size="14" font-weight="bold">TOTAL UNIQUE MESHES NEEDED</text>
+    <text x="500" y="175" fill="#f59e0b" font-size="16" font-weight="bold">~35 unique + 20 variants = 55 models</text>
+
+    <!-- Rig types -->
+    <rect x="920" y="0" width="900" height="180" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="940" y="28" fill="#06b6d4" font-size="16" font-weight="bold" letter-spacing="2">RIG TYPES NEEDED</text>
+
+    <rect x="940" y="42" width="180" height="55" rx="6" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="1"/>
+    <text x="1030" y="62" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="bold">Humanoid (Mixamo)</text>
+    <text x="1030" y="80" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">38</text>
+    <text x="1030" y="92" text-anchor="middle" fill="#6b7280" font-size="9">Party + Military + NPCs + some bosses</text>
+
+    <rect x="1140" y="42" width="180" height="55" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+    <text x="1230" y="62" text-anchor="middle" fill="#60a5fa" font-size="12" font-weight="bold">Quadruped</text>
+    <text x="1230" y="80" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">3</text>
+    <text x="1230" y="92" text-anchor="middle" fill="#6b7280" font-size="9">Crystal Stalker, Hollow Beast, Colossus</text>
+
+    <rect x="1340" y="42" width="180" height="55" rx="6" fill="rgba(147,51,234,0.08)" stroke="#9333ea" stroke-width="1"/>
+    <text x="1430" y="62" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="bold">Spectral/Float</text>
+    <text x="1430" y="80" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">3</text>
+    <text x="1430" y="92" text-anchor="middle" fill="#6b7280" font-size="9">Wraith, Spirit Mender, Spewer</text>
+
+    <rect x="1540" y="42" width="180" height="55" rx="6" fill="rgba(6,182,212,0.08)" stroke="#06b6d4" stroke-width="1"/>
+    <text x="1630" y="62" text-anchor="middle" fill="#22d3ee" font-size="12" font-weight="bold">Flying/Drone</text>
+    <text x="1630" y="80" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">2</text>
+    <text x="1630" y="92" text-anchor="middle" fill="#6b7280" font-size="9">Patrol Drone, Sniper Drone</text>
+
+    <rect x="1740" y="42" width="70" height="55" rx="6" fill="rgba(239,68,68,0.08)" stroke="#ef4444" stroke-width="1"/>
+    <text x="1775" y="62" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="bold">Unique</text>
+    <text x="1775" y="80" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">9</text>
+    <text x="1775" y="92" text-anchor="middle" fill="#6b7280" font-size="8">Bosses + Avatar</text>
+
+    <text x="940" y="120" fill="#9ca3af" font-size="11" font-weight="bold" letter-spacing="1">MESH REUSE OPPORTUNITIES</text>
+    <text x="940" y="140" fill="#4ade80" font-size="11">✓ Corrupted Soldier = Garrison Soldier + corruption shader/overlay</text>
+    <text x="940" y="156" fill="#4ade80" font-size="11">✓ Corrupted Automaton = Security Automaton + corruption growths</text>
+    <text x="940" y="172" fill="#4ade80" font-size="11">✓ 4 Elite enemies = base meshes with recolor + minor additions (heavier armor, frost effects)</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="960" y="3020" text-anchor="middle" fill="#4b5563" font-size="11" letter-spacing="1">RAGNORAK · CHARACTER GENERATION GUIDE · 55 MODELS · 7 BATCHES · GENERATE IN ORDER FOR MAXIMUM CONSISTENCY</text>
+</svg>

@@ -1,7 +1,14 @@
 ## Handles target lock acquisition, switching, and release.
+##
+## v5 DD (user rule, item 3): acquisition / switching reach is the active
+## member's maximum ability range (AbilitySystem.get_max_range(), Package BB).
+## `detection_range` is only the fallback when no AbilitySystem (or an older
+## one without get_max_range) is present. A lock is kept out to
+## get_acquire_range() * lose_range_multiplier.
 class_name LockOnComponent
 extends Node
 
+## Fallback acquisition range (m) when the AbilitySystem range API is missing.
 @export var detection_range: float = 20.0
 @export var lose_range_multiplier: float = 1.5
 @export var obstruction_timeout: float = 1.5
@@ -22,7 +29,7 @@ func _physics_process(delta: float) -> void:
 			release_target()
 			return
 		var dist := _player.global_position.distance_to(current_target.global_position)
-		if dist > detection_range * lose_range_multiplier:
+		if dist > get_acquire_range() * lose_range_multiplier:
 			release_target()
 			return
 
@@ -49,7 +56,7 @@ func _is_obstructed() -> bool:
 func acquire_target() -> Node3D:
 	var enemies := get_tree().get_nodes_in_group(&"enemies")
 	var closest: Node3D = null
-	var closest_dist: float = detection_range
+	var closest_dist: float = get_acquire_range()
 
 	for enemy in enemies:
 		if not _is_valid_target(enemy):
@@ -63,6 +70,17 @@ func acquire_target() -> Node3D:
 		current_target = closest
 		Events.lock_on_target_acquired.emit(closest)
 	return closest
+
+
+## Lock-on reach: the active member's max ability range (BB API), else
+## detection_range.
+func get_acquire_range() -> float:
+	var abil: Node = _player.get(&"ability_system") if _player else null
+	if abil and abil.has_method(&"get_max_range"):
+		var r := float(abil.get_max_range())
+		if r > 0.0:
+			return r
+	return detection_range
 
 
 func release_target() -> void:
@@ -91,7 +109,7 @@ func switch_target(direction: float) -> void:
 		if enemy == current_target or not _is_valid_target(enemy):
 			continue
 		var dist := _player.global_position.distance_to(enemy.global_position)
-		if dist > detection_range:
+		if dist > get_acquire_range():
 			continue
 		var dir_to: Vector3 = (enemy.global_position - _player.global_position).normalized()
 		var dot: float = dir_to.dot(cam_right) * sign(direction)

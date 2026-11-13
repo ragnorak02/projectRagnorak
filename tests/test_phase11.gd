@@ -313,8 +313,8 @@ func test_save_load_menu_has_overwrite_confirm() -> void:
 func test_save_load_menu_controller_nav() -> void:
 	var source := _get_source("res://src/ui/menus/save_load_menu.gd")
 	_assert(source.contains('"move_up"') and source.contains('"move_down"')
-		and source.contains('"attack"'),
-		"Save/Load menu supports controller navigation")
+		and source.contains('"ui_accept"'),
+		"Save/Load menu supports controller navigation (D-pad + A via ui_accept)")
 
 
 func test_save_load_menu_keyboard_nav() -> void:

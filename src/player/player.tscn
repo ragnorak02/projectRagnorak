@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3]
+[gd_scene load_steps=36 format=3]
 
 [ext_resource type="Script" path="res://src/player/player.gd" id="1"]
 [ext_resource type="Script" path="res://src/player/states/state_machine.gd" id="2"]
@@ -26,6 +26,15 @@
 [ext_resource type="Script" path="res://src/player/components/equipment_system.gd" id="24"]
 [ext_resource type="Script" path="res://src/quest/quest_system.gd" id="25"]
 [ext_resource type="PackedScene" uid="uid://b4baoawm2bcya" path="res://public/assets/fbx/redKnight/red_knight.fbx" id="26"]
+[ext_resource type="Script" path="res://src/player/components/carry_component.gd" id="27"]
+[ext_resource type="Script" path="res://src/player/states/carry_state.gd" id="28"]
+[ext_resource type="Script" path="res://src/player/states/throw_aim_state.gd" id="29"]
+[ext_resource type="Script" path="res://src/ui/hud/throw_arc.gd" id="30"]
+[ext_resource type="Script" path="res://src/player/states/melee_strike_state.gd" id="31"]
+[ext_resource type="Script" path="res://src/combat/battle_mode_component.gd" id="32"]
+[ext_resource type="Script" path="res://src/combat/combo_component.gd" id="33"]
+[ext_resource type="Script" path="res://src/combat/stance_component.gd" id="34"]
+[ext_resource type="Script" path="res://src/player/states/air_dodge_state.gd" id="35"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
 radius = 0.4
@@ -157,6 +166,18 @@ script = ExtResource("20")
 [node name="ClimbUp" type="Node" parent="StateMachine"]
 script = ExtResource("21")
 
+[node name="Carry" type="Node" parent="StateMachine"]
+script = ExtResource("28")
+
+[node name="ThrowAim" type="Node" parent="StateMachine"]
+script = ExtResource("29")
+
+[node name="MeleeStrike" type="Node" parent="StateMachine"]
+script = ExtResource("31")
+
+[node name="AirDodge" type="Node" parent="StateMachine"]
+script = ExtResource("35")
+
 [node name="LedgeDetector" type="Node3D" parent="."]
 
 [node name="ChestRay" type="RayCast3D" parent="LedgeDetector"]
@@ -168,3 +189,22 @@ collision_mask = 1
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
 target_position = Vector3(0, 0, -1.2)
 collision_mask = 1
+
+[node name="CarryAnchor" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+
+[node name="CarryComponent" type="Node" parent="."]
+script = ExtResource("27")
+
+[node name="BattleModeComponent" type="Node" parent="."]
+script = ExtResource("32")
+
+[node name="ComboComponent" type="Node" parent="."]
+script = ExtResource("33")
+
+[node name="StanceComponent" type="Node" parent="."]
+script = ExtResource("34")
+
+[node name="ThrowArc" type="MeshInstance3D" parent="."]
+visible = false
+script = ExtResource("30")

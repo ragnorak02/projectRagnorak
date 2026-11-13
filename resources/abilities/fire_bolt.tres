@@ -17,3 +17,5 @@ damage = 25.0
 animation_name = &""
 effect_scene = ExtResource("2")
 icon = null
+range = 20.0
+targeting = 0

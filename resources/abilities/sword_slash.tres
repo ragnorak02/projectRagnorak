@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/abilities/ability_data.gd" id="1"]
+[ext_resource type="Script" path="res://src/effects/abilities/sword_slash.gd" id="2"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"sword_slash"
+display_name = "Sword Slash"
+description = "A wide crescent of Lumina energy cuts the target. Strong stagger."
+ability_type = 0
+mp_cost = 0.0
+atb_cost = 50.0
+cooldown = 1.5
+cast_time = 0.45
+damage = 32.0
+animation_name = &""
+effect_scene = null
+icon = null
+range = 3.5
+targeting = 1
+effect_script = ExtResource("2")
+stagger = 35.0
+ground_only = true
+owner_member = Array[StringName]([&"hero"])

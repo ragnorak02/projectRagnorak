@@ -1,0 +1,8 @@
+{
+  "bindings": {
+    "town": "_fallback",
+    "field": "_fallback",
+    "dungeon": "_fallback"
+  },
+  "default_pack": "_fallback"
+}
