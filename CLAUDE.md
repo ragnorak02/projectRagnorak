@@ -490,7 +490,7 @@ No system may directly own another system’s state.
 - [ ] Command Menu can open while airborne
 - [ ] Battle/Free Roam can be toggled by hand; a manual stand-down suppresses auto-battle until damage is dealt/taken or a new enemy engages
 - [ ] Offensive commands always open the target step (enemies nearest-first + Fire Forward)
-- [ ] Per-spell range: target list and lock-on reach = active member's max offensive range; rows beyond the selected ability's range are darkened "Out of range" (reticle + target bar dim) and cannot be confirmed; Fire Forward always works
+- [ ] Per-spell range: target list and lock-on reach = active member's max offensive range; rows beyond the selected ability's range are darkened "Out of range" and cannot be confirmed; Fire Forward always works. Out of range: the reticle dims while the "OUT OF RANGE" label stays large on a dark pill; the target bar keeps its dark panel and dims only its content
 - [ ] Party switch swaps identities, not bodies (data, HP/MP/ATB, commands, model, position); camera/lock-on/state machine stay on the Player node; 1.0s cooldown; blocked in dodge/cast/attack/flinch/carry/menus/dialogue/dead
 - [ ] Abilities v5: Sword Slash (Amaro, 0 MP), Water Geyser and Wind Crescent (Taighe, spawn at target); Taighe unique = Super Jump (~5x jump)
 - [ ] Aerial Command Menu: opened airborne it lists aerial_only abilities first (Plunge Strike / Air Burst); ground_only rows grey "Grounded only"
@@ -500,6 +500,14 @@ No system may directly own another system’s state.
 - [ ] Settings > Options: Minimap On/Off, Minimap Rotating/North-Up, Control Hints, Damage Numbers
 - [ ] Rigless models: RiglessVisual gives un-rigged meshes procedural motion and never mutates the body; generated (Hunyuan) materials have metal stripped on load; new models only after user approval (docs/rigless_models.md)
 - [ ] HUD: Free Roam/Battle chip top-left, control hints bottom-left, minimap top-right (rotates with camera; enemies red, NPCs white, chests gold, exits cyan; hidden in full-screen menus/dialogue)
+- [ ] Basic attack is data-driven per member (PartyMemberData.basic_attack_profile): Amaro = sword combo; Taighe = mage bolts (tap = quick bolt, hold = charged shot, soft-track lock-on, 0 MP, builds stagger), mixable L/H 3-step whose step 3 is a ranged burst scaling with heavies (Arcane Burst 2 m -> Lumina Nova 4.5 m); same timing, dodge-cancel and air-combo rules as melee; AI-controlled members use the same profile
+- [ ] Enemies pick a target among the party by threat (damage dealt, proximity, stickiness, crowd spread), keyed by member id so a party switch keeps the enemy on the same member; re-evaluated every 0.5 s, voluntary switches at most once per 2 s; downed/dead members are dropped at once
+- [ ] Spacing around ANY targeted member: ring slots at preferred radius (attack_range - 0.2, 1.8 m), stop distance 1.5 m from every party member (downed included), enemy separation 1.3 m, at most 2 simultaneous attackers per member
+- [ ] AI companion has a Hurtbox (same layers as the Player): hits flinch it (0.45 s, no actions, string interrupted); 0 HP = downed (no actions, not targetable, hurtbox off, switch onto it blocked)
+- [ ] Rigged models never show a T-pose: Amaro's idle is a held walk pose (passing frames averaged) with a cosmetic IdleLayer bob/lean; the walk is in place and loops; this holds when AI-controlled and in the Command Menu
+- [ ] NPCs face the street/approach path by default (_add_npc face_point); model NPCs turn toward the player during dialogue and back after (cosmetic, RiglessVisual)
+- [ ] Dungeon elite Goblin Chief: 2.4 m rigless model, with the body (capsule/hurtbox/lock-on/health bar) scaled to match
+- [ ] Ability VFX are translucent additive (unshaded, no depth write) and fade within 0.25 s (Sword Slash); multi-hit spells show a hit flash per hit; the target stays readable through every effect
 - [ ] Ledge grab is automatic
 - [ ] Quicksave disabled in combat
 - [ ] Enemy states reset per zone

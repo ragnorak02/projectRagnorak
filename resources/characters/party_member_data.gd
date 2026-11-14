@@ -25,6 +25,13 @@ extends Resource
 ## Amaro = &"arcane_stance", Taighe = &"super_jump".
 @export var unique_ability_id: StringName = &""
 
+## v6 HH — basic attack (X) kit: a BasicAttackProfile
+## (src/combat/basic_attacks/basic_attack_profile.gd). Null = melee (the v5
+## sword combo). Amaro = melee_profile.tres, Taighe = mage_profile.tres. Read by
+## the MeleeStrike state / ComboComponent on the Player body and by CompanionAI,
+## so the kit travels with the identity on a party switch.
+@export var basic_attack_profile: Resource = null
+
 ## v5 EE — rigless model support (docs/rigless_models.md). Null/false = current
 ## model (Amaro: red knight in player.tscn; others: the companion capsule tinted
 ## with capsule_color). The visual is built once per member and then travels

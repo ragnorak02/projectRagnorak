@@ -21,6 +21,17 @@
 ## air_strike_light / air_strike_heavy. Every strike also sends the rigless
 ## cue &"attack" / &"attack_heavy" (v5 EE; no-op without a RiglessVisual).
 ##
+## v6 HH — MAGE PROFILE. The controlled member's BasicAttackProfile
+## (ComboComponent.active_profile()) picks the kit at enter(). Melee (Amaro) runs
+## exactly the v5 code below (STRIKES, ComboComponent.FINISHERS, hitbox, arcs).
+## Mage (Taighe) keeps every rule of this state (timing from the profile's
+## strike table, chain point, buffered input, dodge cancel, air mode) but
+## instead of the hitbox it spawns a MageBolt (src/combat/basic_attacks/) that
+## charges at the hand and launches at `hit_start`: light = quick bolt, heavy =
+## charged shot, step 3 = finisher orb that bursts (radius by heavy count). The
+## bolt soft-tracks the lock-on target, else the nearest enemy in a forward
+## cone. A strike cancelled before its fire time fizzles the bolt (no damage).
+##
 ## Contract: basic attacks are unlimited (no MP/ATB/stamina) and cancel into
 ## Dodge at any point. Illegal (player.gd): MeleeStrike -> TacticalIdle,
 ## Flinch/LedgeGrab/ClimbUp -> MeleeStrike.
@@ -28,6 +39,7 @@ extends State
 
 const AttackVFX = preload("res://src/effects/attack_vfx.gd")
 const BlastVFX = preload("res://src/effects/blast_vfx.gd")
+const MageBolt = preload("res://src/combat/basic_attacks/mage_bolt.gd")
 
 ## duration: total strike time (s, game time); hit_start/hit_end: hitbox window;
 ## chain_at: earliest time a buffered next step starts; lunge: forward speed
@@ -65,6 +77,20 @@ var last_blast: Dictionary = {}
 var airborne: bool = false
 var _drift_dir: Vector3 = Vector3.ZERO
 
+## v6 HH: the profile this strike runs (null only before the first enter).
+var profile: BasicAttackProfile = null
+## True when this strike is a mage strike (bolt instead of hitbox).
+var mage: bool = false
+var _bolt: Node3D = null
+var _bolt_fired: bool = false
+var _aim_target: Node3D = null
+## Last mage bolt fired (for tests / debug): {"kind", "step", "finisher",
+## "damage", "stagger", "burst_radius", "target", "node", "airborne"}.
+var last_bolt: Dictionary = {}
+## Mage: hand offset the bolt charges at (up, forward), metres.
+const MAGE_HAND_UP := 1.25
+const MAGE_HAND_FORWARD := 0.55
+
 
 func enter(msg: Dictionary = {}) -> void:
 	var combo: ComboComponent = player.combo if "combo" in player else null
@@ -77,9 +103,18 @@ func enter(msg: Dictionary = {}) -> void:
 		kind = &"light"
 	step = clampi(int(msg.get("step", 1)), 1, 3)
 	var combo_string: String = msg.get("string", "")
-	finisher = ComboComponent.get_finisher(combo_string) if step == 3 else &""
-
-	_data = STRIKES[kind]
+	profile = combo.active_profile() if combo else BasicAttackProfile.for_member(
+		player.get_member_data() if player.has_method(&"get_member_data") else null)
+	mage = profile != null and profile.is_mage() and not profile.get_strike(kind).is_empty()
+	if mage:
+		finisher = profile.get_finisher(combo_string) if step == 3 else &""
+		_data = profile.get_strike(kind)
+	else:
+		finisher = ComboComponent.get_finisher(combo_string) if step == 3 else &""
+		_data = STRIKES[kind]
+	_bolt = null
+	_bolt_fired = false
+	_aim_target = null
 	_timer = 0.0
 	_hit_active = false
 	_hit_done = false
@@ -88,7 +123,7 @@ func enter(msg: Dictionary = {}) -> void:
 	damage = float(_data["damage"])
 	stagger = float(_data["stagger"])
 	if finisher != &"":
-		var fin := ComboComponent.get_finisher_data(finisher)
+		var fin := _finisher_data()
 		damage *= float(fin["mult"])
 		stagger = float(fin["stagger"])
 		if float(fin["radius"]) > 0.0:
@@ -106,12 +141,20 @@ func enter(msg: Dictionary = {}) -> void:
 	if player.has_method(&"_rigless_cue"):
 		player._rigless_cue(&"attack_heavy" if kind == &"heavy" else &"attack")
 
+	if mage:
+		_begin_bolt()
+		AudioManager.play_sfx_varied("spell_cast", 0.7 if kind == &"heavy" or finisher != &"" else 0.45)
+		return
 	_spawn_arc()
 	AudioManager.play_sfx_varied("attack_3" if kind == &"heavy" else "attack_1")
 
 
 func exit() -> void:
 	_set_hitbox(false)
+	# v6 HH: a mage strike cancelled before its fire time fizzles its bolt.
+	if _bolt and is_instance_valid(_bolt) and not _bolt_fired:
+		_bolt.fizzle()
+	_bolt = null
 	var combo: ComboComponent = player.combo if "combo" in player else null
 	if combo:
 		combo.notify_strike_exited()
@@ -129,10 +172,16 @@ func process_physics(delta: float) -> StringName:
 	else:
 		_apply_lunge(delta)
 
-	var is_blast := finisher != &"" and float(ComboComponent.get_finisher_data(finisher)["radius"]) > 0.0
+	var is_blast := not mage and finisher != &"" and float(ComboComponent.get_finisher_data(finisher)["radius"]) > 0.0
 	var hit_start := float(_data["hit_start"])
 	var hit_end := float(_data["hit_end"])
-	if is_blast:
+	if mage:
+		if not _bolt_fired:
+			if _timer >= hit_start:
+				_fire_bolt()
+			else:
+				_hold_bolt()
+	elif is_blast:
 		if not _blast_fired and _timer >= hit_start:
 			_fire_blast()
 	else:
@@ -276,6 +325,84 @@ func _set_hitbox(on: bool) -> void:
 			if hb.has_meta("hit_kind"):
 				hb.remove_meta("hit_kind")
 		_hit_active = false
+
+
+## Finisher data from the strike's profile (melee = ComboComponent.FINISHERS).
+func _finisher_data() -> Dictionary:
+	if mage and profile:
+		return profile.get_finisher_data(finisher)
+	return ComboComponent.get_finisher_data(finisher)
+
+
+# --- v6 HH mage strike ---
+
+func _hand_position() -> Vector3:
+	var fwd: Vector3 = -player.global_basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized() if fwd.length() > 0.01 else Vector3.FORWARD
+	return player.global_position + Vector3(0, MAGE_HAND_UP, 0) + fwd * MAGE_HAND_FORWARD
+
+
+## Pick the soft-aim target, face it (ground strikes; air strikes keep their
+## drift facing unless locked on) and spawn the charging bolt at the hand.
+func _begin_bolt() -> void:
+	_aim_target = MageBolt.pick_target(player, BasicAttackProfile.SOFT_AIM_RANGE, BasicAttackProfile.SOFT_AIM_DOT)
+	if _aim_target and not player.is_locked_on and not airborne:
+		var to: Vector3 = _aim_target.global_position - player.global_position
+		to.y = 0.0
+		if to.length() > 0.1:
+			player.basis = Basis.looking_at(to.normalized())
+	var parent: Node = player.get_parent()
+	if parent == null or not player.is_inside_tree():
+		return
+	var params := _bolt_params()
+	_bolt = MageBolt.create(params)
+	parent.add_child(_bolt)
+	_bolt.global_position = _hand_position()
+
+
+func _bolt_params() -> Dictionary:
+	var p := {
+		"damage": damage, "stagger": stagger, "source": player,
+		"speed": float(_data.get("speed", 30.0)), "lifetime": float(_data.get("lifetime", 0.6)),
+		"homing": float(_data.get("homing", 6.0)), "radius": float(_data.get("radius", 0.3)),
+		"hit_kind": kind, "burst_radius": 0.0, "shake": [],
+		"core_color": profile.core_color, "glow_color": profile.glow_color,
+	}
+	if finisher != &"":
+		var fin := _finisher_data()
+		p["burst_radius"] = float(fin.get("radius", 0.0))
+		p["shake"] = fin.get("shake", [])
+		p["speed"] = float(fin.get("speed", p["speed"]))
+		p["lifetime"] = float(fin.get("lifetime", p["lifetime"]))
+		p["homing"] = float(fin.get("homing", p["homing"]))
+		p["radius"] = float(fin.get("size", p["radius"]))
+		p["hit_kind"] = &"finisher"
+	return p
+
+
+func _hold_bolt() -> void:
+	if player.is_locked_on:
+		player.face_lock_target(get_physics_process_delta_time())
+	if _bolt and is_instance_valid(_bolt):
+		_bolt.hold_at(_hand_position())
+
+
+func _fire_bolt() -> void:
+	_bolt_fired = true
+	if _aim_target == null or not is_instance_valid(_aim_target):
+		_aim_target = MageBolt.pick_target(player, BasicAttackProfile.SOFT_AIM_RANGE, BasicAttackProfile.SOFT_AIM_DOT)
+	var fwd: Vector3 = -player.global_basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized() if fwd.length() > 0.01 else Vector3.FORWARD
+	if _bolt and is_instance_valid(_bolt):
+		_bolt.hold_at(_hand_position())
+		_bolt.launch(fwd, _aim_target)
+	last_bolt = {
+		"kind": kind, "step": step, "finisher": finisher, "damage": damage,
+		"stagger": stagger, "burst_radius": float(_finisher_data().get("radius", 0.0)) if finisher != &"" else 0.0,
+		"target": _aim_target, "node": _bolt, "airborne": airborne,
+	}
 
 
 func _fire_blast() -> void:

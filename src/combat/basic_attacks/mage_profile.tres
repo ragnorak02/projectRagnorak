@@ -1,0 +1,87 @@
+[gd_resource type="Resource" script_class="BasicAttackProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/combat/basic_attacks/basic_attack_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+kind = &"mage"
+display_name = "Frost Bolts"
+strikes = {
+&"heavy": {
+"chain_at": 0.36,
+"damage": 17.0,
+"duration": 0.6,
+"hit_end": 0.2,
+"hit_start": 0.2,
+"homing": 5.0,
+"lifetime": 0.8,
+"lunge": 0.0,
+"lunge_time": 0.0,
+"radius": 0.45,
+"speed": 26.0,
+"stagger": 18.0
+},
+&"light": {
+"chain_at": 0.17,
+"damage": 9.0,
+"duration": 0.36,
+"hit_end": 0.08,
+"hit_start": 0.08,
+"homing": 7.0,
+"lifetime": 0.6,
+"lunge": 0.0,
+"lunge_time": 0.0,
+"radius": 0.3,
+"speed": 32.0,
+"stagger": 6.0
+}
+}
+finishers = {
+&"arcane_burst": {
+"homing": 6.0,
+"lifetime": 0.75,
+"mult": 1.4,
+"radius": 2.0,
+"shake": [],
+"size": 0.32,
+"speed": 24.0,
+"stagger": 14.0
+},
+&"frost_burst": {
+"homing": 6.0,
+"lifetime": 0.75,
+"mult": 1.7,
+"radius": 2.6,
+"shake": [],
+"size": 0.38,
+"speed": 24.0,
+"stagger": 28.0
+},
+&"frost_nova": {
+"homing": 6.0,
+"lifetime": 0.75,
+"mult": 2.2,
+"radius": 3.4,
+"shake": [],
+"size": 0.46,
+"speed": 22.0,
+"stagger": 44.0
+},
+&"lumina_nova": {
+"homing": 6.0,
+"lifetime": 0.8,
+"mult": 3.0,
+"radius": 4.5,
+"shake": [0.3, 0.3],
+"size": 0.56,
+"speed": 22.0,
+"stagger": 66.0
+}
+}
+finisher_by_heavies = Array[StringName]([&"arcane_burst", &"frost_burst", &"frost_nova", &"lumina_nova"])
+core_color = Color(0.85, 0.97, 1, 1)
+glow_color = Color(0.35, 0.8, 1, 1)
+ai_attack_range = 9.0
+ai_keep_distance = 4.0
+ai_pattern = "LLH"
+ai_string_cooldown = 2.2

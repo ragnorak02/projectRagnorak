@@ -493,7 +493,8 @@ func test_no_traversal_softlocks() -> void:
 	# All zones have return portals
 	var field := _get_source("res://scenes/zones/field_zone.gd")
 	var dungeon := _get_source("res://scenes/zones/dungeon_zone.gd")
-	_assert(field.contains("Return to Town") and dungeon.contains("Exit to Field"),
+	# v6 (KK-4): the field's town portal was renamed "Return to Millhaven".
+	_assert(field.contains("Return to Millhaven") and dungeon.contains("Exit to Field"),
 		"Field and dungeon have return portals (no softlocks)")
 
 

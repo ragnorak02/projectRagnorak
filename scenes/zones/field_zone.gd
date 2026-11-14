@@ -29,6 +29,7 @@ const EnemyScene := preload("res://src/enemies/enemy.tscn")
 const ENEMY_MODELS := [
 	["Kobold", preload("res://assets/models/characters/kobold_female1.glb")],
 	["Kobold Queen", preload("res://assets/models/characters/kobold_queen1.glb")],
+	["Goblin", preload("res://assets/models/characters/goblin_male2.glb")],  # v6 JJ-4: goblinMale2 run-002
 ]
 var _enemy_spawn_count: int = 0
 const NpcInteractable := preload("res://src/interaction/npc_interactable.gd")
@@ -537,7 +538,11 @@ func _add_enemy(pos: Vector3) -> void:
 	enemy.global_position.y = 1.0
 
 
-func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array) -> void:
+## `model`: optional un-rigged NPC model (RiglessVisual, v6 JJ-3). `face_point`:
+## where the NPC looks by default; INF = the main road (x = 0) a few metres
+## toward the south approach (v6 JJ-2).
+func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array, model: PackedScene = null,
+		face_point: Vector3 = Vector3.INF) -> void:
 	var npc := Area3D.new()
 	npc.set_script(NpcInteractable)
 	npc.npc_name = npc_name
@@ -559,6 +564,16 @@ func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array) -> voi
 	mat.albedo_color = color
 	mesh.material_override = mat
 	npc.add_child(mesh)
+	if model != null:
+		# Un-rigged model replaces the capsule; idle bob only (NPCs don't move).
+		mesh.visible = false
+		var rv: Node3D = load("res://src/characters/rigless_visual.gd").new()
+		rv.name = "RiglessVisual"
+		rv.set(&"model_scene", model)
+		rv.set(&"fit_height", 1.7)
+		rv.set(&"model_yaw_offset_deg", 180.0)
+		rv.set(&"face_speaker_in_dialogue", true)
+		npc.add_child(rv)
 
 	# Name plate (UI Package N): fixed on-screen size (~24px tall at any distance,
 	# so it can never fill the screen when the camera is close), style-kit font,
@@ -582,8 +597,20 @@ func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array) -> voi
 	label_3d.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	npc.add_child(label_3d)
 
+	# Facing is set before entering the tree so the visual starts on it.
+	npc.rotation.y = npc_face_yaw(pos, face_point)
 	add_child(npc)
 	npc.global_position = pos
+
+
+## Yaw that points an NPC at `face_point` (INF = the street default above).
+static func npc_face_yaw(pos: Vector3, face_point: Vector3 = Vector3.INF) -> float:
+	var target := face_point if face_point.is_finite() else Vector3(0.0, pos.y, pos.z + 4.0)
+	var d := target - pos
+	d.y = 0.0
+	if d.length() < 0.1:
+		return 0.0
+	return atan2(-d.x, -d.z)
 
 
 func _add_portal(portal_name: String, pos: Vector3, target_zone: String,

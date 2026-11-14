@@ -6,6 +6,9 @@ extends "res://src/world/zone_base.gd"
 const NpcInteractable := preload("res://src/interaction/npc_interactable.gd")
 ## v5 placeholder NPC model (un-rigged Hunyuan mesh, RiglessVisual).
 const PirateModel := preload("res://assets/models/characters/pirate_female1.glb")
+## v6 JJ-4 NPC models (Hunyuan runs picked by the user, RiglessVisual).
+const TeacherModel := preload("res://assets/models/characters/teacher_female2.glb")      # teacherFemale2 run-002
+const AlchemistModel := preload("res://assets/models/characters/alchemist_female1.glb")  # alchemistFemale1 run-002
 const ChestInteractable := preload("res://src/interaction/chest_interactable.gd")
 const ZonePortal := preload("res://src/interaction/zone_portal.gd")
 const CarryableCrateScene := preload("res://src/interaction/carryable_crate.tscn")
@@ -204,6 +207,21 @@ func _place_npcs() -> void:
 		{"speaker": "Villager", "text": "They say the coastal facility is the biggest one yet."},
 	])
 
+	# v6 JJ-4: Scholar Yeun (Teacher Female 2) — quest giver on the north edge
+	# of the square. Dialogue only: no quest system hook yet.
+	_add_npc("Scholar Yeun", Vector3(-4, 0, -27), Color(0.45, 0.4, 0.6), [
+		{"speaker": "Scholar Yeun", "text": "Ah, a new face. I teach the village children their letters, and their Lumina lore."},
+		{"speaker": "Scholar Yeun", "text": "The shrine beyond the northern fields holds glyphs older than any reactor."},
+		{"speaker": "Scholar Yeun", "text": "If you venture there, bring me word of what is carved inside. I will make it worth your while."},
+	], TeacherModel)
+
+	# v6 JJ-4: Alchemist Ines (Alchemist Female 1) — vendor at the west path.
+	# Dialogue only: no shop UI hook yet.
+	_add_npc("Alchemist Ines", Vector3(-7, 0, -14.5), Color(0.3, 0.55, 0.45), [
+		{"speaker": "Alchemist Ines", "text": "Tonics, salves, a little chilled Lumina dust. Mind the fumes."},
+		{"speaker": "Alchemist Ines", "text": "Bring me herbs and monster parts from the wilds and I'll brew you something strong."},
+	], AlchemistModel)
+
 
 # ── Portals ────────────────────────────────────────────────────────────────────
 
@@ -217,7 +235,11 @@ func _place_portals() -> void:
 
 # ── NPC / Portal Helpers (unchanged from original) ────────────────────────────
 
-func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array, model: PackedScene = null) -> void:
+## `model`: optional un-rigged NPC model (RiglessVisual). `face_point`: where the
+## NPC looks by default; INF = the main road (x = 0) a few metres toward the
+## south approach, so NPCs face the street the player arrives on (v6 JJ-2).
+func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array, model: PackedScene = null,
+		face_point: Vector3 = Vector3.INF) -> void:
 	var npc := Area3D.new()
 	npc.set_script(NpcInteractable)
 	npc.npc_name = npc_name
@@ -248,6 +270,7 @@ func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array, model:
 		rv.set(&"model_scene", model)
 		rv.set(&"fit_height", 1.7)
 		rv.set(&"model_yaw_offset_deg", 180.0)
+		rv.set(&"face_speaker_in_dialogue", true)
 		npc.add_child(rv)
 
 	# Floating name label
@@ -273,8 +296,20 @@ func _add_npc(npc_name: String, pos: Vector3, color: Color, pages: Array, model:
 	label_3d.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	npc.add_child(label_3d)
 
+	# Facing is set before entering the tree so the visual starts on it.
+	npc.rotation.y = npc_face_yaw(pos, face_point)
 	add_child(npc)
 	npc.global_position = pos
+
+
+## Yaw that points an NPC at `face_point` (INF = the street default above).
+static func npc_face_yaw(pos: Vector3, face_point: Vector3 = Vector3.INF) -> float:
+	var target := face_point if face_point.is_finite() else Vector3(0.0, pos.y, pos.z + 4.0)
+	var d := target - pos
+	d.y = 0.0
+	if d.length() < 0.1:
+		return 0.0
+	return atan2(-d.x, -d.z)
 
 
 func _add_portal(portal_name: String, pos: Vector3, target_zone: String,

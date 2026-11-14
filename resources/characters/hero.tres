@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://resources/characters/party_member_data.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/abilities/fire_bolt.tres" id="a0"]
@@ -6,6 +6,7 @@
 [ext_resource type="Resource" path="res://resources/abilities/heal.tres" id="a2"]
 [ext_resource type="Resource" path="res://resources/abilities/sword_slash.tres" id="a3"]
 [ext_resource type="Resource" path="res://resources/abilities/plunge_strike.tres" id="a4"]
+[ext_resource type="Resource" path="res://src/combat/basic_attacks/melee_profile.tres" id="p1"]
 
 [resource]
 script = ExtResource("1")
@@ -20,5 +21,6 @@ attack_damage = 15.0
 move_speed = 8.0
 capsule_color = Color(0.3, 0.5, 0.8, 1)
 traversal_flags = []
+basic_attack_profile = ExtResource("p1")
 unique_ability_id = &"arcane_stance"
 default_abilities = Array[Resource]([ExtResource("a0"), ExtResource("a1"), ExtResource("a2"), ExtResource("a3"), ExtResource("a4")])

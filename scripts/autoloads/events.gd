@@ -71,6 +71,7 @@ signal party_member_joined(member_id: StringName)
 signal party_member_switched(old_id: StringName, new_id: StringName)
 signal party_member_downed(member_id: StringName)
 signal party_member_revived(member_id: StringName)
+signal party_member_damaged(member_id: StringName, amount: float, source: Node3D)  # v6 II
 signal team_meter_changed(current: float, maximum: float)
 
 # --- Dialogue ---

@@ -375,8 +375,12 @@ func test_field_zone_hud() -> void:
 		Events.lock_on_target_acquired.emit(e)
 		await _frames(3)
 		_assert(bar.is_shown() and bar.get_target() == e, "Target bar shows on lock_on_target_acquired")
-		_assert(bar._name_label.text.to_lower().contains("reactor sentry"), "Target bar name uses enemy display_name",
-			bar._name_label.text)
+		# v6 LL: compare against the enemy's own display_name (field enemies are
+		# named by their model since v5/v6: Kobold, Kobold Queen, Goblin...).
+		var want := str(e.get(&"display_name")) if e.get(&"display_name") != null else ""
+		_assert(want != "" and bar._name_label.text.to_lower().contains(want.to_lower()),
+			"Target bar name uses enemy display_name",
+			"label='%s' display_name='%s'" % [bar._name_label.text, want])
 		if enemies.size() >= 2:
 			Events.lock_on_target_switched.emit(enemies[1])
 			await _frames(2)

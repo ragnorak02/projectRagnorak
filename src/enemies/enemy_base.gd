@@ -44,6 +44,34 @@ var current_hp: float
 @export var rigless_yaw_offset_deg: float = 180.0
 var _rigless: Node3D = null
 
+# --- v6 (Package II): party targeting + ENEMY COMBAT SPACING RULE ---
+## Ring radius (centre to centre) the enemy holds around its target. <= 0 =
+## auto: attack_range - 0.2, never below stop_distance (1.8 m by default,
+## ~6 ft: inside the 5-10 ft contract band and inside attack reach).
+@export var preferred_radius: float = -1.0
+## Hard floor: the enemy never moves closer than this to ANY party member.
+@export var stop_distance: float = 1.5
+## Enemies push apart inside this distance (no dogpiling).
+@export var enemy_separation: float = 1.3
+## Attack queue: at most this many enemies wind up / strike / recover on the
+## same party member at once; the rest hold their ring slot.
+@export var max_attackers_per_target: int = 2
+const ThreatTableScript := preload("res://src/enemies/threat_table.gd")
+## Angular spacing of ring slots (radians). Groups spread over an arc in front
+## of their side instead of a full surround, unless they need the room.
+const RING_STEP_MAX := PI * 0.5
+## Slot arrival tolerance (m) and tangential orbit threshold (radians).
+const SLOT_TOLERANCE := 0.2
+const ORBIT_ANGLE := 0.35
+## Faces the target (instead of the move direction) inside this distance.
+const FACE_TARGET_RANGE := 5.0
+## Emitted when the chosen party member changes (null = no target).
+signal target_changed(enemy: Node3D, new_target: Node3D)
+var threat: RefCounted = ThreatTableScript.new()
+var _target_key: StringName = &""
+var _retarget_timer: float = 0.0
+var _hold_timer: float = 0.0
+
 @onready var visual_root: Node3D = $VisualRoot
 @onready var hurtbox: Area3D = $Hurtbox
 @onready var attack_origin: Node3D = $AttackOrigin
@@ -90,6 +118,10 @@ func _ready() -> void:
 
 	_setup_rigless()
 	_build_health_bar()
+	# Party switch swaps identities between bodies: re-resolve the body of the
+	# member this enemy is fighting (threat is keyed by member id).
+	Events.party_member_switched.connect(_on_party_member_switched)
+	Events.party_member_downed.connect(_on_party_member_downed)
 	Events.enemy_spawned.emit(self)
 
 
@@ -128,6 +160,9 @@ func _physics_process(delta: float) -> void:
 		_attack_cooldown_timer -= delta
 
 	_update_stagger_decay(delta)
+	threat.decay(delta)
+	if _hold_timer > 0.0:
+		_hold_timer -= delta
 
 	match ai_state:
 		AIState.IDLE:
@@ -165,6 +200,7 @@ func take_damage(amount: float, source: Node3D = null, hit_kind: StringName = &"
 	if staggered:
 		amount *= stagger_damage_multiplier
 	current_hp = maxf(current_hp - amount, 0.0)
+	_add_damage_threat(amount, source)
 	Events.enemy_damaged.emit(self, amount)
 	Events.enemy_hit.emit(self, amount, source)
 	_rigless_cue(&"hit")
@@ -285,12 +321,251 @@ func _on_hurtbox_hit(area: Area3D) -> void:
 
 
 func _on_aggro_body_entered(body: Node3D) -> void:
-	if body.is_in_group(&"player"):
+	# v6: any targetable party body (the Player node or an AI companion) aggros.
+	if not (body.is_in_group(&"player") or body.is_in_group(&"party_members")):
+		return
+	if not _is_targetable(body):
+		return
+	var key := _key_for_body(body)
+	threat.add(key, ThreatTableScript.ENGAGE_THREAT)
+	if _target == null or not is_instance_valid(_target) or ai_state == AIState.IDLE:
+		_set_target(body, key)
+	if ai_state == AIState.IDLE:
+		ai_state = AIState.CHASE
+		_retarget_timer = ThreatTableScript.RETARGET_INTERVAL
+		_show_health_bar()
+		Events.enemy_aggro_triggered.emit(self)
+
+
+# --- v6 Party targeting (threat) ---
+
+## The party member body this enemy is currently fighting (null = none).
+func get_target() -> Node3D:
+	return _target if _target != null and is_instance_valid(_target) else null
+
+
+## Member id of the current target (threat key).
+func get_target_key() -> StringName:
+	return _target_key
+
+
+## Ring radius actually used (see preferred_radius).
+func get_preferred_radius() -> float:
+	if preferred_radius > 0.0:
+		return maxf(preferred_radius, stop_distance)
+	return maxf(attack_range - 0.2, stop_distance)
+
+
+## True while this enemy occupies an attack slot (wind-up / strike / recovery).
+func is_attacking() -> bool:
+	return ai_state == AIState.ATTACK_TELEGRAPH or ai_state == AIState.ATTACK_STRIKE \
+		or ai_state == AIState.ATTACK_RECOVERY
+
+
+## A party body can be targeted: alive, not downed, damageable.
+func _is_targetable(n: Node) -> bool:
+	if n == null or not is_instance_valid(n) or not (n is Node3D) or not n.is_inside_tree():
+		return false
+	if not n.has_method("take_damage"):
+		return false
+	if n.has_method("is_downed") and n.is_downed():
+		return false
+	if "current_hp" in n and float(n.get(&"current_hp")) <= 0.0:
+		return false
+	return true
+
+
+func _find_party_system() -> Node:
+	if not is_inside_tree():
+		return null
+	var player := get_tree().get_first_node_in_group(&"player")
+	if player == null or not ("party_system" in player):
+		return null
+	var ps: Node = player.get(&"party_system")
+	if ps == null or not is_instance_valid(ps) or not ("members" in ps):
+		return null
+	return ps
+
+
+## Every party body (targetable or not) as [{key, node}], in a stable order:
+## PartySystem member order, else the "player" group then "party_members".
+func _party_bodies() -> Array:
+	var out: Array = []
+	if not is_inside_tree():
+		return out
+	var ps := _find_party_system()
+	if ps != null and ps.members.size() > 0:
+		for m in ps.members:
+			var n = m.get("node")
+			if n is Node3D and is_instance_valid(n) and n.is_inside_tree():
+				out.append({"key": StringName(m.get("id", &"")), "node": n})
+		return out
+	var seen: Dictionary = {}
+	for g in [&"player", &"party_members"]:
+		for n in get_tree().get_nodes_in_group(g):
+			if n is Node3D and not seen.has(n.get_instance_id()):
+				seen[n.get_instance_id()] = true
+				out.append({"key": _fallback_key(n), "node": n})
+	return out
+
+
+func _party_candidates() -> Array:
+	var out: Array = []
+	for c in _party_bodies():
+		if _is_targetable(c["node"]):
+			out.append(c)
+	return out
+
+
+func _fallback_key(n: Node) -> StringName:
+	var data: Resource = null
+	if n.has_method("get_member_data"):
+		data = n.get_member_data()
+	elif "member_data" in n:
+		data = n.get(&"member_data")
+	if data != null and "member_id" in data and StringName(data.member_id) != &"":
+		return StringName(data.member_id)
+	return StringName("node_%d" % n.get_instance_id())
+
+
+func _key_for_body(body: Node) -> StringName:
+	for c in _party_bodies():
+		if c["node"] == body:
+			return c["key"]
+	return _fallback_key(body)
+
+
+func _body_for_key(key: StringName) -> Node3D:
+	for c in _party_bodies():
+		if c["key"] == key:
+			return c["node"]
+	return null
+
+
+## Who dealt this hit: the party body that is (or owns) `source`. Projectiles
+## and effects that live outside their caster expose it as `source`/`caster`
+## (property or meta). No source / unknown source = the controlled Player body
+## (same rule as BattleModeComponent: only companions are told apart).
+func _attribute_source(source: Node) -> Dictionary:
+	var bodies := _party_bodies()
+	if bodies.is_empty():
+		return {}
+	var n: Node = source
+	var guard := 0
+	while n != null and is_instance_valid(n) and guard < 32:
+		guard += 1
+		for c in bodies:
+			if c["node"] == n:
+				return c
+		n = _owner_of(n)
+	for c in bodies:
+		if (c["node"] as Node).is_in_group(&"player"):
+			return c
+	return {}
+
+
+## Next node up the ownership chain: an explicit caster/source (meta first,
+## then property) if it names another node, else the scene-tree parent.
+static func _owner_of(n: Node) -> Node:
+	for prop in [&"caster", &"source"]:
+		var ref: Variant = null
+		if n.has_meta(prop):
+			ref = n.get_meta(prop)
+		elif prop in n:
+			ref = n.get(prop)
+		if ref is Node and is_instance_valid(ref) and ref != n:
+			return ref
+	return n.get_parent()
+
+
+func _add_damage_threat(amount: float, source: Node) -> void:
+	var c := _attribute_source(source)
+	if c.is_empty():
+		return
+	threat.add(c["key"], amount)
+	# Hit while unengaged (e.g. from range): engage the attacker if it is in reach.
+	if (_target == null or not is_instance_valid(_target)) and _is_targetable(c["node"]):
+		if global_position.distance_to((c["node"] as Node3D).global_position) <= aggro_range * 1.5:
+			_set_target(c["node"], c["key"])
+			_retarget_timer = ThreatTableScript.RETARGET_INTERVAL
+
+
+func _set_target(body: Node3D, key: StringName) -> void:
+	var changed := body != _target or key != _target_key
+	_target = body
+	_target_key = key
+	if changed:
+		_hold_timer = ThreatTableScript.MIN_HOLD
+		target_changed.emit(self, body)
+
+
+## Number of OTHER live enemies currently targeting `body` (optionally only
+## those holding an attack slot).
+func _count_on_target(body: Node3D, attackers_only: bool = false) -> int:
+	var n := 0
+	if body == null or not is_inside_tree():
+		return 0
+	for e in get_tree().get_nodes_in_group(&"enemies"):
+		if e == self or not (e is EnemyBase) or not is_instance_valid(e):
+			continue
+		var eb := e as EnemyBase
+		if eb._is_dead or eb.get_target() != body:
+			continue
+		if attackers_only and not eb.is_attacking():
+			continue
+		n += 1
+	return n
+
+
+## Re-evaluate the target. `forced` = the current one became invalid (downed,
+## dead, freed): switch at once, ignoring hold/interval. Returns false when no
+## party member can be targeted.
+func _evaluate_target(forced: bool) -> bool:
+	var cands := _party_candidates()
+	if cands.is_empty():
+		if _target != null:
+			_target = null
+			_target_key = &""
+			target_changed.emit(self, null)
+		return false
+	var current_ok := _target != null and is_instance_valid(_target) and _is_targetable(_target)
+	if current_ok and not forced and _hold_timer > 0.0:
+		return true
+	var rows: Array = []
+	for c in cands:
+		var node: Node3D = c["node"]
+		rows.append({"key": c["key"],
+			"dist": global_position.distance_to(node.global_position),
+			"crowd": _count_on_target(node)})
+	var idx: int = threat.pick(rows, _target_key if current_ok else &"", aggro_range)
+	if idx < 0:
+		return false
+	_set_target(cands[idx]["node"], cands[idx]["key"])
+	return true
+
+
+func _on_party_member_switched(_old_id: StringName, _new_id: StringName) -> void:
+	if _is_dead or _target_key == &"":
+		return
+	var body := _body_for_key(_target_key)
+	if body != null and body != _target:
+		# Same member, new body: not a voluntary switch (hold timer untouched).
 		_target = body
-		if ai_state == AIState.IDLE:
-			ai_state = AIState.CHASE
-			_show_health_bar()
-			Events.enemy_aggro_triggered.emit(self)
+		target_changed.emit(self, body)
+
+
+func _on_party_member_downed(member_id: StringName) -> void:
+	if _is_dead or member_id != _target_key:
+		return
+	_retarget_timer = ThreatTableScript.RETARGET_INTERVAL
+	# A wind-up on the downed member is dropped; a strike already out finishes
+	# harmlessly (the downed hurtbox is off). The target switches at once in
+	# every state, so no enemy keeps a downed member as its target.
+	if ai_state == AIState.ATTACK_TELEGRAPH:
+		ai_state = AIState.CHASE
+	if not _evaluate_target(true):
+		_target = null
+		_target_key = &""
 
 
 # --- AI States ---
@@ -305,32 +580,188 @@ func _process_chase(delta: float) -> void:
 		ai_state = AIState.IDLE
 		return
 
+	# Target selection: forced when the current member is no longer targetable,
+	# otherwise on a fixed interval (game time, so tactical mode slows it too).
+	if not _is_targetable(_target):
+		if not _evaluate_target(true):
+			ai_state = AIState.IDLE
+			velocity.x = 0.0
+			velocity.z = 0.0
+			return
+	else:
+		_retarget_timer -= delta
+		if _retarget_timer <= 0.0:
+			_retarget_timer = ThreatTableScript.RETARGET_INTERVAL
+			_evaluate_target(false)
+
 	var dist := global_position.distance_to(_target.global_position)
 
-	# Lost interest
+	# Lost interest in this member: fall back to the nearest member in aggro
+	# range (party order breaks ties), else give up.
 	if dist > aggro_range * 1.5:
+		var nearest: Dictionary = {}
+		var best := aggro_range
+		for c in _party_candidates():
+			var d := global_position.distance_to((c["node"] as Node3D).global_position)
+			if d <= best and c["node"] != _target:
+				best = d
+				nearest = c
+		if not nearest.is_empty():
+			_set_target(nearest["node"], nearest["key"])
+			return
 		_target = null
+		_target_key = &""
+		threat.clear()
+		target_changed.emit(self, null)
 		ai_state = AIState.IDLE
 		return
 
-	# In attack range and cooldown ready
-	if dist < attack_range and _attack_cooldown_timer <= 0.0:
+	# In attack range, cooldown ready and an attack slot free on this target.
+	if dist < attack_range and _attack_cooldown_timer <= 0.0 \
+			and _count_on_target(_target, true) < max_attackers_per_target:
 		_enter_attack_telegraph()
 		return
 
-	# Navigate toward target — use direct steering (no nav mesh dependency)
-	var direction: Vector3 = (_target.global_position - global_position)
-	direction.y = 0.0
-	if direction.length() > 0.1:
-		direction = direction.normalized()
-		velocity.x = direction.x * move_speed
-		velocity.z = direction.z * move_speed
+	_steer_spacing(delta, dist)
 
-		# Face movement direction
-		basis = basis.slerp(Basis.looking_at(direction), clampf(8.0 * delta, 0.0, 1.0))
+
+# --- v6 Spacing (ENEMY COMBAT SPACING RULE) ---
+
+## Ring slot angle (radians, atan2(x, z) around the target) for this enemy.
+## Every enemy on the same target computes the same assignment: the group is
+## sorted by its current angle around the target relative to the group's mean
+## direction (order never swaps, so no crossing), then spread RING_STEP_MAX
+## apart (or TAU/N when they need a full ring), centred on the mean direction.
+func get_ring_slot_angle() -> float:
+	var t := get_target()
+	if t == null:
+		return 0.0
+	var group: Array = []
+	for e in get_tree().get_nodes_in_group(&"enemies"):
+		if not (e is EnemyBase) or not is_instance_valid(e):
+			continue
+		var eb := e as EnemyBase
+		if eb._is_dead or eb.get_target() != t:
+			continue
+		group.append(eb)
+	var own := _angle_around(t.global_position, global_position)
+	if group.size() <= 1:
+		return own
+	var sx := 0.0
+	var sz := 0.0
+	for eb in group:
+		var a := _angle_around(t.global_position, (eb as Node3D).global_position)
+		sx += sin(a)
+		sz += cos(a)
+	var mean: float
+	if Vector2(sx, sz).length() < 0.2 * group.size():
+		# Balanced surround: anchor on the lowest instance id (deterministic).
+		var anchor: EnemyBase = group[0]
+		for eb in group:
+			if (eb as Object).get_instance_id() < anchor.get_instance_id():
+				anchor = eb
+		mean = _angle_around(t.global_position, anchor.global_position)
 	else:
-		velocity.x = 0.0
-		velocity.z = 0.0
+		mean = atan2(sx, sz)
+	var rel: Array = []
+	for eb in group:
+		var a := _angle_around(t.global_position, (eb as Node3D).global_position)
+		rel.append([wrapf(a - mean, -PI, PI), (eb as Object).get_instance_id(), eb])
+	rel.sort_custom(func(x, y): return x[0] < y[0] or (x[0] == y[0] and x[1] < y[1]))
+	var n := rel.size()
+	var step := minf(RING_STEP_MAX, TAU / float(n))
+	for i in n:
+		if rel[i][2] == self:
+			return mean + (float(i) - float(n - 1) * 0.5) * step
+	return own
+
+
+static func _angle_around(center: Vector3, p: Vector3) -> float:
+	return atan2(p.x - center.x, p.z - center.z)
+
+
+## Move to this enemy's ring slot around the target, orbiting (not cutting
+## through) the target, separated from other enemies, and never closer than
+## stop_distance to ANY party member. Faces the target when close.
+func _steer_spacing(delta: float, dist: float) -> void:
+	var tp := _target.global_position
+	var radius := get_preferred_radius()
+	var slot := get_ring_slot_angle()
+	var rel := global_position - tp
+	rel.y = 0.0
+	var outward := rel.normalized() if rel.length() > 0.01 else -global_basis.z
+	var cur_ang := atan2(rel.x, rel.z)
+	var dang := wrapf(slot - cur_ang, -PI, PI)
+
+	var desired := Vector3.ZERO
+	var speed := move_speed
+	if dist > radius + 1.0:
+		# Approach: head for the slot point.
+		var slot_point := tp + Vector3(sin(slot), 0.0, cos(slot)) * radius
+		var to_slot := slot_point - global_position
+		to_slot.y = 0.0
+		desired = to_slot.normalized()
+	else:
+		# On the ring: correct the radius, orbit toward the slot angle.
+		var radial := clampf((radius - dist) * 2.0, -1.0, 1.0)
+		desired = outward * radial
+		if absf(dang) > ORBIT_ANGLE * 0.25:
+			var tangent := Vector3(cos(cur_ang), 0.0, -sin(cur_ang)) * signf(dang)
+			desired += tangent * clampf(absf(dang) / ORBIT_ANGLE, 0.0, 1.0)
+		var off := Vector2(radius - dist, absf(dang) * radius).length()
+		if off < SLOT_TOLERANCE:
+			desired = Vector3.ZERO
+		speed = move_speed * clampf(off / 0.8, 0.35, 1.0)
+
+	# Separation from other enemies (local, symmetric).
+	var sep := Vector3.ZERO
+	for e in get_tree().get_nodes_in_group(&"enemies"):
+		if e == self or not (e is EnemyBase) or not is_instance_valid(e) or (e as EnemyBase)._is_dead:
+			continue
+		var d := global_position - (e as Node3D).global_position
+		d.y = 0.0
+		var l := d.length()
+		if l < enemy_separation:
+			sep += (d / maxf(l, 0.05)) * (enemy_separation - l) / enemy_separation
+	desired += sep * 1.5
+
+	if desired.length() > 1.0:
+		desired = desired.normalized()
+	var v := desired * speed
+	v = _clamp_member_overlap(v, delta)
+	velocity.x = v.x
+	velocity.z = v.z
+
+	# Facing: the target when close (attacks read from range), else movement.
+	var face: Vector3 = -rel if dist <= FACE_TARGET_RANGE else Vector3(v.x, 0.0, v.z)
+	if face.length() > 0.1:
+		basis = basis.slerp(Basis.looking_at(face.normalized()), clampf(8.0 * delta, 0.0, 1.0))
+
+
+## No overlap with ANY party member (targeted or not, downed included): inside
+## stop_distance the enemy backs out; otherwise the inward velocity component
+## that would cross stop_distance this frame is removed (enemies collide with
+## the world only, so this is what keeps them out of member colliders).
+func _clamp_member_overlap(v: Vector3, delta: float) -> Vector3:
+	for c in _party_bodies():
+		var node: Node3D = c["node"]
+		var d := global_position - node.global_position
+		d.y = 0.0
+		var l := d.length()
+		if l < 0.001:
+			d = -global_basis.z
+			l = 0.001
+		var n := d / l
+		var radial := v.dot(n)  # > 0 = moving away
+		if l < stop_distance:
+			# Too close: back out at no less than 60% of move speed.
+			var out_speed := maxf(radial, move_speed * 0.6)
+			v += n * (out_speed - radial)
+		elif radial < 0.0:
+			var max_in := (l - stop_distance) / maxf(delta, 0.0001)
+			if -radial > max_in:
+				v += n * (-radial - max_in)
+	return v
 
 
 func _enter_attack_telegraph() -> void:

@@ -23,6 +23,14 @@
 ##   &"manual"
 ## Step 3 is a finisher; see FINISHERS / get_finisher().
 ##
+## v6 HH — BASIC-ATTACK PROFILES. The timing, string, chain window, resets and
+## air budget here are shared by every member. WHAT a step does comes from the
+## controlled member's BasicAttackProfile (active_profile(), read from
+## player.get_member_data(), so it follows the identity on a party switch):
+## melee (Amaro) = FINISHERS below, unchanged; mage (Taighe) = bolts and a
+## heavy-scaled finisher burst (profile.get_finisher / get_finisher_data), run
+## by the same MeleeStrike state.
+##
 ## v5 DD — AIR COMBO + AIR BUDGET. Jump and Fall are strike entry states too:
 ## an airborne press is timed exactly like a ground one (L/H mixable, max 3)
 ## and the MeleeStrike it starts runs in air mode (holds altitude, drifts).
@@ -313,6 +321,16 @@ static func get_finisher_data(finisher: StringName) -> Dictionary:
 	return FINISHERS.get(finisher, {})
 
 
+## v6 HH: the controlled member's basic-attack profile (BasicAttackProfile;
+## the melee profile when the member has none or the player has no member data).
+## The profile changes only on an identity swap, which resets the string.
+func active_profile() -> BasicAttackProfile:
+	var data: Resource = null
+	if player and player.has_method(&"get_member_data"):
+		data = player.get_member_data()
+	return BasicAttackProfile.for_member(data)
+
+
 # --- Internals ---
 
 func _current_state_name() -> StringName:
@@ -362,8 +380,14 @@ func _append_and_prepare(kind: StringName) -> StringName:
 	Events.combo_step.emit(step, kind)
 	Events.combo_count_changed.emit(step)
 	if step == MAX_STEPS:
-		var fin := get_finisher(_string)
-		Events.combo_finisher.emit(fin, float(FINISHERS[fin]["radius"]))
+		var prof := active_profile()
+		if prof.is_mage():
+			# v6 HH: the mage finisher burst (named by the heavy count).
+			var mfin := prof.get_finisher(_string)
+			Events.combo_finisher.emit(mfin, float(prof.get_finisher_data(mfin).get("radius", 0.0)))
+		else:
+			var fin := get_finisher(_string)
+			Events.combo_finisher.emit(fin, float(FINISHERS[fin]["radius"]))
 	return &"MeleeStrike"
 
 

@@ -506,9 +506,10 @@ func test_pause_menu_return_to_title_cleans_state() -> void:
 # ========== CATEGORY 10: TITLE-TO-GAME FLOW ==========
 
 func test_new_game_loads_test_arena() -> void:
+	# v6 (KK-4): New Game starts in the town hub (Millhaven), not the test arena.
 	var source := _get_source("res://scenes/menus/main_menu.gd")
-	_assert(source.contains("test_arena.tscn"),
-		"New Game loads test arena scene")
+	_assert(source.contains("town_hub.tscn"),
+		"New Game loads town hub scene")
 
 
 func test_main_menu_scene_is_boot_scene() -> void:

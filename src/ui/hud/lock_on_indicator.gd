@@ -6,9 +6,13 @@ extends CanvasLayer
 
 const RETICLE_SIZE := 56.0
 const ROTATE_SPEED := 0.9  # radians per second (real time)
+const LABEL_SIZE := 13
+## v6 GG-4: "OUT OF RANGE" is larger and sits on a dark pill.
+const OUT_OF_RANGE_LABEL_SIZE := UIStyle.SIZE_S + 4
 
 var _indicator: Control
 var _reticle: Control
+var _label_box: PanelContainer
 var _label: Label
 var _target: Node3D = null
 var _camera: Camera3D = null
@@ -44,14 +48,20 @@ func _build_ui() -> void:
 	_reticle.draw.connect(_draw_reticle)
 	_indicator.add_child(_reticle)
 
-	_label = UIStyle.make_label("LOCKED ON", 13, UIStyle.CYAN, true)
-	_label.add_theme_font_size_override("font_size", 13)
+	# v6 GG-4: the label sits in a box that gains a dark pill backing while the
+	# target is out of range (bigger text, readable at 10 m over bright roofs).
+	_label_box = PanelContainer.new()
+	_label_box.name = "LabelBox"
+	_label_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_label_box.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	_indicator.add_child(_label_box)
+	_label = UIStyle.make_label("LOCKED ON", LABEL_SIZE, UIStyle.CYAN, true)
+	_label.add_theme_font_size_override("font_size", LABEL_SIZE)
 	_label.add_theme_constant_override("outline_size", 4)
 	_label.add_theme_color_override("font_outline_color", UIStyle.SHADOW)
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_label.size = Vector2(120, 18)
-	_label.position = Vector2(-60, RETICLE_SIZE * 0.5 + 6)
-	_indicator.add_child(_label)
+	_label_box.add_child(_label)
+	_place_label()
 
 
 ## Diamond outline + inner diamond + centre dot, in the reticle's local space.
@@ -130,12 +140,14 @@ func _on_tactical_entered() -> void:
 	_tactical = true
 	_label.text = "TARGET"
 	_label.add_theme_color_override("font_color", UIStyle.GOLD)
+	_place_label()
 
 
 func _on_tactical_exited() -> void:
 	_tactical = false
 	_label.text = "LOCKED ON"
 	_label.add_theme_color_override("font_color", UIStyle.CYAN)
+	_place_label()
 
 
 func _process(_delta: float) -> void:
@@ -182,15 +194,35 @@ func is_out_of_range() -> bool:
 	return _out_of_range
 
 
+## v6 GG-4: only the reticle dims; the label stays bright, grows and gets a
+## dark backing pill so "OUT OF RANGE" reads at 10 m over bright roofs.
 func _set_out_of_range(dim: bool) -> void:
 	_out_of_range = dim
-	_indicator.modulate = OUT_OF_RANGE_TINT if dim else Color.WHITE
+	_indicator.modulate = Color.WHITE
+	_reticle.modulate = OUT_OF_RANGE_TINT if dim else Color.WHITE
+	var fs: int = OUT_OF_RANGE_LABEL_SIZE if dim else LABEL_SIZE
+	_label.add_theme_font_size_override("font_size", fs)
+	_label.add_theme_constant_override("outline_size", 6 if dim else 4)
+	_label_box.add_theme_stylebox_override("panel",
+		UIStyle.pill(Color(UIStyle.GLASS_DEEP, 0.92), Color(UIStyle.DANGER, 0.85), 12.0, 3.0) if dim
+		else StyleBoxEmpty.new())
 	if dim:
 		_label.text = "OUT OF RANGE"
-		_label.add_theme_color_override("font_color", UIStyle.TEXT_DIM)
+		_label.add_theme_color_override("font_color", UIStyle.DANGER)
 	elif _tactical:
 		_label.text = "TARGET"
 		_label.add_theme_color_override("font_color", UIStyle.GOLD)
 	else:
 		_label.text = "LOCKED ON"
 		_label.add_theme_color_override("font_color", UIStyle.CYAN)
+	_place_label()
+
+
+## Centre the label box under the reticle (after a text / size change).
+func _place_label() -> void:
+	if _label_box == null:
+		return
+	_label_box.reset_size()
+	var s := _label_box.get_combined_minimum_size()
+	_label_box.size = s
+	_label_box.position = Vector2(-s.x * 0.5, RETICLE_SIZE * 0.5 + 6)

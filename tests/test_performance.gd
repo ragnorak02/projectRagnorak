@@ -527,7 +527,8 @@ func test_autoload_count() -> void:
 	for line in source.split("\n"):
 		if line.contains("=\"*res://"):
 			count += 1
-	_assert(count == 7, "Exactly 7 autoloads registered (got %d)" % count)
+	# v6 (KK-4): 8 autoloads — the original 7 plus AssetRegistry.
+	_assert(count == 8, "Exactly 8 autoloads registered (got %d)" % count)
 
 
 func test_autoload_unique_paths() -> void:

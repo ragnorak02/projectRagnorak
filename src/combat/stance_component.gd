@@ -35,8 +35,10 @@ class_name StanceComponent
 extends Node
 
 const REGISTRY := {
-	&"arcane_stance": "res://src/combat/unique_abilities/arcane_stance.gd",
-	&"super_jump": "res://src/combat/unique_abilities/super_jump.gd",
+	# preload, not runtime load(): a runtime script load during the player's _ready
+	# breaks Godot 4.6's exit cycle cleanup (v6 KK: "resources still in use at exit").
+	&"arcane_stance": preload("res://src/combat/unique_abilities/arcane_stance.gd"),
+	&"super_jump": preload("res://src/combat/unique_abilities/super_jump.gd"),
 }
 
 var player: Node = null
@@ -73,7 +75,7 @@ func refresh_ability() -> void:
 		if ability_id != &"":
 			push_warning("StanceComponent: unregistered unique ability '%s'" % ability_id)
 		return
-	var script: GDScript = load(REGISTRY[ability_id])
+	var script: GDScript = REGISTRY[ability_id]
 	if script == null:
 		return
 	ability = script.new()

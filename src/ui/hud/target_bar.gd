@@ -219,7 +219,7 @@ func _refresh(instant: bool) -> void:
 	var name_text := disambiguated_name(t).to_upper()
 	if _name_label.text != name_text:
 		_name_label.text = name_text
-	_panel.line_color = UIStyle.DANGER if is_enemy else UIStyle.CYAN
+	_panel.line_color = _line_color()
 	if is_enemy:
 		_hp_gauge.fill_color = UIStyle.DANGER.darkened(0.25)
 		_hp_gauge.fill_color_end = UIStyle.DANGER
@@ -260,9 +260,14 @@ func _refresh(instant: bool) -> void:
 
 
 # --- v5: out-of-range dimming (Events.tactical_target_reach) -------------------
+# v6 GG-4: the panel's dark glass backing stays (and turns more opaque) while
+# only its content (name, HP, stagger) dims; an "OUT OF RANGE" pill shows in the
+# top row, undimmed.
 
-const OUT_OF_RANGE_TINT := Color(UIStyle.TEXT_DISABLED, 0.55)
+const OUT_OF_RANGE_TINT := Color(UIStyle.TEXT_DIM, 0.6)
+const OUT_OF_RANGE_FILL := Color(UIStyle.GLASS_DEEP, 0.95)
 var _out_of_range: bool = false
+var _range_tag: PanelContainer
 
 
 func _on_target_reach(target: Node3D, in_range: bool) -> void:
@@ -278,8 +283,43 @@ func is_out_of_range() -> bool:
 	return _out_of_range
 
 
+func _build_range_tag() -> void:
+	_range_tag = PanelContainer.new()
+	_range_tag.name = "RangeTag"
+	_range_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_range_tag.add_theme_stylebox_override("panel",
+		UIStyle.pill(Color(UIStyle.GLASS_DEEP, 0.95), UIStyle.DANGER, 10.0, 2.0))
+	_range_tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_range_tag.visible = false
+	_range_tag.add_child(UIStyle.make_label("OUT OF RANGE", UIStyle.SIZE_S, UIStyle.DANGER, true))
+	_name_label.get_parent().add_child(_range_tag)
+	_name_label.get_parent().move_child(_range_tag, _name_label.get_index() + 1)
+
+
+## Content nodes dimmed while out of range (the panel itself is not).
+func _dim_targets() -> Array:
+	# _stagger_tag is left alone: UIStyle.pulse animates its modulate.
+	return [_name_label, _hp_number, _hp_gauge, _stagger_row]
+
+
 func _set_out_of_range(dim: bool) -> void:
 	_out_of_range = dim
-	var root := get_node_or_null(^"TargetBarRoot") as Control
-	if root:
-		root.modulate = OUT_OF_RANGE_TINT if dim else Color.WHITE
+	if _panel == null:
+		return
+	if _range_tag == null:
+		_build_range_tag()
+	var tint := OUT_OF_RANGE_TINT if dim else Color.WHITE
+	for c in _dim_targets():
+		(c as CanvasItem).modulate = tint
+	_range_tag.visible = dim
+	_panel.fill_color = OUT_OF_RANGE_FILL if dim else UIStyle.GLASS
+	_panel.fill_bottom_color = OUT_OF_RANGE_FILL if dim else UIStyle.GLASS_DEEP
+	_panel.line_color = _line_color()
+
+
+func _line_color() -> Color:
+	if _out_of_range:
+		return UIStyle.TEXT_DIM
+	if _target != null and is_instance_valid(_target) and _target.is_in_group(&"enemies"):
+		return UIStyle.DANGER
+	return UIStyle.CYAN

@@ -16,6 +16,13 @@
 ## Water Geyser / Wind Crescent mid-effect, v5_07 Taighe active (HUD), v5_08 Super
 ## Jump apex with the aerial list, v5_09 air combo mid-air, v5_10 lock-on framing.
 ##   ... -- v5        only the v5 set (town_hub), skips the older shots
+## v6 (Package LL3): v6_ll_01 Amaro idle (front), 02/03 Scholar Yeun / Alchemist Ines,
+## 04 Sword Slash mid-sweep, 05 out-of-range bar + reticle label, 06 the "pale
+## shell" repro (Taighe AI bolt impact frozen by the Command Menu slow), 07 enemies
+## ringed around the AI companion, 08 companion downed, 09 Taighe quick bolt in
+## flight (real D-pad switch), 10 Taighe HHH Lumina Nova burst, 11 dungeon Goblin +
+## Goblin Chief.
+##   ... -- v6        only the v6 set
 ## Not a test: it never saves a game (save/load is only viewed; the zone-entry
 ## autosave is blocked) and quits itself.
 extends SceneTree
@@ -40,12 +47,14 @@ var _out := ""
 var _shots: PackedStringArray = []
 var _notes: PackedStringArray = []
 var _only_v5 := false
+var _only_v6 := false
 var _dummies: Array = []
 
 
 func _initialize() -> void:
 	_pad = not OS.get_cmdline_user_args().has("kb")
 	_only_v5 = OS.get_cmdline_user_args().has("v5")
+	_only_v6 = OS.get_cmdline_user_args().has("v6")
 	_run.call_deferred()
 
 
@@ -185,6 +194,10 @@ func _run() -> void:
 	_out = ProjectSettings.globalize_path(OUT_DIR)
 	DirAccess.make_dir_recursive_absolute(_out)
 
+	if _only_v6:
+		await _v6()
+		_finish(0)
+		return
 	if not _only_v5:
 		await _main_menu()
 		await _town()
@@ -704,3 +717,252 @@ func _v5() -> void:
 	await _shot("v5_10_lockon_framing")
 	await _tap(&"lock_on")
 	_free_dummies()
+
+
+# ---------------------------------------------------------------- v6 (LL3)
+
+const DUNGEON := "res://scenes/zones/dungeon_zone.tscn"
+
+
+func _comp() -> Node3D:
+	var p := _player()
+	var party: Node = p.get(&"party_system") if p else null
+	return party.get_companion() if party and party.has_method(&"get_companion") else null
+
+
+func _member_name() -> String:
+	var p := _player()
+	return str(p.get_member_data().display_name) if p and p.has_method(&"get_member_data") else "?"
+
+
+## Which model each body shows: "Amaro (IdleLayer)" / "RiglessVisual (princess1.glb)" / other.
+func _visual_of(body: Node) -> String:
+	if body == null:
+		return "none"
+	var vr: Node = body.get(&"visual_root")
+	if vr == null or vr.get_child_count() == 0:
+		return "empty"
+	var m: Node = vr.get_child(0)
+	if m.name == "IdleLayer":
+		return "Amaro (IdleLayer)"
+	var ms = m.get(&"model_scene")
+	return "%s (%s)" % [m.name, String(ms.resource_path).get_file() if ms else "?"]
+
+
+## Live enemy (not frozen); huge HP so nothing dies.
+func _spawn_live(pos: Vector3) -> Node3D:
+	var e: Node3D = (load(ENEMY) as PackedScene).instantiate()
+	e.set(&"max_hp", 100000.0)
+	e.set(&"current_hp", 100000.0)
+	current_scene.add_child(e)
+	e.global_position = pos
+	_dummies.append(e)
+	return e
+
+
+func _v6() -> void:
+	await _load_scene(TOWN)
+	var p := _player()
+	var lane := Vector3(0, 0.1, -2)
+	var comp := _comp()
+
+	# 01 Amaro idle, seen from the front.
+	await _place(lane, 180.0, -8.0)
+	if comp:
+		comp.global_position = lane + Vector3(6, 0, 4)
+	p.rotation.y = 0.0
+	await _real(0.6)
+	_note("v6 01 amaro idle: state=%s anim=%s visual=%s" % [_state_name(),
+		str(p.anim_player.current_animation if p.anim_player else null), _visual_of(p)])
+	await _shot("v6_ll_01_amaro_idle")
+
+	# 02 Scholar Yeun (-4, 0, -27) / 03 Alchemist Ines (-7, 0, -14.5).
+	await _place(Vector3(-1.2, 0.1, -23.2), 34.0, -6.0)  # yaw toward (-4, 0, -27)
+	await _real(0.4)
+	await _shot("v6_ll_02_npc_scholar_yeun")
+	await _place(Vector3(-3.9, 0.1, -11.6), 45.0, -6.0)  # yaw toward (-7, 0, -14.5)
+	await _real(0.4)
+	await _shot("v6_ll_03_npc_alchemist_ines")
+
+	# 04 Sword Slash mid-sweep / 05 out-of-range bar (companion frozen far away so
+	# no AI bolt lands on the dummies).
+	await _place(lane, 0.0, -12.0)
+	comp = _comp()
+	if comp:
+		comp.set_physics_process(false)
+		comp.global_position = lane + Vector3(30, 0, 25)
+	var near := await _spawn_dummy(lane + Vector3(0.4, -0.1, -2.5))
+	await _spawn_dummy(lane + Vector3(-2.0, -0.1, -10.0))
+	await _spawn_dummy(lane + Vector3(2.0, -0.1, -17.0))
+	await _real(0.3)
+	var tac := await _menu_to_ability(&"sword_slash")
+	if tac:
+		await _joy_tap(JOY_A)
+		await _joy_tap(JOY_DPAD_RIGHT)
+		await _real(0.3)
+		var ind := _hud("lock_on_indicator.gd")
+		var bar := _hud("target_bar.gd")
+		_note("v6 05 out of range: reticle=%s bar=%s near-dummy shells=%d" % [
+			str(ind.is_out_of_range() if ind else null), str(bar.is_out_of_range() if bar else null), _shells_near(near)])
+		await _shot("v6_ll_05_out_of_range")
+		await _joy_tap(JOY_DPAD_UP)
+		await _joy_tap(JOY_A)
+		var fx := await _ability_effect()
+		await _real(0.07)
+		_note("v6 04 sword slash: fx=%s sweep=%s" % [str(fx),
+			str(fx.get_node_or_null(^"Sweep") != null if fx and is_instance_valid(fx) else null)])
+		await _shot("v6_ll_04_sword_slash")
+	await _close_menus()
+	await _to_ground()
+
+	# 06 "Pale shell" repro: the AI companion (Taighe) bolts the near dummy, then the
+	# Command Menu slow (0.05) freezes the impact flash on it.
+	await _place(lane, 0.0, -12.0)
+	comp = _comp()
+	if comp:
+		comp.set_physics_process(true)
+	var impact_seen := false
+	for i in 600:
+		await physics_frame
+		if _impacts().size() > 0:
+			impact_seen = true
+			break
+	await _menu_to_ability(&"sword_slash")
+	await _real(0.2)
+	var imp := _impacts()
+	var desc: PackedStringArray = []
+	for n in imp:
+		var mi: Node3D = n.get_child(0) if n.get_child_count() > 0 else null
+		desc.append("%s at %s scale=%.2f" % [n.name, str(n.global_position.snapped(Vector3.ONE * 0.01)),
+			mi.scale.x if mi else -1.0])
+	_note("v6 06 shell repro: impact seen=%s ts=%.2f impacts=%s near-dummy shells=%d" % [str(impact_seen),
+		Engine.time_scale, str(desc), _shells_near(near)])
+	await _shot("v6_ll_06_pale_shell_repro")
+	await _close_menus()
+	await _to_ground()
+	_free_dummies()
+	await _real(0.5)
+
+	# 07 Enemies ringed around the AI companion (player 7.5 m back, outside aggro).
+	comp = _comp()
+	var cpos := Vector3(0, 0.1, -16)
+	await _place(cpos + Vector3(0, 0, 7.5), 0.0, -22.0)
+	if comp:
+		comp.set_physics_process(false)  # stands still: shows the ring, no kiting
+		comp.global_position = cpos
+		comp.rotation.y = 0.0
+	for d in [Vector3(0, 0, -7), Vector3(6, 0, -5), Vector3(-6, 0, -4)]:
+		_spawn_live(cpos + d)
+	for i in 300:
+		await physics_frame
+	var ring: PackedStringArray = []
+	for e in _dummies:
+		var dd := Vector2(e.global_position.x - cpos.x, e.global_position.z - cpos.z).length()
+		ring.append("%s->%s %.2fm" % [e.name, str(e.get_target().name if e.get_target() else null), dd])
+	_note("v6 07 ring around companion (%s): %s" % [_visual_of(comp), str(ring)])
+	await _shot("v6_ll_07_enemies_ring_companion")
+
+	# 08 Companion downed (enemies drop it; HUD party panel).
+	if comp and not _dummies.is_empty():
+		comp.take_damage(float(comp.get(&"current_hp")) + 10.0, _dummies[0])
+	for i in 90:
+		await physics_frame
+	var tg: PackedStringArray = []
+	for e in _dummies:
+		tg.append(str(e.get_target().name if e.get_target() else null))
+	_note("v6 08 downed=%s enemy targets=%s" % [str(comp.is_downed() if comp else null), str(tg)])
+	await _shot("v6_ll_08_companion_downed")
+	_free_dummies()
+	if comp:
+		comp.revive(-1.0)
+	await _real(0.5)
+
+	# 09 Taighe quick bolt in flight (real D-pad switch first).
+	await _place(lane, 0.0, -10.0)
+	if comp:
+		comp.set_physics_process(true)
+	await _real(1.2)
+	await _joy_tap(JOY_DPAD_UP)
+	await _real(0.4)
+	comp = _comp()
+	_note("v6 switch: member=%s player shows %s, AI body shows %s" % [_member_name(), _visual_of(p), _visual_of(comp)])
+	await _place(lane, 0.0, -10.0)
+	if comp:
+		comp.set_physics_process(false)  # the Amaro AI would walk in and hit the dummies
+	await _spawn_dummy(lane + Vector3(0.6, -0.1, -9.0))
+	var side := await _spawn_dummy(lane + Vector3(4.1, -0.1, -9.0))
+	await _real(0.3)
+	var st: Node = p.state_machine.states.get(&"MeleeStrike")
+	await _joy_tap(JOY_X, 0.04)
+	for i in 60:
+		await physics_frame
+		var b = st.last_bolt.get("node") if st and not st.last_bolt.is_empty() else null
+		if b and is_instance_valid(b) and b.launched and b.global_position.distance_to(p.global_position) > 3.0:
+			break
+	_note("v6 09 bolt: %s" % str(st.last_bolt if st else null))
+	await _shot("v6_ll_09_taighe_quick_bolt")
+	await _real(1.0)
+	await _to_ground()
+
+	# 10 HHH -> Lumina Nova burst (the side enemy 3.5 m away is inside the 4.5 m burst).
+	for k in 3:
+		await _joy_tap(JOY_X, 0.30)
+	var burst_done := false
+	for i in 240:
+		await physics_frame
+		var lb: Dictionary = st.last_bolt if st else {}
+		var b2 = lb.get("node")
+		if lb.get("finisher", &"") != &"" and (b2 == null or not is_instance_valid(b2) or b2.done):
+			burst_done = true
+			break
+	await _real(0.05)
+	_note("v6 10 finisher: %s done=%s side hp=%.0f" % [str(st.last_bolt.get("finisher") if st else null),
+		str(burst_done), float(side.get(&"current_hp"))])
+	await _shot("v6_ll_10_taighe_lumina_nova")
+	await _real(1.0)
+	await _to_ground()
+	_free_dummies()
+	await _real(1.2)
+	await _joy_tap(JOY_DPAD_DOWN)  # back to Amaro
+	await _real(0.3)
+
+	# 11 Dungeon: Goblin + Goblin Chief (frozen, turned to the camera).
+	await _load_scene(DUNGEON)
+	p = _player()
+	var foes: Array = get_nodes_in_group(&"enemies")
+	for e in foes:
+		e.set_physics_process(false)
+	await _place(Vector3(-0.5, 0.1, -4.0), 10.0, -8.0)
+	var dcomp := _comp()
+	if dcomp:
+		dcomp.set_physics_process(false)  # no AI bolts / impact flashes in the showcase
+		dcomp.global_position = Vector3(-3.0, 0.0, 1.0)
+	for e in foes:
+		e.look_at(Vector3(p.global_position.x, e.global_position.y, p.global_position.z), Vector3.UP)
+	await _real(0.5)
+	var fn: PackedStringArray = []
+	for e in foes:
+		fn.append("%s@%s" % [e.get(&"display_name"), str(e.global_position.snapped(Vector3.ONE * 0.1))])
+	_note("v6 11 dungeon enemies: %s" % str(fn))
+	await _shot("v6_ll_11_dungeon_goblin_and_chief")
+
+
+## Live MageBolt impact flashes (MageBoltImpact nodes, any parent).
+func _impacts() -> Array:
+	return current_scene.find_children("*MageBoltImpact*", "Node3D", true, false)
+
+
+## Visible additive meshes within 1.5 m of `e`'s chest that are not part of `e`.
+func _shells_near(e: Node3D) -> int:
+	if e == null or not is_instance_valid(e):
+		return 0
+	var c := 0
+	for n in current_scene.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if e.is_ancestor_of(mi) or not mi.is_visible_in_tree():
+			continue
+		var m = mi.material_override
+		if m is StandardMaterial3D and (m as StandardMaterial3D).blend_mode == BaseMaterial3D.BLEND_MODE_ADD \
+				and mi.global_position.distance_to(e.global_position + Vector3(0, 1, 0)) < 1.5:
+			c += 1
+	return c

@@ -51,6 +51,10 @@ enum YawMode {
 ## > 0: scale the model so its AABB height equals this (metres), ground it
 ## (bottom at y=0) and centre it on X/Z. 0 = use the model as authored.
 @export var fit_height: float = 1.8
+## false = no fit at all: the model keeps its authored scale and offset (no
+## grounding / centring). For rigged models used only as an ambient layer
+## (v6 JJ-1: the red knight's "IdleLayer").
+@export var auto_fit: bool = true
 ## Yaw correction for meshes that do not face -Z (degrees).
 @export var model_yaw_offset_deg: float = 0.0
 ## Rotation pivot height for spins/flips. < 0 = half the fitted height.
@@ -68,6 +72,13 @@ enum YawMode {
 @export var yaw_mode: YawMode = YawMode.FOLLOW_PARENT
 ## Yaw catch-up rate (1/s, exponential). Higher = snappier turn.
 @export var turn_rate: float = 12.0
+## v6 JJ-2 (NPCs): while a dialogue with this visual's NPC is open
+## (Events.dialogue_started and the player's current interactable is an
+## ancestor of this node), the visual turns toward the player; on
+## dialogue_ended it turns back to the parent's facing. Cosmetic only.
+@export var face_speaker_in_dialogue: bool = false
+## Turn rate used while facing / returning from the speaker (1/s).
+@export var speaker_turn_rate: float = 5.0
 ## Bank (roll) into turns: radians of roll per rad/s of yaw rate.
 @export var turn_bank: float = 0.06
 
@@ -146,6 +157,38 @@ func _ready() -> void:
 	_build_hierarchy()
 	_resync_body()
 	_last_ticks_usec = Time.get_ticks_usec()
+	if face_speaker_in_dialogue:
+		var ev := get_node_or_null(^"/root/Events")
+		if ev and ev.has_signal(&"dialogue_started"):
+			ev.dialogue_started.connect(_on_dialogue_started)
+			ev.dialogue_ended.connect(_on_dialogue_ended)
+
+
+## Node currently faced in dialogue (null = follow the normal yaw mode).
+var _look_target: Node3D = null
+## > 0 while easing back to the parent facing after a dialogue.
+var _speaker_return: float = 0.0
+
+
+func get_look_target() -> Node3D:
+	return _look_target
+
+
+func _on_dialogue_started() -> void:
+	if not is_inside_tree():
+		return
+	var player := get_tree().get_first_node_in_group(&"player") as Node3D
+	if player == null or not player.has_method(&"get_current_interactable"):
+		return
+	var talking_to: Node = player.get_current_interactable()
+	if talking_to != null and (talking_to == get_parent() or talking_to.is_ancestor_of(self)):
+		_look_target = player
+
+
+func _on_dialogue_ended() -> void:
+	if _look_target != null:
+		_speaker_return = 1.5
+	_look_target = null
 
 
 ## Re-resolve the owning body every time we (re)enter the tree. Party identity
@@ -299,21 +342,34 @@ func _update_floor_events(on_floor: bool, vel: Vector3) -> void:
 
 func _update_yaw(dt: float, vel: Vector3) -> void:
 	if yaw_mode == YawMode.NONE:
+		# Track the parent so speed-relative lean uses the real facing.
+		_yaw_global = _parent_yaw()
 		_yaw_local = 0.0
 		_yaw_rate = 0.0
 		return
 	var parent_yaw := _parent_yaw()
 	var target := _yaw_global
+	var rate := turn_rate
 	if yaw_mode == YawMode.FOLLOW_PARENT:
 		target = parent_yaw
 	else:
 		var flat := Vector2(vel.x, vel.z)
 		if flat.length() > 0.3:
 			target = atan2(-vel.x, -vel.z)
+	if _look_target != null and not is_instance_valid(_look_target):
+		_look_target = null
+	if _look_target != null and _look_target.is_inside_tree() and is_inside_tree():
+		var to := _look_target.global_position - global_position
+		if Vector2(to.x, to.z).length() > 0.2:
+			target = atan2(-to.x, -to.z)
+		rate = speaker_turn_rate
+	elif _speaker_return > 0.0:
+		_speaker_return -= dt
+		rate = speaker_turn_rate
 	var prev := _yaw_global
 	if dt > 0.0:
 		var diff := wrapf(target - _yaw_global, -PI, PI)
-		_yaw_global = wrapf(_yaw_global + diff * (1.0 - exp(-turn_rate * dt)), -PI, PI)
+		_yaw_global = wrapf(_yaw_global + diff * (1.0 - exp(-rate * dt)), -PI, PI)
 		_yaw_rate = lerpf(_yaw_rate, wrapf(_yaw_global - prev, -PI, PI) / dt, 1.0 - exp(-10.0 * dt))
 	_yaw_local = wrapf(_yaw_global - parent_yaw, -PI, PI)
 
@@ -525,6 +581,14 @@ func _make_capsule() -> Node3D:
 func _apply_fit() -> void:
 	_fit_node.transform = Transform3D.IDENTITY
 	var aabb := _model_aabb()
+	if not auto_fit:
+		_fit_node.scale = Vector3.ONE * model_scale
+		_fitted_height = aabb.size.y * model_scale
+		var php := pivot_height if pivot_height >= 0.0 else _fitted_height * 0.5
+		_spin_node.position = Vector3(0.0, php, 0.0)
+		_facing_node.position = Vector3(0.0, -php, 0.0)
+		_facing_node.rotation = Vector3(0.0, deg_to_rad(model_yaw_offset_deg), 0.0)
+		return
 	var s := model_scale
 	if fit_height > 0.0 and aabb.size.y > 0.0001:
 		s = fit_height / aabb.size.y * model_scale

@@ -11,7 +11,16 @@ const TILE := 2.0     # floor tile size
 # ── Asset Loading ──────────────────────────────────────────────────────────────
 
 ## Per-asset merged mesh AABB cache (local to the asset root), used by solid props.
-static var _aabb_cache: Dictionary = {}
+## Kept as Engine metadata (AABB values only), NOT a `static var`: a script with
+## static vars is pinned by GDScript's static cache and was one of the scripts
+## reported "still in use at exit" (v6 KK-1). See _aabb_cache().
+const _AABB_CACHE_META := &"_town_builder_aabb_cache"
+
+
+static func _aabb_cache() -> Dictionary:
+	if not Engine.has_meta(_AABB_CACHE_META):
+		Engine.set_meta(_AABB_CACHE_META, {})
+	return Engine.get_meta(_AABB_CACHE_META)
 
 
 static func place(parent: Node3D, asset_name: String, pos: Vector3, rot_y: float = 0.0,
@@ -37,11 +46,12 @@ static func place(parent: Node3D, asset_name: String, pos: Vector3, rot_y: float
 
 static func _add_aabb_collision(inst: Node3D, cache_key: String) -> void:
 	var aabb: AABB
-	if _aabb_cache.has(cache_key):
-		aabb = _aabb_cache[cache_key]
+	var cache := _aabb_cache()
+	if cache.has(cache_key):
+		aabb = cache[cache_key]
 	else:
 		aabb = merged_mesh_aabb(inst)
-		_aabb_cache[cache_key] = aabb
+		cache[cache_key] = aabb
 	if aabb.size.length_squared() < 0.0001:
 		return
 	var body := StaticBody3D.new()

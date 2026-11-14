@@ -441,6 +441,14 @@ func has_interactable() -> bool:
 	return _current_interactable.has_method("interact")
 
 
+## Read-only: the interactable currently targeted (null if none/invalid).
+## Used by cosmetic listeners (RiglessVisual NPC face-the-speaker, v6 JJ-2).
+func get_current_interactable() -> Node3D:
+	if _current_interactable == null or not is_instance_valid(_current_interactable):
+		return null
+	return _current_interactable
+
+
 ## Interact with the current interactable. Returns true if an interaction fired.
 func try_interact() -> bool:
 	if not has_interactable():
@@ -737,18 +745,143 @@ func _setup_model() -> void:
 		push_warning("Player: No AnimationPlayer found in model")
 		return
 
-	# Rename the default imported animation to "idle" (T-pose rest)
+	# The model's own imported clip is only the T-pose rest: keep it as "tpose"
+	# (never played) so "idle" can be the held walk pose below.
 	var default_lib: AnimationLibrary = anim_player.get_animation_library(&"")
 	if default_lib and default_lib.has_animation(&"mixamo_com"):
-		var idle_anim: Animation = default_lib.get_animation(&"mixamo_com")
+		var rest_anim: Animation = default_lib.get_animation(&"mixamo_com")
 		default_lib.remove_animation(&"mixamo_com")
-		default_lib.add_animation(&"idle", idle_anim)
+		default_lib.add_animation(&"tpose", rest_anim)
 
 	# Load walking animation from separate FBX
 	_import_animation("res://public/assets/fbx/redKnight/red_knight_walking.fbx", &"walk")
 
+	# v6 JJ-1: no T-pose in any state. The only real clip is the walk, so:
+	#  - "walk" is made in-place (root motion stripped) and looping;
+	#  - "idle" is a static pose built from the walk's two passing frames
+	#    (mirror phases averaged: feet together, arms down) — the "paused
+	#    walk on a neutral frame". Static, so it holds at any time_scale
+	#    (Command Menu 0.05) and when the AI body plays &"idle".
+	if default_lib and default_lib.has_animation(&"walk"):
+		var src_walk: Animation = default_lib.get_animation(&"walk")
+		var walk_in_place := make_in_place_loop(src_walk)
+		default_lib.remove_animation(&"walk")
+		default_lib.add_animation(&"walk", walk_in_place)
+		if default_lib.has_animation(&"idle"):
+			default_lib.remove_animation(&"idle")
+		default_lib.add_animation(&"idle", build_idle_pose(src_walk))
+		anim_player.play(&"idle")
+		_add_idle_layer()
+
 	if DebugFlags.DEBUG_PLAYER:
 		print("Player: Animations loaded: %s" % str(anim_player.get_animation_list()))
+
+
+## Walk-cycle times (fractions of the clip) of the two "passing" frames, where
+## the feet are together and the arms hang at the sides (measured on
+## red_knight_walking.fbx: feet 0.157 m / 0.158 m apart at 0.026 s / 0.542 s).
+const IDLE_PASS_FRACTIONS: Array[float] = [0.025, 0.525]
+## Hips drop for the averaged pose so both feet reach the floor (the averaged
+## swing leg is ~5 cm up otherwise).
+const IDLE_HIPS_DROP: float = -0.04
+
+
+## Static one-key idle pose from a walk clip: every bone track is sampled at
+## IDLE_PASS_FRACTIONS and averaged (rotations slerped). Root (hips) X/Z are
+## zeroed so the pose stands on the body origin.
+static func build_idle_pose(walk: Animation) -> Animation:
+	var idle := Animation.new()
+	idle.length = 1.0
+	idle.loop_mode = Animation.LOOP_LINEAR
+	var times: Array[float] = []
+	for f in IDLE_PASS_FRACTIONS:
+		times.append(walk.length * f)
+	for i in walk.get_track_count():
+		var type := walk.track_get_type(i)
+		var path := walk.track_get_path(i)
+		var t := -1
+		match type:
+			Animation.TYPE_POSITION_3D:
+				var p := Vector3.ZERO
+				for tm in times:
+					p += walk.position_track_interpolate(i, tm)
+				p /= float(times.size())
+				if String(path).ends_with("Hips"):
+					p.x = 0.0
+					p.z = 0.0
+					p.y += IDLE_HIPS_DROP
+				t = idle.add_track(type)
+				idle.track_set_path(t, path)
+				idle.position_track_insert_key(t, 0.0, p)
+			Animation.TYPE_ROTATION_3D:
+				var q := walk.rotation_track_interpolate(i, times[0])
+				for k in range(1, times.size()):
+					q = q.slerp(walk.rotation_track_interpolate(i, times[k]), 1.0 / float(k + 1))
+				t = idle.add_track(type)
+				idle.track_set_path(t, path)
+				idle.rotation_track_insert_key(t, 0.0, q.normalized())
+			Animation.TYPE_SCALE_3D:
+				var s := Vector3.ZERO
+				for tm in times:
+					s += walk.scale_track_interpolate(i, tm)
+				t = idle.add_track(type)
+				idle.track_set_path(t, path)
+				idle.scale_track_insert_key(t, 0.0, s / float(times.size()))
+	return idle
+
+
+## Copy of a Mixamo walk with the root's forward travel removed (the clip moves
+## the hips ~2 m per cycle, which drifted the model off the body) and looping on.
+static func make_in_place_loop(walk: Animation) -> Animation:
+	var anim := walk.duplicate(true) as Animation
+	anim.loop_mode = Animation.LOOP_LINEAR
+	for i in anim.get_track_count():
+		if anim.track_get_type(i) != Animation.TYPE_POSITION_3D:
+			continue
+		if not String(anim.track_get_path(i)).ends_with("Hips"):
+			continue
+		var n := anim.track_get_key_count(i)
+		if n == 0:
+			continue
+		var first: Vector3 = anim.track_get_key_value(i, 0)
+		var last: Vector3 = anim.track_get_key_value(i, n - 1)
+		var clip_len := maxf(anim.length, 0.001)
+		for k in n:
+			var tk := anim.track_get_key_time(i, k)
+			var v: Vector3 = anim.track_get_key_value(i, k)
+			# Remove the linear forward drift; keep the small in-cycle sway.
+			var drift := first.lerp(last, tk / clip_len)
+			v.x -= drift.x
+			v.z -= drift.z
+			anim.track_set_key_value(i, k, v)
+	return anim
+
+
+## v6 JJ-1: wrap the rigged model in a cosmetic RiglessVisual ("IdleLayer") so
+## the held idle pose breathes (bob) and leans with speed. Named IdleLayer, not
+## RiglessVisual, so gameplay cues (_rigless_cue: dodge spin, hit shake...) stay
+## off for the rigged knight. Read-only: it never writes the body. It travels
+## with the model on a party identity swap (it is $VisualRoot's child).
+func _add_idle_layer() -> void:
+	if model == null or model.get_parent() != visual_root:
+		return
+	var layer := RiglessVisual.new()
+	layer.name = "IdleLayer"
+	layer.auto_fit = false            # keep the authored scale/offset of the FBX
+	layer.fix_generated_materials = false
+	layer.yaw_mode = RiglessVisual.YawMode.NONE  # body facing stays exact
+	layer.idle_bob_amplitude = 0.02
+	layer.move_bob_amplitude = 0.0    # the walk clip carries the step bounce
+	layer.max_lean_deg = 7.0
+	layer.max_side_lean_deg = 4.0
+	layer.jump_stretch = 0.08
+	layer.land_squash_per_speed = 0.01
+	layer.max_squash = 0.12
+	layer.air_stretch_per_speed = 0.004
+	visual_root.remove_child(model)
+	layer.add_child(model)
+	visual_root.add_child(layer)
+	model = layer
 
 
 func _import_animation(fbx_path: String, anim_name: StringName) -> void:
