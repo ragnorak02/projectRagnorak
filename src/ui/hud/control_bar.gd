@@ -2,8 +2,9 @@
 ## Replaces the old full-width bottom control bar with a compact "Lumina Frost"
 ## glass panel on the left edge (lower-middle) holding 3–5 GlyphHints chosen from
 ## the player's current state and mode (Battle System v3, Package U):
-##   Free roam : Jump / Attack / Dodge / Command (pad Y = Interact while a prompt
-##               is active, else Command; keyboard adds E Interact next to Q)
+##   Free roam : Jump / Attack / Dodge / Command (v8: pad A reads Interact
+##               instead of Jump while a prompt is active, Y is always Command;
+##               keyboard adds E Interact next to Q)
 ##   Battle    : Command / Attack (hold Heavy) / <Unique> / Dodge
 ##   Stance    : Command / Orbs (hold Fireball) / Exit Stance / Dodge
 ##   (v4) Free / Battle / Stance end with the battle_toggle hint:
@@ -61,6 +62,8 @@ const HINTS_FREE: Array = [
 	[&"tactical_mode", "Command", &"command"],
 ]
 const HINT_INTERACT: Array = [&"interact", "Interact"]
+## v8: on a pad, A (the `jump` button) interacts while a prompt shows.
+const HINT_PAD_INTERACT: Array = [&"jump", "Interact"]
 const HINTS_BATTLE: Array = [
 	[&"tactical_mode", "Command", &"command"],
 	[&"attack", "Attack · Hold Heavy"],
@@ -184,7 +187,8 @@ func _get_bind_text(ctrl: Dictionary, controller: bool) -> String:
 ## Glyph label for a routed role (ROLE_COMMAND / ROLE_UNIQUE) on a device.
 ## Keyboard: the real binding (tactical_mode = Q, unique_ability = R).
 ## Controller: Command = jump's button (A) in battle, interact's button (Y) in
-## free roam; Unique = interact's button (Y). Follows rebinds of jump/interact.
+## free roam (v8: always, prompt or not); Unique = interact's button (Y).
+## Follows rebinds of jump/interact.
 static func routed_label(role: StringName, in_battle: bool, controller: bool) -> String:
 	return ButtonGlyph.label_for(routed_action(role, in_battle, controller), controller)
 
@@ -252,8 +256,9 @@ func _hint_set_for(ctx: int) -> Array:
 			var hints: Array = HINTS_FREE.duplicate()
 			if _has_interaction:
 				if _is_controller():
-					# Pad Y interacts while a prompt shows (Command needs no prompt).
-					hints[hints.size() - 1] = HINT_INTERACT
+					# v8: pad A is the context button — it interacts while a
+					# prompt shows (instead of jumping); Y stays Command.
+					hints[0] = HINT_PAD_INTERACT
 				else:
 					hints.append(HINT_INTERACT)
 			hints.append(HINT_TO_BATTLE)

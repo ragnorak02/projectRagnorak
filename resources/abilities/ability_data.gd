@@ -11,7 +11,10 @@ enum Targeting { PROJECTILE, AT_TARGET, SELF_ALLY }
 ## v5 BB6: caster movement during the release phase.
 ##  NONE — rooted (default). PLUNGE — dive straight down (toward the target
 ##  when one is chosen); the effect fires on landing.
-enum CasterMotion { NONE, PLUNGE }
+##  LAUNCH — v8: the release launches the caster straight up (Super Jump:
+##  ~5x the jump apex, see super_jump.gd constants) into Jump. Self-only: the
+##  Command Menu fires it without a target step.
+enum CasterMotion { NONE, PLUNGE, LAUNCH }
 
 ## Default reach (m) = LockOnComponent.detection_range default (20 m).
 const DEFAULT_RANGE := 20.0
@@ -55,6 +58,11 @@ func is_offensive() -> bool:
 	if targeting == Targeting.SELF_ALLY:
 		return false
 	return ability_type in [AbilityType.MELEE, AbilityType.PROJECTILE, AbilityType.AOE]
+
+
+## v8: self-only commands skip the Command Menu target step (Super Jump).
+func is_self_only() -> bool:
+	return caster_motion == CasterMotion.LAUNCH
 
 
 func usable_by(member_id: StringName) -> bool:

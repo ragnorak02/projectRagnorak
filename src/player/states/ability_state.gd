@@ -26,6 +26,11 @@ var _plunge_velocity: Vector3 = Vector3.ZERO
 var _plunge_timer: float = 0.0
 ## v5 BB: last effect_script node spawned (read by tests/HUD; may be freed).
 var last_effect: Node3D = null
+## v8: LAUNCH (Super Jump command) — same numbers as the old Y ability.
+const SuperJumpScript := preload("res://src/combat/unique_abilities/super_jump.gd")
+var _launch_pending: bool = false
+## Count of LAUNCH casts that left the ground (tests).
+var launches_fired: int = 0
 
 
 func enter(msg: Dictionary = {}) -> void:
@@ -35,6 +40,7 @@ func enter(msg: Dictionary = {}) -> void:
 	_forward_aim = false
 	_plunging = false
 	_plunge_timer = 0.0
+	_launch_pending = false
 	_ability_data = msg.get("ability_data") as AbilityData
 	_explicit_target = msg.get("target") as Node3D
 
@@ -113,6 +119,8 @@ func process_physics(delta: float) -> StringName:
 				_phase = CastPhase.RELEASE
 				_spawn_effect()
 				_timer = 0.0
+				if _launch_pending:
+					return _do_launch()
 
 		CastPhase.RELEASE:
 			if _timer >= _recovery_time:
@@ -124,6 +132,22 @@ func process_physics(delta: float) -> StringName:
 				return _follow_up_state()
 
 	return &""
+
+
+## v8 LAUNCH: vertical launch to ~HEIGHT_MULTIPLIER x the jump apex with a
+## slight forward carry, then Jump (Fall -> Land as usual). The cast completes
+## here; lock-on is kept and the airborne Command Menu shows the aerial list.
+func _do_launch() -> StringName:
+	_launch_pending = false
+	_phase = CastPhase.RECOVERY
+	var vy: float = float(player.jump_force) * sqrt(SuperJumpScript.HEIGHT_MULTIPLIER)
+	player.prepare_launch(vy, SuperJumpScript.FORWARD_CARRY)
+	launches_fired += 1
+	if player.is_inside_tree():
+		StanceAuraVfx.flash(player.get_parent(), player.global_position, true)
+	AudioManager.play_sfx_named("jump")
+	Events.ability_cast_completed.emit(_ability_data)
+	return &"Jump"
 
 
 ## After the cast: still airborne (v5 aerial casts) -> Fall, else as before.
@@ -204,6 +228,11 @@ func _spawn_effect() -> void:
 	# Handle heal abilities — no projectile, direct HP restore
 	if _ability_data.ability_type == AbilityData.AbilityType.HEAL:
 		_apply_heal()
+		return
+
+	# v8: Super Jump command — the caster launches at release (no effect node).
+	if _ability_data.caster_motion == AbilityData.CasterMotion.LAUNCH:
+		_launch_pending = true
 		return
 
 	# v5 BB6: caster dive first (impact spawns on landing).

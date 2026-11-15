@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/abilities/ability_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"super_jump"
+display_name = "Super Jump"
+description = "Taighe launches herself high into the air (about five times a normal jump)."
+ability_type = 3
+mp_cost = 0.0
+atb_cost = 25.0
+cooldown = 3.0
+cast_time = 0.2
+damage = 0.0
+animation_name = &""
+effect_scene = null
+icon = null
+range = 0.0
+targeting = 2
+effect_script = null
+stagger = 0.0
+aerial_only = false
+ground_only = true
+owner_member = Array[StringName]([&"companion"])
+caster_motion = 2

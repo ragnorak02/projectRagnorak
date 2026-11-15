@@ -40,7 +40,7 @@ func process_input(event: InputEvent) -> StringName:
 	if event.is_action_released(&"attack"):
 		return _route_attack_release()
 	if event.is_action_pressed(&"dodge") and player.dodge_ready:
-		return &"Dodge"
+		return &"DodgeReady"  # v8: hold to aim, fires on release
 	# Command Menu: tactical_mode (Q), A in battle, Y with no prompt in free roam.
 	if player.is_command_press(event):
 		return &"TacticalIdle"

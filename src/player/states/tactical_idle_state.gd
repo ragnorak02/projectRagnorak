@@ -404,6 +404,11 @@ func _confirm_ability() -> void:
 		Events.ability_request_failed.emit(reason if reason != "" else "unavailable", ability)
 		return
 
+	# v8: self-only commands (Super Jump) fire on confirm, no target step.
+	if ability.has_method(&"is_self_only") and ability.is_self_only():
+		player.ability_system.request_ability_with_target(ability, player)
+		return
+
 	_selected_ability = ability
 	var offensive := _is_offensive_ability(ability)
 	_has_forward_row = offensive

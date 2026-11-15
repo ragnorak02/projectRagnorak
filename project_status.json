@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "gameId": "projectRagnorak",
   "title": "Project Ragnorak",
-  "lastUpdated": "2026-11-15T13:00Z",
+  "lastUpdated": "2026-11-15T15:25Z",
   "health": {
     "progressPercent": 45,
     "buildVersion": "0.0.17-dev",
@@ -20,7 +20,7 @@
     "macroPhaseLabel": "Polish, QA & Regression",
     "status": "in_progress",
     "currentGoal": "Phase 15 — Polish, QA, and Regression",
-    "currentTask": "v7 done (zone edges + fall recovery, lit exits, floating interact prompts, hold-to-interact, Main Menu > Battle Test arena: dummy / enemy spawner / invincible combo partner); next: Phase 15 regression items 385-400",
+    "currentTask": "v8 done (A = context button: interact with a prompt, else jump; Y = Command Menu in Free Roam; hold-to-aim dodge with roll / side / back leap, Amaro acrobat vs Taighe glide; Taighe Y = Arcane Focus channel, Super Jump moved to her Command Menu); next: Phase 15 regression items 385-400",
     "nextMilestone": "Phase 15 regression items 385-400"
   },
   "tech": {
@@ -83,18 +83,19 @@
     "phase14Tests": 67,
     "phase15Tests": 68,
     "performanceTests": 65,
-    "totalTests": 1862,
-    "notes": "1862/1862 passing across 21 suites, all exit 0. v7: test_v4 target-step harness now returns to Free Roam after spawning dummies (fixed a frame-pacing race where a dummy aggroed before being frozen).",
-    "battleTests": 136,
+    "totalTests": 1920,
+    "notes": "1920/1920 passing across 22 suites, all exit 0. v8: control tests updated to the new A / Y layout; v5 normal-jump check moved off a crate (A now interacts there). v7: test_v4 target-step harness now returns to Free Roam after spawning dummies (fixed a frame-pacing race where a dummy aggroed before being frozen).",
+    "battleTests": 137,
     "carryTests": 80,
     "controlsTests": 236,
     "uiStyleTests": 141,
     "v4Tests": 96,
     "v5Tests": 160,
-    "passedTests": 1862,
+    "passedTests": 1920,
     "v6Tests": 178,
     "v7Tests": 53,
-    "battleTestArenaTests": 28
+    "battleTestArenaTests": 28,
+    "v8Tests": 57
   },
   "links": {
     "repo": null,

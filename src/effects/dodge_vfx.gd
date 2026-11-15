@@ -11,7 +11,7 @@ static func spawn(parent: Node3D, pos: Vector3, facing: Vector3) -> void:
 	## Spawns a translucent ghost silhouette at the dodge start position.
 	var effect := Node3D.new()
 	effect.name = "DodgeVFX"
-	parent.add_child(effect)
+	parent.add_child(effect, true)  # readable names (DodgeVFX2...) for tools/tests
 	effect.global_position = pos
 
 	# Orient toward dodge direction

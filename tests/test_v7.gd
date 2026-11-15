@@ -8,7 +8,7 @@
 ##    gold when the player stands in it (real Area3D overlap), back to cyan after.
 ##  - WorldPrompt: follows the focused interactable, verb on the pill, visible on
 ##    screen; nearby markers; bottom pill hidden unless carrying.
-##  - Hold-to-interact (dungeon lever): short tap does nothing, a 0.9 s hold of Y
+##  - Hold-to-interact (dungeon lever): short tap does nothing, a 0.9 s hold of A (v8)
 ##    pulls it; the prompt reads "Hold" and the progress reaches 1.
 extends Node
 
@@ -17,6 +17,7 @@ var _failed: int = 0
 var _total: int = 0
 
 const JOY_Y := 3
+const JOY_A := 0  # v8: A is the context (interact) button
 const TOWN_SCENE := "res://scenes/zones/town_hub.tscn"
 const FIELD_SCENE := "res://scenes/zones/field_zone.tscn"
 const DUNGEON_SCENE := "res://scenes/zones/dungeon_zone.tscn"
@@ -255,19 +256,19 @@ func test_hold_lever() -> void:
 
 	InputManager.active_device = InputManager.DeviceType.CONTROLLER
 	_hold_log.clear()
-	await _tap(_joy_press(JOY_Y), _joy_release(JOY_Y), 0.15)
+	await _tap(_joy_press(JOY_A), _joy_release(JOY_A), 0.15)
 	await _physics_frames(5)
 	var cancelled := _hold_log.any(func(e: Array) -> bool: return e[0] == lever and e[1] < 0.0)
-	_assert(not lever.is_on and cancelled, "dungeon: a short Y tap does not pull the lever (hold cancelled)",
+	_assert(not lever.is_on and cancelled, "dungeon: a short A tap does not pull the lever (hold cancelled)",
 		"is_on=%s log=%s" % [lever.is_on, _hold_log.size()])
 	_assert(_player.state_machine.current_state.name != &"TacticalIdle",
-		"dungeon: the tap did not open the Command Menu instead")
+		"dungeon: the tap did not jump or open the Command Menu instead")
 
 	_hold_log.clear()
-	await _tap(_joy_press(JOY_Y), _joy_release(JOY_Y), 0.9)
+	await _tap(_joy_press(JOY_A), _joy_release(JOY_A), 0.9)
 	await _physics_frames(5)
 	var full := _hold_log.any(func(e: Array) -> bool: return e[0] == lever and e[1] >= 1.0)
-	_assert(lever.is_on and full, "dungeon: holding Y 0.9 s pulls the lever (progress reached 1)",
+	_assert(lever.is_on and full, "dungeon: holding A 0.9 s pulls the lever (progress reached 1)",
 		"is_on=%s full=%s" % [lever.is_on, full])
 
 

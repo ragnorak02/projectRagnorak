@@ -76,6 +76,8 @@ var _current_interactable: Node3D = null
 # Events.interaction_hold_progress (ratio 0..1; -1 = cancelled) for the HUD.
 var _hold_target: Node3D = null
 var _hold_time: float = 0.0
+## Action whose button started the hold (v8: pad A = `jump`, keyboard E = `interact`).
+var _hold_action: StringName = &"interact"
 
 # Fall recovery (v7): a safety net under ZoneBounds. Below fall_reset_y the
 # player is put back on the last floor position it stood on.
@@ -158,7 +160,7 @@ func _ready() -> void:
 	state_machine.add_illegal_transition(&"ClimbUp", &"MeleeStrike")
 
 	# Block tactical mode from forced/locked states (items 167-170)
-	for blocked_state in [&"Dodge", &"AirDodge", &"Ability", &"LedgeGrab", &"ClimbUp",
+	for blocked_state in [&"Dodge", &"DodgeReady", &"Focus", &"AirDodge", &"Ability", &"LedgeGrab", &"ClimbUp",
 			&"JumpAttack", &"Attack1", &"Attack2", &"Attack3", &"MeleeStrike", &"Land"]:
 		state_machine.add_illegal_transition(blocked_state, &"TacticalIdle")
 
@@ -489,8 +491,9 @@ func is_holding_interact() -> bool:
 	return _hold_target != null
 
 
-func _start_interact_hold() -> void:
+func _start_interact_hold(action: StringName = &"interact") -> void:
 	_hold_target = _current_interactable
+	_hold_action = action
 	_hold_time = 0.0
 	Events.interaction_hold_progress.emit(_hold_target, 0.0)
 
@@ -510,7 +513,7 @@ func _cancel_interact_hold() -> void:
 func _update_interact_hold(delta: float) -> void:
 	if _hold_target == null:
 		return
-	if not is_instance_valid(_hold_target) or _hold_target != _current_interactable 			or not has_interactable() or in_battle or not can_interact_now() 			or not Input.is_action_pressed(&"interact"):
+	if not is_instance_valid(_hold_target) or _hold_target != _current_interactable 			or not has_interactable() or in_battle or not can_interact_now() 			or not Input.is_action_pressed(_hold_action):
 		_cancel_interact_hold()
 		return
 	var duration := 0.6
@@ -552,8 +555,26 @@ func is_dialogue_active() -> bool:
 # a dialogue box is open (the dialogue owns the press; this preserves the v2
 # handle_contextual_command gate).
 
+## v8 controller layout (Free Roam):
+##   A = context button: interacts while a prompt is up and the player is in a
+##       free-locomotion state, otherwise jumps (air jumps always jump).
+##   Y = Command Menu (always; it no longer interacts).
+## Keyboard is unchanged: Space jumps, E interacts (Command with no prompt), Q
+## opens the Command Menu. Battle is unchanged on both: A / Q = Command Menu
+## (no jumping), Y / R = the member's unique ability.
+
+## True for presses coming from a gamepad button (A/B/X/Y...).
+static func is_pad_event(event: InputEvent) -> bool:
+	return event is InputEventJoypadButton
+
+
+## True when a pad A press right now would interact instead of jumping.
+func pad_a_interacts() -> bool:
+	return not in_battle and has_interactable() and can_interact_now()
+
+
 ## Command Menu: `tactical_mode` (Q) in either mode, OR `jump` (A) in battle,
-## OR `interact` (Y/E) in free roam when no interactable is targeted.
+## OR in free roam: pad Y always, keyboard E when nothing is targeted.
 func is_command_press(event: InputEvent) -> bool:
 	if is_dialogue_active():
 		return false
@@ -561,22 +582,34 @@ func is_command_press(event: InputEvent) -> bool:
 		return true
 	if in_battle:
 		return event.is_action_pressed(&"jump")
-	return event.is_action_pressed(&"interact") and not has_interactable()
+	if not event.is_action_pressed(&"interact"):
+		return false
+	return is_pad_event(event) or not has_interactable()
 
 
-## Jump: `jump` (A/Space) in free roam only. Does nothing in battle.
+## Jump: `jump` (A/Space) in free roam only. Does nothing in battle. On a pad,
+## A interacts instead while a prompt is up in a free-locomotion state.
 func is_jump_press(event: InputEvent) -> bool:
 	if in_battle or is_dialogue_active():
 		return false
-	return event.is_action_pressed(&"jump")
+	if not event.is_action_pressed(&"jump"):
+		return false
+	return not (is_pad_event(event) and pad_a_interacts())
 
 
-## Interact: `interact` (Y/E) in free roam when an interactable is targeted.
+## Interact: free roam with an interactable targeted, from pad A or keyboard E.
 ## (Whether the current state allows it is can_interact_now()'s job.)
 func is_interact_press(event: InputEvent) -> bool:
-	if in_battle or is_dialogue_active():
+	if in_battle or is_dialogue_active() or not has_interactable():
 		return false
-	return event.is_action_pressed(&"interact") and has_interactable()
+	if is_pad_event(event):
+		return event.is_action_pressed(&"jump")
+	return event.is_action_pressed(&"interact")
+
+
+## The action an interact press came from (polled while a hold-interaction charges).
+static func interact_action_of(event: InputEvent) -> StringName:
+	return &"jump" if is_pad_event(event) and event.is_action(&"jump") else &"interact"
 
 
 ## Unique ability: `unique_ability` (R) in battle, OR `interact` (Y/E) in battle.
@@ -584,6 +617,11 @@ func is_unique_press(event: InputEvent) -> bool:
 	if not in_battle or is_dialogue_active():
 		return false
 	return event.is_action_pressed(&"unique_ability") or event.is_action_pressed(&"interact")
+
+
+## True while a unique-ability button (R, or Y/E) is held (channel abilities).
+func is_unique_held() -> bool:
+	return Input.is_action_pressed(&"unique_ability") or Input.is_action_pressed(&"interact")
 
 
 ## Battle toggle (v4): `battle_toggle` (View/Back on pad, F on keyboard) in
@@ -748,6 +786,17 @@ func launch_jump(vy: float, forward_carry: float = 0.0) -> bool:
 	var cur: Node = state_machine.current_state if state_machine else null
 	if cur and state_machine._is_illegal_transition(cur.name, &"Jump"):
 		return false
+	prepare_launch(vy, forward_carry)
+	if not request_transition(&"Jump"):
+		_air_jump_pending = false
+		return false
+	return true
+
+
+## Sets the launch velocity (vy up + forward_carry along facing) and flags it so
+## the next JumpState.enter() keeps it. The caller enters Jump (v8: the Ability
+## state returns &"Jump" for a LAUNCH command such as Super Jump).
+func prepare_launch(vy: float, forward_carry: float = 0.0) -> void:
 	var fwd: Vector3 = -global_basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized() if fwd.length() > 0.01 else Vector3.FORWARD
@@ -755,10 +804,16 @@ func launch_jump(vy: float, forward_carry: float = 0.0) -> bool:
 	velocity.z += fwd.z * forward_carry
 	velocity.y = vy
 	_air_jump_pending = true  # JumpState.enter() keeps our velocity.y
-	if not request_transition(&"Jump"):
-		_air_jump_pending = false
-		return false
-	return true
+
+
+## Restores MP (v8: Arcane Focus channel). Clamped to max; resets nothing else.
+func restore_mp(amount: float) -> void:
+	if amount <= 0.0:
+		return
+	var old := current_mp
+	current_mp = minf(current_mp + amount, max_mp)
+	if int(current_mp) != int(old) or current_mp >= max_mp:
+		Events.player_mp_changed.emit(current_mp, max_mp)
 
 
 func _starting_abilities(data: Resource) -> Array:
@@ -798,11 +853,11 @@ func can_interact_now() -> bool:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# The StateMachine (child) sees events first; states that consume a shared
-	# button mark it handled. v3: Y/E interacts only in free roam with a prompt
-	# (in battle it is the unique ability; with no prompt it is the Command Menu).
+	# button mark it handled. v8: pad A / keyboard E interact in free roam with
+	# a prompt (A otherwise jumps; pad Y is the Command Menu / battle unique).
 	if is_interact_press(event) and can_interact_now():
 		if current_interact_needs_hold():
-			_start_interact_hold()
+			_start_interact_hold(interact_action_of(event))
 			get_viewport().set_input_as_handled()
 			return
 		if try_interact():

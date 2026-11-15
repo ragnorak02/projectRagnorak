@@ -120,6 +120,17 @@ var _air_dodge_spent: bool = false
 var air_anchor_y: float = 0.0
 
 
+## Tap/hold split in real ms: HOLD_THRESHOLD_MS, or the unique ability's
+## override (v8: Arcane Focus shortens it while Taighe is focused).
+func hold_threshold_ms() -> int:
+	var st: Node = player.get(&"stance") if player else null
+	if st and st.has_method(&"hold_threshold_ms"):
+		var v := int(st.hold_threshold_ms())
+		if v > 0:
+			return v
+	return HOLD_THRESHOLD_MS
+
+
 func _ready() -> void:
 	player = get_parent()
 	Events.player_hurt.connect(_on_player_hurt)
@@ -144,11 +155,11 @@ func _process(_delta: float) -> void:
 	# the string and any hold in progress.
 	if state != &"" and not (state in STRIKE_ENTRY_STATES):
 		if not _string.is_empty() or _press_ms >= 0 or _buffered_kind != &"":
-			reset(&"dodge" if state in [&"Dodge", &"AirDodge"] else (&"hit" if state == &"Flinch" else &"manual"))
+			reset(&"dodge" if state in [&"Dodge", &"AirDodge", &"DodgeReady"] else (&"hit" if state == &"Flinch" else &"manual"))
 		return
 	var now := Time.get_ticks_msec()
 	# Heavy at threshold, without waiting for release.
-	if _press_ms >= 0 and not _heavy_fired and now - _press_ms >= HOLD_THRESHOLD_MS:
+	if _press_ms >= 0 and not _heavy_fired and now - _press_ms >= hold_threshold_ms():
 		_heavy_fired = true
 		var next := _queue_step(KIND_HEAVY)
 		if next != &"":

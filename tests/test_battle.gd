@@ -148,8 +148,8 @@ func test_member_data() -> void:
 	var comp = load("res://resources/characters/companion.tres")
 	_assert(hero != null and "unique_ability_id" in hero and hero.unique_ability_id == &"arcane_stance",
 		"hero.tres unique_ability_id is &\"arcane_stance\"")
-	_assert(comp != null and "unique_ability_id" in comp and comp.unique_ability_id == &"super_jump",
-		"companion.tres unique_ability_id is &\"super_jump\" (v5 CC4 Taighe unique)")
+	_assert(comp != null and "unique_ability_id" in comp and comp.unique_ability_id == &"arcane_focus",
+		"companion.tres unique_ability_id is &\"arcane_focus\" (v8 Taighe unique)")
 
 
 func test_player_nodes() -> void:
@@ -238,8 +238,10 @@ func test_routing_free_roam() -> void:
 	_assert(not _player.is_unique_press(_joy_press(JOY_Y)) and not _player.is_unique_press(_key_press(KEY_R)),
 		"Free roam: Y / R are never the unique ability")
 	_player._current_interactable = target
-	_assert(_player.is_interact_press(_joy_press(JOY_Y)) and not _player.is_command_press(_joy_press(JOY_Y)),
-		"Free roam: Y with a prompt is interact, not command")
+	_assert(_player.is_command_press(_joy_press(JOY_Y)) and not _player.is_interact_press(_joy_press(JOY_Y)),
+		"Free roam (v8): Y with a prompt is command, not interact")
+	_assert(_player.is_interact_press(_joy_press(JOY_A)) and not _player.is_jump_press(_joy_press(JOY_A)),
+		"Free roam (v8): A with a prompt is interact, not jump")
 
 	# Runtime: A jumps.
 	_player._current_interactable = null
@@ -248,11 +250,11 @@ func test_routing_free_roam() -> void:
 		"Free roam: A (real input) jumps", "state=%s vy=%.2f" % [_state(), _player.velocity.y])
 	await _ground_idle()
 
-	# Runtime: Y next to an NPC interacts.
+	# Runtime (v8): A next to an NPC interacts (no jump, no menu).
 	_player._current_interactable = target
-	await _tap(_joy_press(JOY_Y), _joy_release(JOY_Y))
-	_assert(target.calls == 1 and _state() != &"TacticalIdle", "Free roam: Y near an NPC interacts",
-		"calls=%d state=%s" % [target.calls, _state()])
+	await _tap(_joy_press(JOY_A), _joy_release(JOY_A))
+	_assert(target.calls == 1 and _state() != &"TacticalIdle" and _state() != &"Jump",
+		"Free roam: A near an NPC interacts", "calls=%d state=%s" % [target.calls, _state()])
 
 	# Runtime: Y with no prompt opens the Command Menu.
 	_player._current_interactable = null

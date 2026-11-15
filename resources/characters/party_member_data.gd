@@ -22,8 +22,13 @@ extends Resource
 
 ## Battle-mode unique ability (Y in battle / R on keyboard). Resolved by
 ## StanceComponent's registry (id -> script). Empty = no unique ability yet.
-## Amaro = &"arcane_stance", Taighe = &"super_jump".
+## Amaro = &"arcane_stance", Taighe = &"arcane_focus" (v8; Super Jump moved
+## to her Command Menu as the super_jump ability).
 @export var unique_ability_id: StringName = &""
+
+## v8 ground dodge look (DodgeState): &"acrobat" = roll / cartwheel / backflip
+## (Amaro), &"glide" = ice-trail glide / side glide / floating back-leap (Taighe).
+@export var dodge_style: StringName = &"acrobat"
 
 ## v6 HH — basic attack (X) kit: a BasicAttackProfile
 ## (src/combat/basic_attacks/basic_attack_profile.gd). Null = melee (the v5

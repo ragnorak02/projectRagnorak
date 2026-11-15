@@ -7,9 +7,9 @@
 ## routed by player.is_command_press(): A in battle, Y with no prompt in free roam.
 ## Covers: InputMap v3 bindings, menu / tactical source contracts, routing
 ## helpers, party-switch wiring, bindings versioning (5), v4 battle_toggle, control hints / prompt
-## labels, and FREE-ROAM runtime checks: tactical menu, A jumps (never opens the
-## menu or interacts), Y interacts with a prompt / opens the menu without one,
-## Y never interacts outside PLAYING, B never interacts, double jump on A,
+## labels, and FREE-ROAM runtime checks: tactical menu, v8 context button (A
+## interacts with a prompt, jumps without one; Y always opens the Command Menu),
+## A never interacts outside PLAYING, B never interacts, double jump on A,
 ## sprint, no-target spell (v4: target step with Fire Forward only). Battle-mode routing lives in tests/test_battle.gd.
 extends Node
 
@@ -599,8 +599,8 @@ func test_control_bar_runtime() -> void:
 	_world.add_child(dummy)
 	Events.interaction_available.emit(dummy)
 	await _frames(2)
-	_assert(bar.get_hint_entries() == [["A", "Jump"], ["X", "Attack"], ["B", "Dodge"], ["Y", "Interact"], ["View", "Battle"]],
-		"Free roam pad hints with a prompt: Y reads Interact (View Battle last)", str(bar.get_hint_entries()))
+	_assert(bar.get_hint_entries() == [["A", "Interact"], ["X", "Attack"], ["B", "Dodge"], ["Y", "Command"], ["View", "Battle"]],
+		"Free roam pad hints with a prompt (v8): A reads Interact, Y stays Command (View Battle last)", str(bar.get_hint_entries()))
 	Events.interaction_cleared.emit()
 	await _frames(2)
 	InputManager.active_device = InputManager.DeviceType.KEYBOARD_MOUSE
@@ -847,34 +847,36 @@ func test_free_roam_a_y_routing_runtime() -> void:
 		target.queue_free()
 		return
 
-	# --- A next to an interactable: jumps. Never opens the menu, never interacts. ---
+	# --- v8: A next to an interactable is the context button: interacts, no jump, no menu. ---
 	player._current_interactable = target
 	player.state_machine.force_transition(&"Idle")
 	player.state_machine._unhandled_input(_joy_press(JOY_A))
 	player._unhandled_input(_joy_press(JOY_A))
 	player.state_machine._unhandled_input(_joy_release(JOY_A))
-	_assert(player.state_machine.current_state.name == &"Jump",
-		"Free roam: A next to an interactable jumps (Jump state)",
+	_assert(player.state_machine.current_state.name == &"Idle",
+		"Free roam: A next to an interactable does not jump (v8 context button)",
 		"state=%s" % player.state_machine.current_state.name)
-	_assert(target.calls == 0, "Free roam: A never interacts", "calls=%d" % target.calls)
+	_assert(target.calls == 1, "Free roam: A next to an interactable interacts (v8)", "calls=%d" % target.calls)
 	_assert(GameManager.current_state == GameManager.GameState.PLAYING,
 		"Free roam: A does not open the Command Menu (GameManager still PLAYING)")
-	await _physics_frames(5)  # leave the floor before waiting to land
-	await _wait_on_floor(player, 240)
 	player.state_machine.force_transition(&"Idle")
 	await _physics_frames(2)
 
-	# --- Y with a prompt: interacts (real input path), no menu. ---
+	# --- v8: Y with a prompt opens the Command Menu (real input path), never interacts. ---
 	player._current_interactable = target
 	Input.parse_input_event(_joy_press(JOY_Y))
 	await _physics_frames(2)
 	Input.parse_input_event(_joy_release(JOY_Y))
 	await _physics_frames(2)
-	_assert(target.calls == 1, "Free roam: Y with a prompt interacts", "calls=%d" % target.calls)
-	_assert(player.state_machine.current_state.name != &"TacticalIdle",
-		"Free roam: Y with a prompt does not open the Command Menu",
+	_assert(target.calls == 1, "Free roam: Y with a prompt does not interact (v8)", "calls=%d" % target.calls)
+	_assert(player.state_machine.current_state.name == &"TacticalIdle",
+		"Free roam: Y with a prompt opens the Command Menu (v8)",
 		"state=%s" % player.state_machine.current_state.name)
 	player.state_machine.force_transition(&"Idle")
+	if GameManager.current_state != GameManager.GameState.PLAYING:
+		GameManager.change_state(GameManager.GameState.PLAYING)
+	Engine.time_scale = 1.0
+	await _physics_frames(2)
 
 	# --- Y with no prompt: opens the Command Menu (real input path). ---
 	player._current_interactable = null
@@ -934,10 +936,10 @@ func test_y_interact_guard_runtime() -> void:
 	await _wait_on_floor(player)
 	player.state_machine.force_transition(&"Idle")
 
-	# PLAYING: Y interacts.
+	# PLAYING: pad A (v8 context button) interacts.
 	GameManager.change_state(GameManager.GameState.PLAYING)
-	player._unhandled_input(_joy_press(JOY_Y))
-	_assert(target.calls == 1, "Y interacts with the current interactable in PLAYING",
+	player._unhandled_input(_joy_press(JOY_A))
+	_assert(target.calls == 1, "pad A interacts with the current interactable in PLAYING (v8)",
 		"calls=%d" % target.calls)
 	player._unhandled_input(_key_press(KEY_E))
 	_assert(target.calls == 2, "Keyboard E interacts in PLAYING", "calls=%d" % target.calls)
@@ -945,14 +947,14 @@ func test_y_interact_guard_runtime() -> void:
 	player._unhandled_input(_joy_press(JOY_B))
 	_assert(target.calls == 2, "B never interacts (B = dodge / back in v3)", "calls=%d" % target.calls)
 
-	# Not PLAYING: Y must not interact.
+	# Not PLAYING: A must not interact.
 	for st in [GameManager.GameState.TACTICAL_MODE, GameManager.GameState.PAUSED,
 			GameManager.GameState.CUTSCENE]:
 		GameManager.change_state(st)
 		var before: int = target.calls
-		player._unhandled_input(_joy_press(JOY_Y))
+		player._unhandled_input(_joy_press(JOY_A))
 		_assert(target.calls == before,
-			"Y does not interact while %s" % GameManager.GameState.keys()[st],
+			"A does not interact while %s" % GameManager.GameState.keys()[st],
 			"calls=%d" % target.calls)
 		GameManager.change_state(GameManager.GameState.PLAYING)
 

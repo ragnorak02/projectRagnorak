@@ -30,7 +30,12 @@
 ## v5: INSTANT abilities (var is_instant = true, func activate() -> bool) fire
 ## once per press instead of holding a stance: toggle() calls activate() and
 ## returns false (is_active() stays false, no aura, no stance_changed).
-## Taighe = &"super_jump" (super_jump.gd).
+## v8 CHANNEL abilities (var is_channel = true, func activate() -> bool) start a
+## hold: activate() enters the player's Focus state, which ticks the ability
+## while Y / R stays held (toggle() returns false, no aura tag, no
+## stance_changed). Taighe = &"arcane_focus" (arcane_focus.gd); super_jump.gd
+## stays registered (the Super Jump launch now lives in her Command Menu).
+## Pass-throughs for basic attacks: consume_attack_bonus(), hold_threshold_ms().
 class_name StanceComponent
 extends Node
 
@@ -39,6 +44,7 @@ const REGISTRY := {
 	# breaks Godot 4.6's exit cycle cleanup (v6 KK: "resources still in use at exit").
 	&"arcane_stance": preload("res://src/combat/unique_abilities/arcane_stance.gd"),
 	&"super_jump": preload("res://src/combat/unique_abilities/super_jump.gd"),
+	&"arcane_focus": preload("res://src/combat/unique_abilities/arcane_focus.gd"),
 }
 
 var player: Node = null
@@ -90,7 +96,7 @@ func toggle() -> bool:
 		return false
 	if not _can_enter():
 		return false
-	if is_instant():
+	if is_instant() or is_channel():
 		ability.activate()
 		return false
 	_enter()
@@ -100,6 +106,26 @@ func toggle() -> bool:
 ## True when the resolved unique ability is a one-shot (no stance held).
 func is_instant() -> bool:
 	return ability != null and ability.get(&"is_instant") == true
+
+
+## v8: true when the resolved unique ability is a hold-to-channel (Arcane Focus).
+func is_channel() -> bool:
+	return ability != null and ability.get(&"is_channel") == true
+
+
+## v8: basic-attack bonus from the unique ability ({damage, stagger, size}
+## multipliers; {} = none). Spends one empowered shot when it returns one.
+func consume_attack_bonus() -> Dictionary:
+	if ability and ability.has_method(&"consume_attack_bonus"):
+		return ability.consume_attack_bonus()
+	return {}
+
+
+## v8: heavy-hold threshold override from the unique ability (-1 = default).
+func hold_threshold_ms() -> int:
+	if ability and ability.has_method(&"hold_threshold_ms"):
+		return int(ability.hold_threshold_ms())
+	return -1
 
 
 func is_active() -> bool:
@@ -178,3 +204,5 @@ func _member_id() -> StringName:
 func _on_battle_mode_changed(in_battle: bool) -> void:
 	if not in_battle and is_active():
 		exit_stance(&"battle_end")
+	if not in_battle and ability and ability.has_method(&"clear_focus"):
+		ability.clear_focus()

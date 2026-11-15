@@ -13,7 +13,7 @@
 ##  - 11 Aerial list only airborne (Plunge first, Sword Slash "Grounded only").
 ##  - 7  Party switch: D-pad Up/Down swap, 1 s cooldown, blocked states, stats
 ##       preserved, HUD large panel follows, toast, control-bar Y label.
-##  - 10 Super Jump ~5x normal jump height, aerial list at the apex.
+##  - 10 Super Jump (v8: a Command Menu command) ~5x normal jump height, aerial list at the apex.
 ##  - 12 Air combo: altitude held +-0.2 m, drift, then gravity, no re-hover.
 ##  - 13 Air dodge: backflip arc (up + back), one per airtime, refreshed on landing.
 ##  - 3/4 Lock-on range = max ability range (Amaro 20, Taighe 18); framing: the
@@ -182,7 +182,7 @@ func test_contract() -> void:
 					ps_ok = true
 	_assert(ps_ok, "party_switch bound to D-pad Up and D-pad Down")
 	var comp: Resource = load("res://resources/characters/companion.tres")
-	_assert(comp != null and comp.unique_ability_id == &"super_jump", "companion.tres unique = super_jump")
+	_assert(comp != null and comp.unique_ability_id == &"arcane_focus", "companion.tres unique = arcane_focus (v8; Super Jump is a command)")
 	_assert(_get_source("res://src/enemies/enemy_base.gd").contains("func launch(vel: Vector3)"),
 		"EnemyBase.launch(vel) exists")
 	for p in ["res://src/ui/hud/lock_on_indicator.gd", "res://src/ui/hud/target_bar.gd"]:
@@ -976,8 +976,8 @@ func test_party_switch() -> void:
 	var ids: Array = _player.ability_system.equipped_abilities.map(func(a): return a.ability_id)
 	_assert(&"water_geyser" in ids and &"wind_crescent" in ids and not (&"sword_slash" in ids),
 		"Taighe's command list travels with her", str(ids))
-	_assert(_player.stance.current_stance() == &"" and String(_player.stance.get_display_name()).to_lower().contains("super"),
-		"Taighe's unique ability is Super Jump", _player.stance.get_display_name())
+	_assert(_player.stance.current_stance() == &"" and String(_player.stance.get_display_name()).to_lower().contains("focus"),
+		"Taighe's unique ability is Arcane Focus (v8)", _player.stance.get_display_name())
 	await _frames(4)
 	var hud := _hud("combat_hud.gd")
 	var active_ids: Array = []
@@ -989,7 +989,7 @@ func test_party_switch() -> void:
 	_assert(hud and hud.last_switch_toast == "Taighe", "HUD toast reads Taighe", str(hud.last_switch_toast if hud else ""))
 	await _frames(3)
 	var y_after := _y_label(bar)
-	_assert(y_after == "Super Jump", "Control bar Y label follows the member (Super Jump)", y_after)
+	_assert(y_after == "Arcane Focus", "Control bar Y label follows the member (Arcane Focus)", y_after)
 
 	# Cooldown: an immediate second press is ignored.
 	_assert(_party.get_switch_cooldown_remaining() > 0.0, "Switch cooldown running after a switch")
@@ -1180,17 +1180,29 @@ func test_super_jump() -> void:
 	await _ground_idle()
 	await _physics_frames(6)
 	var ground: float = _player.global_position.y
-	# Normal jump: A in free roam.
+	# v8: A interacts while a prompt is up (a crate sits near this spot), so
+	# measure the normal jump on a spot with nothing to interact with.
+	for spot in [Vector3(0, 0.1, 2), Vector3(-6, 0.1, 6), Vector3(6, 0.1, 6), Vector3(0, 0.1, 9)]:
+		if _player.get_current_interactable() == null:
+			break
+		_place_player(spot, 0.0)
+		await _ground_idle()
+		await _physics_frames(6)
+	ground = _player.global_position.y
+	# Normal jump: A in free roam (no prompt).
 	await _tap(_joy_press(JOY_A), _joy_release(JOY_A), 0.03)
 	var peak_n := await _peak_height(ground)
 	await _ground_idle()
 	await _physics_frames(6)
-	# Battle + Y = Super Jump.
+	# v8: battle + Command Menu > Super Jump (Y is Arcane Focus now).
 	await _enter_battle()
 	ground = _player.global_position.y
-	await _tap(_joy_press(JOY_Y), _joy_release(JOY_Y), 0.03)
+	var sj_tac := await _open_to_ability(&"super_jump")
+	if sj_tac:
+		await _tap(_joy_press(JOY_A), _joy_release(JOY_A), 0.03)
+	await _wait_until(func(): return _state() == &"Jump" or _state() == &"Fall", 1.5)
 	var launched := _state() == &"Jump" or _state() == &"Fall"
-	_assert(launched, "Y in battle (Taighe) fires Super Jump", "state=%s" % _state())
+	_assert(launched, "Command Menu > Super Jump (Taighe, battle) launches with no target step", "state=%s" % _state())
 	# Rise to the apex, then open the Command Menu (A in battle).
 	var peak := ground
 	var start := Time.get_ticks_msec()
@@ -1216,11 +1228,9 @@ func test_super_jump() -> void:
 	_assert(ratio >= 4.3 and ratio <= 5.7, "Super Jump reaches ~5x the normal jump height",
 		"normal=%.2f m super=%.2f m ratio=%.2f" % [peak_n, peak_s, ratio])
 	await _ground_idle()
-	# Cooldown: a second Y right after landing does not launch.
-	await _tap(_joy_press(JOY_Y), _joy_release(JOY_Y), 0.03)
-	await _physics_frames(3)
-	_assert(_player.is_on_floor() and _player.velocity.y < 1.0, "Super Jump is on cooldown (~3 s) right after use",
-		"state=%s vy=%.1f" % [_state(), _player.velocity.y])
+	# Cooldown: the command is on its ~3 s cooldown right after landing.
+	_assert(_player.ability_system.is_on_cooldown(&"super_jump"), "Super Jump is on cooldown (~3 s) right after use",
+		"left=%.2f" % _player.ability_system.get_cooldown_remaining(&"super_jump"))
 	_player.battle_mode.force_exit()
 	await _ground_idle()
 
@@ -1259,13 +1269,22 @@ func test_rigless_player_cues() -> void:
 	await _ground_idle()
 	await _real_seconds(0.5)
 	await _tap(_joy_press(JOY_B), _joy_release(JOY_B), 0.05)
-	await _real_seconds(0.6)
+	var dodged := _state() == &"Dodge"
+	var vis_moved := false
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 600:
+		await get_tree().physics_frame
+		dodged = dodged or _state() == &"Dodge"
+		vis_moved = vis_moved or not _player.visual_root.transform.is_equal_approx(Transform3D.IDENTITY)
 	await _ground_idle()
 	var counts: Dictionary = rv.get_debug_state()["cue_counts"]
 	_assert(int(counts.get(&"hit", 0)) >= 1, "Player hit -> RiglessVisual 'hit' cue", str(counts))
 	_assert(int(counts.get(&"attack", 0)) + int(counts.get(&"attack_heavy", 0)) >= 1,
 		"X attack -> RiglessVisual 'attack' cue", str(counts))
-	_assert(int(counts.get(&"dodge", 0)) >= 1, "B dodge -> RiglessVisual 'dodge' cue", str(counts))
+	# v8: ground dodge visuals (roll / cartwheel / backflip) drive $VisualRoot
+	# directly (DodgeState) and are restored afterwards; no 'dodge' cue spin.
+	_assert(dodged and vis_moved and _player.visual_root.transform.is_equal_approx(Transform3D.IDENTITY),
+		"B dodge -> v8 dodge visual on VisualRoot, restored after", "dodged=%s moved=%s" % [dodged, vis_moved])
 	_player.current_hp = _player.max_hp
 	rv.queue_free()
 	await _frames(2)

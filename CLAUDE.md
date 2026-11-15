@@ -492,7 +492,7 @@ No system may directly own another system’s state.
 - [ ] Offensive commands always open the target step (enemies nearest-first + Fire Forward)
 - [ ] Per-spell range: target list and lock-on reach = active member's max offensive range; rows beyond the selected ability's range are darkened "Out of range" and cannot be confirmed; Fire Forward always works. Out of range: the reticle dims while the "OUT OF RANGE" label stays large on a dark pill; the target bar keeps its dark panel and dims only its content
 - [ ] Party switch swaps identities, not bodies (data, HP/MP/ATB, commands, model, position); camera/lock-on/state machine stay on the Player node; 1.0s cooldown; blocked in dodge/cast/attack/flinch/carry/menus/dialogue/dead
-- [ ] Abilities v5: Sword Slash (Amaro, 0 MP), Water Geyser and Wind Crescent (Taighe, spawn at target); Taighe unique = Super Jump (~5x jump)
+- [ ] Abilities v5: Sword Slash (Amaro, 0 MP), Water Geyser and Wind Crescent (Taighe, spawn at target); Taighe unique = Arcane Focus (v8, see below); Super Jump (~5x jump) is a Taighe Command Menu command (self-only, no target step, grounded only)
 - [ ] Aerial Command Menu: opened airborne it lists aerial_only abilities first (Plunge Strike / Air Burst); ground_only rows grey "Grounded only"
 - [ ] Air combo holds altitude (up to 3 L/H strikes, ~2 m/s drift, once per airtime); air dodge once per airtime, stick-back = backflip, otherwise air dash
 - [ ] Lock-on camera keeps the target at least 18 degrees beside the player
@@ -510,7 +510,9 @@ No system may directly own another system’s state.
 - [ ] Ability VFX are translucent additive (unshaded, no depth write) and fade within 0.25 s (Sword Slash); multi-hit spells show a hit flash per hit; the target stays readable through every effect
 - [ ] Zone edges (ZoneBounds): 80 m walls just outside the walkable rectangle, a thin cyan ground line at the edge and a striped curtain that only fades in within ~7 m; the ground always reaches the edge; below y = -20 the player returns to the last floor it stood on (companion returns beside the leader)
 - [ ] Zone exits light up: floor pad + low light curtain over the exit area, cyan idle, pulsing gold while it is the interact target, red while locked
-- [ ] Interact prompt floats beside the object (WorldPrompt: button glyph in a ring + verb pill); other interactables within 10 m get a small cyan diamond; the bottom pill only shows carry controls; hold interactions read "Hold · <verb>" and the ring fills while held (levers: 0.6 s)
+- [ ] Interact prompt floats beside the object (WorldPrompt: button glyph in a ring + verb pill; v8: A on pad, E on keyboard); other interactables within 10 m get a small cyan diamond; the bottom pill only shows carry controls; hold interactions read "Hold · <verb>" and the ring fills while held (levers: 0.6 s)
+- [ ] Ground dodge (v8): pressing B enters DodgeReady (momentum and facing kept, the stick aims, a ground chevron shows after 0.12 s); releasing fires the dodge toward the stick (a tap dodges on release; held 1 s fires by itself). The kind follows the aim vs facing: within 60 deg = roll, 60-120 deg = side, past 120 deg = big back leap (~1.6 m up, ~6.5 m back). Look per member (PartyMemberData.dodge_style): Amaro acrobat = forward roll / cartwheel / backflip; Taighe glide = ice-trail glide / leaning side glide / floating spinning back-leap. Visuals only rotate $VisualRoot and are restored; attack-cancel dodges fire at once; no i-frames
+- [ ] Taighe unique (v8): Arcane Focus = hold Y / R in battle to channel (rooted, +6 MP/s, full in 1.2 s); release after >= 0.25 s gives 3 empowered bolts (up to +60% damage and stagger, bigger, charged shot after 110 ms instead of 220 ms) for 10 s; a hit interrupts it (no buff); leaving battle clears it
 - [ ] Main Menu top option "Battle Test": 80 x 80 m walled arena (no autosave) with a Training Dummy (passive, killable, back after 3 s), an Enemy Spawner crystal (keeps 2 hostiles alive, replaces each 4 s after death) and an invincible passive Combo Partner that wanders inside a 5 m ring; the AI companion ignores training targets
 - [ ] Ledge grab is automatic
 - [ ] Quicksave disabled in combat
@@ -544,12 +546,12 @@ No system may directly own another system’s state.
 
 - [ ] Move -> Left Stick
 - [ ] Camera -> Right Stick
-- [ ] Jump -> A (Free Roam only)
+- [ ] Jump / Interact -> A (Free Roam, v8 context button: interacts while a prompt is up in a free-locomotion state, otherwise jumps; air jumps always jump)
 - [ ] Command Menu -> A (Battle)
 - [ ] Attack -> X (tap Light / hold Heavy)
-- [ ] Dodge -> B
-- [ ] Interact / Pick up / Carry -> Y (Free Roam, prompt shown; tap Y put down, hold Y aim, X throw; hold-type interactables need Y held)
-- [ ] Command Menu -> Y (Free Roam, no prompt shown)
+- [ ] Dodge -> B (tap = dodge on release; hold = keep momentum, aim with the left stick, release to dodge)
+- [ ] Interact / Pick up -> A (Free Roam, prompt shown; hold-type interactables need A held); while carrying: tap Y put down, hold Y aim, X throw
+- [ ] Command Menu -> Y (Free Roam, always, prompt or not)
 - [ ] Unique Ability -> Y (Battle)
 - [ ] Run -> L3 (hold, Free Roam)
 - [ ] Menu confirm -> A / Menu back -> B (one layer)
@@ -575,7 +577,7 @@ No system may directly own another system’s state.
 - [ ] Camera -> Mouse
 - [ ] Jump -> Space (Free Roam only)
 - [ ] Attack -> Left Mouse (tap Light / hold Heavy)
-- [ ] Dodge -> Shift
+- [ ] Dodge -> Shift (same tap / hold-to-aim rules as B)
 - [ ] Run -> Left Ctrl (hold)
 - [ ] Interact -> E
 - [ ] Tactical/Command Menu -> Q (both modes)

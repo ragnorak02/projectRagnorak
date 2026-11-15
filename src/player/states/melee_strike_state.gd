@@ -64,6 +64,9 @@ var step: int = 1
 var finisher: StringName = &""
 var damage: float = 0.0
 var stagger: float = 0.0
+## v8: this bolt was empowered by Arcane Focus.
+var focused: bool = false
+var _size_mult: float = 1.0
 
 var _data: Dictionary = {}
 var _timer: float = 0.0
@@ -128,6 +131,16 @@ func enter(msg: Dictionary = {}) -> void:
 		stagger = float(fin["stagger"])
 		if float(fin["radius"]) > 0.0:
 			_duration += FINISHER_EXTRA_TIME
+	# v8 Arcane Focus: a focused mage bolt hits harder and is bigger.
+	focused = false
+	_size_mult = 1.0
+	if mage and player.get(&"stance") and player.stance.has_method(&"consume_attack_bonus"):
+		var bonus: Dictionary = player.stance.consume_attack_bonus()
+		if not bonus.is_empty():
+			focused = true
+			damage *= float(bonus.get("damage", 1.0))
+			stagger *= float(bonus.get("stagger", 1.0))
+			_size_mult = float(bonus.get("size", 1.0))
 	if combo:
 		combo.notify_strike_started()
 	airborne = combo != null and combo.is_air_string() and not player.is_on_floor()
@@ -378,6 +391,7 @@ func _bolt_params() -> Dictionary:
 		p["homing"] = float(fin.get("homing", p["homing"]))
 		p["radius"] = float(fin.get("size", p["radius"]))
 		p["hit_kind"] = &"finisher"
+	p["radius"] = float(p["radius"]) * _size_mult
 	return p
 
 

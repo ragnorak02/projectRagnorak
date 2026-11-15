@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3]
+[gd_scene load_steps=38 format=3]
 
 [ext_resource type="Script" path="res://src/player/player.gd" id="1"]
 [ext_resource type="Script" path="res://src/player/states/state_machine.gd" id="2"]
@@ -35,6 +35,8 @@
 [ext_resource type="Script" path="res://src/combat/combo_component.gd" id="33"]
 [ext_resource type="Script" path="res://src/combat/stance_component.gd" id="34"]
 [ext_resource type="Script" path="res://src/player/states/air_dodge_state.gd" id="35"]
+[ext_resource type="Script" path="res://src/player/states/dodge_ready_state.gd" id="36"]
+[ext_resource type="Script" path="res://src/player/states/focus_state.gd" id="37"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
 radius = 0.4
@@ -177,6 +179,12 @@ script = ExtResource("31")
 
 [node name="AirDodge" type="Node" parent="StateMachine"]
 script = ExtResource("35")
+
+[node name="DodgeReady" type="Node" parent="StateMachine"]
+script = ExtResource("36")
+
+[node name="Focus" type="Node" parent="StateMachine"]
+script = ExtResource("37")
 
 [node name="LedgeDetector" type="Node3D" parent="."]
 

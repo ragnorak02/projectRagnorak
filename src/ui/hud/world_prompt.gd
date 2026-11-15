@@ -1,6 +1,7 @@
 ## WorldPrompt (v7) — FF7 Rebirth-style floating button prompt.
-## When the player can interact with something, the interact button (Y on pad,
-## E on keyboard, follows rebinding via ButtonGlyph) floats next to the object
+## When the player can interact with something, the interact button (A on pad
+## since v8 — the context button, E on keyboard; follows rebinding via
+## ButtonGlyph) floats next to the object
 ## inside a round ring, with the verb on a small glass pill beside it.
 ##  - Hold interactions (Interactable.requires_hold()) read "Hold · <verb>" and
 ##    the ring fills gold while the button is held
@@ -202,6 +203,16 @@ func _active(t: Node) -> bool:
 	return not t.has_method("is_active") or t.is_active()
 
 
+## The action whose button interacts (v8): pad A = `jump`, keyboard E = `interact`.
+static func prompt_action() -> StringName:
+	return &"jump" if InputManager.is_using_controller() else &"interact"
+
+
+## Glyph label currently shown in the ring (tests).
+func get_glyph_label() -> String:
+	return _glyph.get_label() if _glyph else ""
+
+
 func _process(delta: float) -> void:
 	if _camera == null or not is_instance_valid(_camera):
 		_camera = get_viewport().get_camera_3d()
@@ -230,6 +241,10 @@ func _update_prompt(t: Node3D, delta: float) -> void:
 		_prompt.visible = false
 		return
 
+	# v8: the context button — pad A (`jump`), keyboard E (`interact`).
+	var want := prompt_action()
+	if _glyph.action != want:
+		_glyph.action = want
 	var hold := _target_needs_hold()
 	var verb := _verb_for(t)
 	_label.text = ("Hold  ·  " + verb) if hold else verb
