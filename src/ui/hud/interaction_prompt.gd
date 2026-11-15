@@ -21,6 +21,7 @@
 extends CanvasLayer
 
 const CARRY_PICK_UP_TEXT := "Pick Up"
+const WorldPromptScript := preload("res://src/ui/hud/world_prompt.gd")
 
 const PROMPT_FONT_SIZE := 20
 ## Distance of the pill's bottom edge from the screen bottom (px @1080p).
@@ -60,6 +61,12 @@ var _in_battle: bool = false
 func _ready() -> void:
 	layer = 10
 	_build_ui()
+	# v7: the floating button prompt next to the object (WorldPrompt) lives
+	# under this HUD, so every scene that has the interact prompt gets both.
+	var wp := CanvasLayer.new()
+	wp.name = "WorldPrompt"
+	wp.set_script(WorldPromptScript)
+	add_child(wp)
 	_connect_signals()
 	_tactical_open = GameManager.current_state == GameManager.GameState.TACTICAL_MODE
 	_hide_prompt()
@@ -252,7 +259,10 @@ func _show_prompt(play_feedback: bool = true) -> void:
 	var was_visible := _visible_state
 	_visible_state = true
 	_update_prompt_text()
-	_bg_panel.visible = true
+	# v7: interactables get the floating WorldPrompt next to the object, so the
+	# bottom pill only appears for the carry controls (Put Down / Hold Throw).
+	# _visible_state above stays the logical "a prompt is up" flag.
+	_bg_panel.visible = _carrying
 	if not play_feedback and was_visible:
 		return
 	AudioManager.play_sfx_named("interaction_prompt")
@@ -322,3 +332,4 @@ func _process(_delta: float) -> void:
 		_hide_prompt()
 		return
 	_update_prompt_text()
+	_bg_panel.visible = _carrying

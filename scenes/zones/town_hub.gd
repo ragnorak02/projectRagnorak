@@ -12,6 +12,7 @@ const AlchemistModel := preload("res://assets/models/characters/alchemist_female
 const ChestInteractable := preload("res://src/interaction/chest_interactable.gd")
 const ZonePortal := preload("res://src/interaction/zone_portal.gd")
 const CarryableCrateScene := preload("res://src/interaction/carryable_crate.tscn")
+const ZoneBounds := preload("res://src/world/zone_bounds.gd")
 
 
 
@@ -35,12 +36,35 @@ func _setup_zone() -> void:
 func _build_terrain() -> void:
 	# Large grass ground plane
 	TownBuilder.add_ground_plane(self, 100.0, Color(0.22, 0.32, 0.15))
+	# v7: the 100 m plane ends at z = -50 (the north gate) while the old wall
+	# stood at -55, a gap you fell through. A separate strip fills it (the main
+	# plane keeps its size: resizing its collider changed floor contact at spawn).
+	_add_ground_strip(Vector3(0, 0, -52.0), Vector2(60.0, 4.0), Color(0.22, 0.32, 0.15))
 
-	# Invisible boundary walls so player doesn't walk off the map
-	TownBuilder.add_invisible_wall(self, Vector3(0, 2, -55), Vector3(100, 6, 1))   # north
-	TownBuilder.add_invisible_wall(self, Vector3(0, 2, 15), Vector3(100, 6, 1))    # south
-	TownBuilder.add_invisible_wall(self, Vector3(-30, 2, -20), Vector3(1, 6, 80))  # west
-	TownBuilder.add_invisible_wall(self, Vector3(30, 2, -20), Vector3(1, 6, 80))   # east
+	# Zone edge (v7): tall walls + a subtle cyan edge line / proximity curtain.
+	ZoneBounds.create(self, Vector2(-29.5, -52.0), Vector2(29.5, 14.5), player)
+
+
+func _add_ground_strip(center: Vector3, size: Vector2, color: Color) -> void:
+	var mi := MeshInstance3D.new()
+	mi.name = "GroundStrip"
+	var plane := PlaneMesh.new()
+	plane.size = size
+	mi.mesh = plane
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mi.material_override = mat
+	add_child(mi)
+	mi.position = center
+	var body := StaticBody3D.new()
+	body.name = "GroundStripCollision"
+	var col := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(size.x, 0.1, size.y)
+	col.shape = shape
+	col.position = center + Vector3(0, -0.05, 0)
+	body.add_child(col)
+	add_child(body)
 
 
 # ── Roads & Paths ──────────────────────────────────────────────────────────────

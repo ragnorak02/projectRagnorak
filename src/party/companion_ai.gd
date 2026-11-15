@@ -152,6 +152,10 @@ func _physics_process(delta: float) -> void:
 			_process_flinch(delta)
 
 	move_and_slide()
+	# v7 fall recovery: dropped out of the world -> back beside the leader.
+	if global_position.y < -20.0 and follow_target != null and is_instance_valid(follow_target):
+		global_position = follow_target.global_position + Vector3(2, 0.3, 2)
+		velocity = Vector3.ZERO
 	_update_animation()
 
 
@@ -483,6 +487,10 @@ func _find_nearest_enemy() -> Node3D:
 		if not is_instance_valid(enemy):
 			continue
 		if enemy.get("_is_dead"):
+			continue
+		# Battle Test: the AI partner leaves training targets (dummy / combo
+		# partner) to the player.
+		if enemy.is_in_group(&"training_targets"):
 			continue
 		var d := global_position.distance_to(enemy.global_position)
 		if d < best_dist:

@@ -10,6 +10,7 @@ func _ready() -> void:
 	super._ready()
 	interactable_type = InteractableType.CHEST
 	interact_priority = 5
+	prompt_height = 0.95
 	if interaction_name == "Interact":
 		interaction_name = "Open Chest"
 	_add_solid_body()

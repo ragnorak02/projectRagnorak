@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "gameId": "projectRagnorak",
   "title": "Project Ragnorak",
-  "lastUpdated": "2026-11-14T03:13Z",
+  "lastUpdated": "2026-11-15T13:00Z",
   "health": {
     "progressPercent": 45,
     "buildVersion": "0.0.17-dev",
@@ -20,7 +20,7 @@
     "macroPhaseLabel": "Polish, QA & Regression",
     "status": "in_progress",
     "currentGoal": "Phase 15 — Polish, QA, and Regression",
-    "currentTask": "v6 done (ability VFX polish, Taighe mage combo, party-wide enemy targeting + companion hurt/downed, Amaro idle pose, NPC facing, 4 new models, exit-leak fix); next: Phase 15 regression items 385-400",
+    "currentTask": "v7 done (zone edges + fall recovery, lit exits, floating interact prompts, hold-to-interact, Main Menu > Battle Test arena: dummy / enemy spawner / invincible combo partner); next: Phase 15 regression items 385-400",
     "nextMilestone": "Phase 15 regression items 385-400"
   },
   "tech": {
@@ -69,7 +69,7 @@
   },
   "testing": {
     "testCommand": "tests/run-tests.bat",
-    "lastRunAt": "2026-11-14T03:13Z",
+    "lastRunAt": "2026-11-15T13:00Z",
     "status": "pass",
     "smokeTests": 35,
     "phase6Tests": 111,
@@ -83,16 +83,18 @@
     "phase14Tests": 67,
     "phase15Tests": 68,
     "performanceTests": 65,
-    "totalTests": 1781,
-    "notes": "1781/1781 passing across 19 suites, all exit 0. The 3 old failures were tests out of date and are updated. Exit leak fixed (preloaded unique-ability scripts); town/field/dungeon exit clean. Test-only exit warnings remain in runner/performance (runtime load() in tests) and carry (pending test timer).",
+    "totalTests": 1862,
+    "notes": "1862/1862 passing across 21 suites, all exit 0. v7: test_v4 target-step harness now returns to Free Roam after spawning dummies (fixed a frame-pacing race where a dummy aggroed before being frozen).",
     "battleTests": 136,
     "carryTests": 80,
     "controlsTests": 236,
     "uiStyleTests": 141,
     "v4Tests": 96,
     "v5Tests": 160,
-    "passedTests": 1781,
-    "v6Tests": 178
+    "passedTests": 1862,
+    "v6Tests": 178,
+    "v7Tests": 53,
+    "battleTestArenaTests": 28
   },
   "links": {
     "repo": null,

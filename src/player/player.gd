@@ -71,6 +71,16 @@ var _ledge_wall_normal: Vector3 = Vector3.ZERO
 # Interaction detection
 var _nearby_interactables: Array[Node3D] = []
 var _current_interactable: Node3D = null
+# Hold-to-interact (v7): an interactable with requires_hold() fires only after
+# `interact` is held for its hold_duration. Progress goes out on
+# Events.interaction_hold_progress (ratio 0..1; -1 = cancelled) for the HUD.
+var _hold_target: Node3D = null
+var _hold_time: float = 0.0
+
+# Fall recovery (v7): a safety net under ZoneBounds. Below fall_reset_y the
+# player is put back on the last floor position it stood on.
+@export var fall_reset_y: float = -20.0
+var _last_safe_position: Vector3 = Vector3.INF
 
 # Combat flag (informational; kept for tests/legacy callers — input routing
 # uses `in_battle`). True if an encounter owner emitted Events.combat_started,
@@ -193,6 +203,26 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor() and velocity.y <= 0.0:
 		_double_jump_used = false
 		_air_jump_pending = false
+		_last_safe_position = global_position
+	elif global_position.y < fall_reset_y:
+		recover_from_fall()
+
+	_update_interact_hold(delta)
+
+
+## Puts the player back on the last floor it stood on (fell out of the world).
+## Returns false when there is no safe position yet (nothing to restore).
+func recover_from_fall() -> bool:
+	if not _last_safe_position.is_finite():
+		return false
+	global_position = _last_safe_position + Vector3(0.0, 0.3, 0.0)
+	velocity = Vector3.ZERO
+	return true
+
+
+## Read-only: last floor position (Vector3.INF before the first landing).
+func get_last_safe_position() -> Vector3:
+	return _last_safe_position
 
 
 func take_damage(amount: float, source: Node3D = null) -> void:
@@ -449,7 +479,54 @@ func get_current_interactable() -> Node3D:
 	return _current_interactable
 
 
+## True when the current interactable wants `interact` held (v7).
+func current_interact_needs_hold() -> bool:
+	return has_interactable() and _current_interactable.has_method("requires_hold") 		and _current_interactable.requires_hold()
+
+
+## True while a hold-to-interact is charging.
+func is_holding_interact() -> bool:
+	return _hold_target != null
+
+
+func _start_interact_hold() -> void:
+	_hold_target = _current_interactable
+	_hold_time = 0.0
+	Events.interaction_hold_progress.emit(_hold_target, 0.0)
+
+
+func _cancel_interact_hold() -> void:
+	if _hold_target == null:
+		return
+	var t := _hold_target
+	_hold_target = null
+	_hold_time = 0.0
+	if is_instance_valid(t):
+		Events.interaction_hold_progress.emit(t, -1.0)
+
+
+## Advances a hold-to-interact. Cancels on release, a target change, Battle
+## Mode or any state where interacting is not allowed.
+func _update_interact_hold(delta: float) -> void:
+	if _hold_target == null:
+		return
+	if not is_instance_valid(_hold_target) or _hold_target != _current_interactable 			or not has_interactable() or in_battle or not can_interact_now() 			or not Input.is_action_pressed(&"interact"):
+		_cancel_interact_hold()
+		return
+	var duration := 0.6
+	if "hold_duration" in _hold_target:
+		duration = maxf(float(_hold_target.get(&"hold_duration")), 0.05)
+	_hold_time += delta
+	var ratio := clampf(_hold_time / duration, 0.0, 1.0)
+	Events.interaction_hold_progress.emit(_hold_target, ratio)
+	if ratio >= 1.0:
+		_hold_target = null
+		_hold_time = 0.0
+		try_interact()
+
+
 ## Interact with the current interactable. Returns true if an interaction fired.
+## (Fires immediately, hold or not: the hold gate lives in input handling.)
 func try_interact() -> bool:
 	if not has_interactable():
 		return false
@@ -724,6 +801,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	# button mark it handled. v3: Y/E interacts only in free roam with a prompt
 	# (in battle it is the unique ability; with no prompt it is the Command Menu).
 	if is_interact_press(event) and can_interact_now():
+		if current_interact_needs_hold():
+			_start_interact_hold()
+			get_viewport().set_input_as_handled()
+			return
 		if try_interact():
 			get_viewport().set_input_as_handled()
 			return

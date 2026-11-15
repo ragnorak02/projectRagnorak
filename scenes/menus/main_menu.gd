@@ -1,4 +1,5 @@
-## Main menu — New Game, Continue, Load Game, Options, Exit.
+## Main menu — Battle Test, New Game, Continue, Load Game, Options, Exit.
+## Battle Test (v7) loads the walled practice arena (scenes/zones/battle_test).
 ## Visuals: "Lumina Frost" title treatment, slanted buttons (UIStyle.style_button
 ## keeps each Button's signals and focus), frost backdrop and a footer glyph bar.
 extends Control
@@ -27,6 +28,7 @@ void fragment() {
 const SaveLoadMenuScript := preload("res://src/ui/menus/save_load_menu.gd")
 const SettingsMenuScript := preload("res://src/ui/menus/settings_menu.gd")
 
+@onready var battle_test_btn: Button = $VBox/BattleTest
 @onready var new_game_btn: Button = $VBox/NewGame
 @onready var continue_btn: Button = $VBox/Continue
 @onready var load_btn: Button = $VBox/Load
@@ -45,6 +47,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	GameManager.change_state(GameManager.GameState.MAIN_MENU)
 
+	battle_test_btn.pressed.connect(_on_battle_test)
 	new_game_btn.pressed.connect(_on_new_game)
 	continue_btn.pressed.connect(_on_continue)
 	load_btn.pressed.connect(_on_load)
@@ -57,7 +60,7 @@ func _ready() -> void:
 	load_btn.disabled = not has_save
 
 	_apply_style()
-	new_game_btn.grab_focus()
+	battle_test_btn.grab_focus()  # top option
 	_nav.horizontal = false
 	_nav.reset()
 
@@ -89,7 +92,7 @@ func _process(_delta: float) -> void:
 ## Moves focus to the next/previous enabled button (wraps), like the D-pad.
 func _step_focus(direction: int) -> void:
 	var buttons: Array = []
-	for b in [new_game_btn, continue_btn, load_btn, options_btn, exit_btn]:
+	for b in [battle_test_btn, new_game_btn, continue_btn, load_btn, options_btn, exit_btn]:
 		if is_instance_valid(b) and b.visible and not b.disabled:
 			buttons.append(b)
 	if buttons.is_empty():
@@ -110,8 +113,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if focused is BaseButton and not (focused as BaseButton).disabled:
 			focused.emit_signal(&"pressed")
 		elif focused == null:
-			new_game_btn.grab_focus()
+			battle_test_btn.grab_focus()
 		get_viewport().set_input_as_handled()
+
+
+func _on_battle_test() -> void:
+	AudioManager.play_sfx_named("menu_confirm")
+	get_tree().change_scene_to_file("res://scenes/zones/battle_test.tscn")
 
 
 func _on_new_game() -> void:
@@ -201,7 +209,7 @@ func _apply_style() -> void:
 	vbox.add_child(glow)
 	vbox.move_child(glow, line.get_index() + 1)
 
-	for btn: Button in [new_game_btn, continue_btn, load_btn, options_btn, exit_btn]:
+	for btn: Button in [battle_test_btn, new_game_btn, continue_btn, load_btn, options_btn, exit_btn]:
 		UIStyle.style_button(btn, 28)
 		btn.custom_minimum_size = Vector2(440, 56)
 		btn.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN

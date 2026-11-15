@@ -83,6 +83,8 @@ signal zone_entered(zone_id: StringName)
 signal zone_exiting(zone_id: StringName)
 signal interaction_available(interactable: Node3D)
 signal interaction_cleared
+## v7 hold-to-interact: ratio 0..1 while `interact` is held; -1 = cancelled.
+signal interaction_hold_progress(interactable: Node3D, ratio: float)
 
 # --- Carry / Throw ---
 signal carry_started(obj: Node3D)

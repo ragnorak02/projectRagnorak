@@ -35,6 +35,7 @@ var _enemy_spawn_count: int = 0
 const NpcInteractable := preload("res://src/interaction/npc_interactable.gd")
 const ChestInteractable := preload("res://src/interaction/chest_interactable.gd")
 const ZonePortal := preload("res://src/interaction/zone_portal.gd")
+const ZoneBounds := preload("res://src/world/zone_bounds.gd")
 const HiddenArea := preload("res://src/interaction/hidden_area.gd")
 const CarryableCrateScene := preload("res://src/interaction/carryable_crate.tscn")
 
@@ -76,11 +77,9 @@ func _build_terrain() -> void:
 	# Large rolling grass field
 	TownBuilder.add_ground_plane(self, 250.0, Color(0.28, 0.38, 0.18))
 
-	# Boundary walls
-	TownBuilder.add_invisible_wall(self, Vector3(0, 3, -110), Vector3(250, 8, 1))   # north
-	TownBuilder.add_invisible_wall(self, Vector3(0, 3, 18), Vector3(250, 8, 1))     # south
-	TownBuilder.add_invisible_wall(self, Vector3(-80, 3, -50), Vector3(1, 8, 260))  # west
-	TownBuilder.add_invisible_wall(self, Vector3(80, 3, -50), Vector3(1, 8, 260))   # east
+	# Zone edge (v7): 80 m walls (the old 7 m ones were cleared by Super Jump)
+	# + a subtle cyan edge line / proximity curtain.
+	ZoneBounds.create(self, Vector2(-79.5, -109.5), Vector2(79.5, 17.5), player)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

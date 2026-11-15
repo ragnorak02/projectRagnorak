@@ -20,6 +20,10 @@ const ZonePortal := preload("res://src/interaction/zone_portal.gd")
 const ChestInteractable := preload("res://src/interaction/chest_interactable.gd")
 const HiddenArea := preload("res://src/interaction/hidden_area.gd")
 const CarryableCrateScene := preload("res://src/interaction/carryable_crate.tscn")
+const ZoneBounds := preload("res://src/world/zone_bounds.gd")
+## v7: dungeon floor, now 32 x 48 so the reward chest (z = -20) and the secret
+## chamber are inside the edge instead of on the lip of a 30 x 40 slab.
+const FLOOR_SIZE := Vector2(32, 48)
 
 
 func _ready() -> void:
@@ -30,6 +34,8 @@ func _ready() -> void:
 func _setup_zone() -> void:
 	# Dark floor
 	_add_ground(Color(0.15, 0.12, 0.1))
+	# Zone edge (v7): the dungeon had no walls at all, so you could walk off.
+	ZoneBounds.create(self, Vector2(-15.0, -23.0), Vector2(15.0, 15.0), player)
 
 	# Enemies
 	_add_enemy(Vector3(5, 0, -5))
@@ -56,7 +62,7 @@ func _setup_zone() -> void:
 func _add_ground(color: Color) -> void:
 	var mesh_inst := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
-	plane.size = Vector2(30, 40)
+	plane.size = FLOOR_SIZE
 	mesh_inst.mesh = plane
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
@@ -66,7 +72,7 @@ func _add_ground(color: Color) -> void:
 	var body := StaticBody3D.new()
 	var col := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
-	shape.size = Vector3(30, 0.1, 40)
+	shape.size = Vector3(FLOOR_SIZE.x, 0.1, FLOOR_SIZE.y)
 	col.shape = shape
 	col.position.y = -0.05
 	body.add_child(col)

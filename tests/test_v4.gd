@@ -421,6 +421,11 @@ func test_target_step_enemies() -> void:
 	if a == null or b == null or c == null:
 		_fail("Target step harness", "enemy.tscn failed to load")
 		return
+	# The dummies run unfrozen for 2 physics frames in _spawn_dummy and can
+	# aggro the player at 5 m; if BattleModeComponent polls in between, Battle
+	# latches and Y becomes the unique ability (frame-pacing race, v7). Reset to
+	# Free Roam before opening the menu with Y.
+	await _to_free_roam()
 	await _ground_idle()
 	_player.current_atb = _player.max_atb
 	_player.current_mp = _player.max_mp
